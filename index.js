@@ -1537,7 +1537,7 @@ function winBattle(btl, server) {
 	var isBigBoss = false;
     for (const enemy in btl[server].enemies.members) {
 		const enmDefs = readEnm(btl[server].enemies.members[enemy].name)
-        totalXP += parseInt(enmDefs.awardxp)
+        totalXP += parseInt(enmDefs.awardxp * servFile[server].xprate)
 
         if (enmDefs.boss) {
             totalRings = Math.round(Math.random() * 600)
@@ -1555,7 +1555,7 @@ function winBattle(btl, server) {
 		const charDefs = charFile[btl[server].allies.members[i].name]
 
 		// Award XP now
-		charDefs.xp += totalXP;
+		charDefs.xp += totalXP
 		console.log(`BattleStatus: ${charDefs.name} got ${totalXP}XP. (${charDefs.xp}/${charDefs.maxxp}XP)`)
 		client.channels.fetch(btl[server].battlechannel)
 			.then(channel => channel.send(`${charDefs.name} got **${totalXP}EXP**!`))
@@ -2877,6 +2877,7 @@ client.on('messageCreate', message => {
 				showtimes: false,
 				onemores: false,
 				currency: "RPGBot Token",
+				xprate: 1,
 				pvpstuff: {
 					none: {},
 					metronome: {},
@@ -2965,6 +2966,7 @@ client.on('messageCreate', message => {
                     { name: `${prefix}limitbreaks`, value: `\nThis command is Admin Only. Implements a custom Limit Break mechanic. \n**Currently "${(servFile[message.guild.id].limitbreaks == true) ? "true" : "false"}"**`, inline: true },
                     { name: `${prefix}onemores`, value: `\nThis command is Admin Only. Implements the "One More" mechanic from the Persona Series. \n**Currently "${(servFile[message.guild.id].onemores == true) ? "true" : "false"}"**`, inline: true },
                     { name: `${prefix}showtimes`, value: `\nThis command is Admin Only. Implements the "Showtime" mechanic from Persona 5 Royal. \n**Currently "${(servFile[message.guild.id].showtimes == true) ? "true" : "false"}"**`, inline: true },
+					{ name: `${prefix}xprate`, value: `\nThis command is Admin Only. Changes the rate of xp gained with battles. \n**Currently "${servFile[message.guild.id].xprate}x"**`, inline: true },
                 )
             message.channel.send({embeds: [DiscordEmbed]})
         } else {
@@ -8586,6 +8588,7 @@ client.on('messageCreate', message => {
 				showtimes: false,
 				onemores: false,
 				currency: "RPGBot Token",
+				xprate: 1,
 				pvpstuff: {
 					none: {},
 					metronome: {},
@@ -8621,6 +8624,7 @@ client.on('messageCreate', message => {
 				showtimes: false,
 				onemores: false,
 				currency: "RPGBot Token",
+				xprate: 1,
 				pvpstuff: {
 					none: {},
 					metronome: {},
@@ -8655,6 +8659,7 @@ client.on('messageCreate', message => {
 				showtimes: false,
 				onemores: false,
 				currency: "RPGBot Token",
+				xprate: 1,
 				pvpstuff: {
 					none: {},
 					metronome: {},
@@ -8670,6 +8675,46 @@ client.on('messageCreate', message => {
         fs.writeFileSync(servPath, JSON.stringify(servFile, null, '    '));
 
         message.channel.send(`One Mores have been toggled ${(servFile[message.guild.id].onemores == true) ? "on" : "off"}`)
+	}
+
+	if (command === 'xprate') {
+        if (!message.member.permissions.serialize().ADMINISTRATOR) {
+            message.channel.send("You lack sufficient permissions, I'm so sorry!");
+            return
+        }
+
+        var servPath = dataPath+'/Server Settings/server.json'
+        var servRead = fs.readFileSync(servPath);
+        var servFile = JSON.parse(servRead);
+
+        if (!servFile[message.guild.id]) {
+            servFile[message.guild.id] = {
+				prefix: "rpg!",
+				limitbreaks: false,
+				showtimes: false,
+				onemores: false,
+				currency: "RPGBot Token",
+				xprate: 1,
+				pvpstuff: {
+					none: {},
+					metronome: {},
+					randskills: {},
+					randstats: {},
+					charfuck: {}
+				},
+				banned: []
+			}
+        }
+
+        const arg = message.content.slice(prefix.length).trim().split(/ +/);
+
+		if (isFinite(parseFloat(arg[1]))) {
+			servFile[message.guild.id].xprate = arg[1]
+			fs.writeFileSync(servPath, JSON.stringify(servFile, null, '    '));
+	
+			message.channel.send(`XP Rate has been changed to ${servFile[message.guild.id].xprate}x`)
+		} else
+			message.channel.send(`Please change the XP rate to an intenger or a float.`)
 	}
 
     if (command === 'showtimes') {
@@ -8689,6 +8734,7 @@ client.on('messageCreate', message => {
 				showtimes: false,
 				onemores: false,
 				currency: "RPGBot Token",
+				xprate: 1,
 				pvpstuff: {
 					none: {},
 					metronome: {},
@@ -8723,6 +8769,7 @@ client.on('messageCreate', message => {
 				showtimes: false,
 				onemores: false,
 				currency: "RPGBot Token",
+				xprate: 1,
 				pvpstuff: {
 					none: {},
 					metronome: {},
@@ -8808,6 +8855,7 @@ client.on('messageCreate', message => {
 				showtimes: false,
 				onemores: false,
 				currency: "RPGBot Token",
+				xprate: 1,
 				pvpstuff: {
 					none: {},
 					metronome: {},
@@ -8858,6 +8906,7 @@ client.on('messageCreate', message => {
 				showtimes: false,
 				onemores: false,
 				currency: "RPGBot Token",
+				xprate: 1,
 				pvpstuff: {
 					none: {},
 					metronome: {},
@@ -8904,6 +8953,7 @@ client.on('messageCreate', message => {
 				showtimes: false,
 				onemores: false,
 				currency: "RPGBot Token",
+				xprate: 1,
 				pvpstuff: {
 					none: {},
 					metronome: {},
@@ -8966,6 +9016,9 @@ client.on('messageCreate', message => {
 		
 		// Currency
 		DiscordEmbed.fields.push({name: 'Currency', value: `${servStuff.currency}, ${servStuff.currency}s*`, inline: true})
+
+		// XP Rate
+		DiscordEmbed.fields.push({name: 'XP Rate', value: `${servStuff.xprate}x`, inline: true})
 
         message.channel.send({embeds: [DiscordEmbed]})
 	}
@@ -9122,4 +9175,4 @@ process.on('unhandledRejection', error => {
 	console.error('Unhandled promise rejection:', error);
 });
 
-client.login('bot ID');
+client.login('TOKEN ID');
