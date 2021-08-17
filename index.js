@@ -9263,4 +9263,4 @@ process.on('unhandledRejection', error => {
 	console.error('Unhandled promise rejection:', error);
 });
 
-client.login('ODc3MTQzOTQzNzAyMjUzNjI5.YRuV9A.zQny_E706T2l6W4JeUo5x3SdMIM');
+client.login('bot token');
