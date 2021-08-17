@@ -14,6 +14,7 @@ const dataPath = './data'
 
 //FS, for writing files.
 const fs = require('fs');
+const { stringify } = require('querystring');
 
 // Games
 var doGSM = false;
@@ -2917,6 +2918,7 @@ client.on('messageCreate', message => {
                     { name: `${prefix}scenario`, value: `(Args <Optional: Person>)\nI'll think of a little scenario with you and whoever you specify...`, inline: true },
                     { name: `${prefix}guessmyword`, value: `(Args <Person>)\nThe pinged persom must guess your word! Good luck to both of you.`, inline: true },
                     { name: `${prefix}quote`, value: `I'll recite one of the quotes I remember... I don't remember many.`, inline: true },
+					{ name: `${prefix}ship`, value: `(Args <Person> <Person> <Person>...) Ships any number of people of your choice based on certain variables. Supports as many people as one wants, should you pick at least two people.`, inline: true },
                 )
             message.channel.send({embeds: [DiscordEmbed]})
         } else if (arg2 === 'relics') {
@@ -3422,6 +3424,92 @@ client.on('messageCreate', message => {
 
         fs.writeFileSync(unoPath, JSON.stringify(uno, null, '    '));
     }
+
+	if (command === 'ship') {
+		const arg = message.content.slice(prefix.length).trim().split(/ +/);
+
+		if (!arg[1]) {
+			message.channel.send(`Please specify at least two people who you want to ship with.`)
+			return false
+		}
+
+		if (!arg[2]) {
+			message.channel.send(`Please specify at least one more person who you want to ship with.`)
+			return false
+		}
+
+		let shipCandidates = []
+		shipCandidates = arg
+		shipCandidates.shift()
+
+		// Converting Mentions
+		for (i in shipCandidates) {
+			if (shipCandidates[i].mention)
+				console.log("true")
+		}
+
+		// Getting Candidates
+		var resulttext = "**Candidates:** \n"
+		for (i in shipCandidates)
+			resulttext = resulttext + `:small_orange_diamond: ${shipCandidates[i]} \n`
+		
+		//Splicing Name
+		var splicedName = ""
+		for (i in shipCandidates) {
+			var nameToCut
+			nameToCut = shipCandidates[i].slice(Math.floor(shipCandidates[i].length / shipCandidates.length * i), Math.round(shipCandidates[i].length / shipCandidates.length * (i + 1)))
+			splicedName += nameToCut
+		}
+
+		//Fetching Love
+		var shipPath = dataPath+'/Ship/shipParameters.json'
+		var shipRead = fs.readFileSync(shipPath);
+		var shipFile = JSON.parse(shipRead);
+
+		var lust = 0
+		var needForAttention = 0
+		var humbleEnergy = 0
+		var excitement = 0
+		var comfortZoneLevel = 0
+
+		for (i in shipCandidates) {
+			if (!shipFile[shipCandidates[i]]) {
+				shipFile[shipCandidates[i]] = {
+					lust: Math.round(Math.random() * 100),
+					needForAttention: Math.round(Math.random() * 100),
+					humbleEnergy: Math.round(Math.random() * 100),
+					excitement: Math.round(Math.random() * 100),
+					comfortZoneLevel: Math.round(Math.random() * 100),
+				}
+
+				fs.writeFileSync(shipPath, JSON.stringify(shipFile, null, '    '));
+			}
+
+			var candidate = shipFile[shipCandidates[i]]
+
+			lust += candidate.lust
+			needForAttention += candidate.needForAttention
+			humbleEnergy += candidate.humbleEnergy
+			excitement += candidate.excitement
+			comfortZoneLevel += candidate.comfortZoneLevel
+		}
+
+		lust /= shipCandidates.length
+		needForAttention /= shipCandidates.length
+		humbleEnergy /= shipCandidates.length
+		excitement /= shipCandidates.length
+		comfortZoneLevel /= shipCandidates.length
+
+		const love = Math.round((lust + needForAttention + humbleEnergy + excitement + comfortZoneLevel) / 5);
+        const loveIndex = Math.floor(love / 10);
+        const loveLevel = ":white_medium_square:".repeat(loveIndex) + ":black_medium_square:".repeat(10 - loveIndex);
+
+		const DiscordEmbed = new Discord.MessageEmbed()
+            .setColor('#ff06aa')
+            .setTitle(`${splicedName}`)
+			.setDescription(`${resulttext}\n**${love}%** ${loveLevel}`)
+		message.channel.send({embeds: [DiscordEmbed]})
+	}
 
     ///////////////////
     // Relic Search! //
@@ -9175,4 +9263,4 @@ process.on('unhandledRejection', error => {
 	console.error('Unhandled promise rejection:', error);
 });
 
-client.login('TOKEN ID');
+client.login('ODc3MTQzOTQzNzAyMjUzNjI5.YRuV9A.zQny_E706T2l6W4JeUo5x3SdMIM');

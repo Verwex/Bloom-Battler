@@ -1,1 +1,18 @@
-{}
+{
+    "877143757697454120": {
+        "prefix": "rpg!",
+        "limitbreaks": false,
+        "showtimes": false,
+        "onemores": false,
+        "currency": "RPGBot Token",
+        "xprate": 1,
+        "pvpstuff": {
+            "none": {},
+            "metronome": {},
+            "randskills": {},
+            "randstats": {},
+            "charfuck": {}
+        },
+        "banned": []
+    }
+}
