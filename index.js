@@ -1,6 +1,7 @@
 ﻿//Discord.JS initiation.
 const Discord = require('discord.js');
 const client = new Discord.Client({intents:[Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES]});
+require('dotenv').config();
 
 // Bot Stuff
 const utilityFuncs = require('./Packages/utilityFuncs.js');
@@ -2918,7 +2919,7 @@ client.on('messageCreate', message => {
                     { name: `${prefix}scenario`, value: `(Args <Optional: Person>)\nI'll think of a little scenario with you and whoever you specify...`, inline: true },
                     { name: `${prefix}guessmyword`, value: `(Args <Person>)\nThe pinged persom must guess your word! Good luck to both of you.`, inline: true },
                     { name: `${prefix}quote`, value: `I'll recite one of the quotes I remember... I don't remember many.`, inline: true },
-					{ name: `${prefix}ship`, value: `(Args <Person> <Person> <Person>...) Ships any number of people of your choice based on certain variables. Supports as many people as one wants, should you pick at least two people.`, inline: true },
+					{ name: `${prefix}ship`, value: `(Args <Person> <Person> <Person>...) Ships any number of people of your choice based on certain variables. Supports as many people as one wants, should you pick at least one of them.`, inline: true },
                 )
             message.channel.send({embeds: [DiscordEmbed]})
         } else if (arg2 === 'relics') {
@@ -3429,13 +3430,30 @@ client.on('messageCreate', message => {
 		const arg = message.content.slice(prefix.length).trim().split(/ +/);
 
 		if (!arg[1]) {
-			message.channel.send(`Please specify at least two people who you want to ship with.`)
+			message.channel.send(`Please specify at least one person who you want to ship yourself with, or two if you want to ship two different people.`)
 			return false
 		}
 
+		function getFromMention(mention) {
+			if (!mention) return;
+		
+			if (mention.startsWith('<@!') && mention.endsWith('>')) {
+				mention = mention.slice(3, -1);
+		
+				return client.users.cache.get(mention);
+			}
+		}
+
+		for (i in arg) {
+			if (arg[i].startsWith('<@!') && arg[i].endsWith('>')) {
+				arg[i] = getFromMention(arg[i])
+				arg[i] = arg[i].username
+			}
+		}
+
 		if (!arg[2]) {
-			message.channel.send(`Please specify at least one more person who you want to ship with.`)
-			return false
+			arg[2] = arg[1]
+			arg[1] = message.author.username
 		}
 
 		let shipCandidates = []
@@ -3461,25 +3479,24 @@ client.on('messageCreate', message => {
 			splicedName += nameToCut
 		}
 
+		// Filtering Duplicates
+		var filtered = new Set(shipCandidates);
+		shipCandidates = [...filtered]
+
 		//Fetching Love
 		var shipPath = dataPath+'/Ship/shipParameters.json'
 		var shipRead = fs.readFileSync(shipPath);
 		var shipFile = JSON.parse(shipRead);
 
-		var lust = 0
-		var needForAttention = 0
-		var humbleEnergy = 0
-		var excitement = 0
-		var comfortZoneLevel = 0
+		var loveParameters = []
+		var loveResults = []
+		var loveCloseness = 0
+		var finalLoveCloseness = 0
 
 		for (i in shipCandidates) {
 			if (!shipFile[shipCandidates[i]]) {
 				shipFile[shipCandidates[i]] = {
-					lust: Math.round(Math.random() * 100),
-					needForAttention: Math.round(Math.random() * 100),
-					humbleEnergy: Math.round(Math.random() * 100),
-					excitement: Math.round(Math.random() * 100),
-					comfortZoneLevel: Math.round(Math.random() * 100),
+					loveParameter: Math.round(Math.random() * 100),
 				}
 
 				fs.writeFileSync(shipPath, JSON.stringify(shipFile, null, '    '));
@@ -3487,27 +3504,103 @@ client.on('messageCreate', message => {
 
 			var candidate = shipFile[shipCandidates[i]]
 
-			lust += candidate.lust
-			needForAttention += candidate.needForAttention
-			humbleEnergy += candidate.humbleEnergy
-			excitement += candidate.excitement
-			comfortZoneLevel += candidate.comfortZoneLevel
+			loveParameters.push(candidate.loveParameter)
 		}
 
-		lust /= shipCandidates.length
-		needForAttention /= shipCandidates.length
-		humbleEnergy /= shipCandidates.length
-		excitement /= shipCandidates.length
-		comfortZoneLevel /= shipCandidates.length
+		for (i in loveParameters) {
+			var secondID = parseInt(i) + 1
 
-		const love = Math.round((lust + needForAttention + humbleEnergy + excitement + comfortZoneLevel) / 5);
+			if (loveParameters.length > 1)
+			{
+				if (loveParameters[secondID] != undefined) {
+					loveResults.push(loveParameters[i])
+					loveResults.push(loveParameters[secondID])
+					loveResults.sort((a,b) => a - b)
+
+					loveCloseness = loveResults[1] - loveResults[0]
+					finalLoveCloseness += 100 - loveCloseness
+					loveResults = []
+				}
+			} else
+				finalLoveCloseness += loveParameters[i]
+		}
+
+		if (loveParameters.length > 1)
+			finalLoveCloseness /= (shipCandidates.length - 1)
+
+		const love = Math.round(finalLoveCloseness);
         const loveIndex = Math.floor(love / 10);
         const loveLevel = ":white_medium_square:".repeat(loveIndex) + ":black_medium_square:".repeat(10 - loveIndex);
+
+		//footer reactions
+		var footerConditions = [
+			`${(love <= 0) ? true : false}`,
+			`${(love <= 10 && love > 0) ? true : false}`,
+			`${(love <= 20 && love > 10) ? true : false}`,
+			`${(love <= 30 && love > 20) ? true : false}`,
+			`${(love <= 40 && love > 30) ? true : false}`,
+			`${(love <= 50 && love > 40) ? true : false}`,
+			`${(love <= 60 && love > 50) ? true : false}`,
+			`${(love <= 70 && love > 60) ? true : false}`,
+			`${(love <= 80 && love > 70) ? true : false}`,
+			`${(love <= 90 && love > 80) ? true : false}`,
+			`${(love <= 99 && love > 90) ? true : false}`
+		]
+		var footerText = ""
+
+		for (i in footerConditions) {
+			if (footerConditions[i].endsWith('true')) {
+				switch (parseInt(i)) {
+					case 0:
+						footerText = "Forget about even trying with this."
+						break;
+					case 1:
+						footerText = "This is definitely not gonna work out at all."
+						break;
+					case 2:
+						footerText = "There is no chance this is happening."
+						break;
+					case 3:
+						footerText = "There might be a slight chance, but don't get your hopes up."
+						break;
+					case 4:
+						footerText = "Maybe if you try hard enough, they'll be together."
+						break;
+					case 5:
+						footerText = "Pretty meh, to be honest."
+						break;
+					case 6:
+						footerText = "This ship is pretty alright, I'll tell you."
+						break;
+					case 7:
+						footerText = "I like where this is going."
+						break;
+					case 8:
+						footerText = "Great ship, they have a high chance of being together."
+						break;
+					case 9:
+						footerText = "Awesome. They fit so well together!"
+						break;
+					case 10:
+						footerText = "Almost perfection!"
+						break;
+				}
+			}
+		}
+
+		if (love === 69)
+			footerText = "Nice."
+
+		if (love === 100)
+			footerText = "OTP!"
+
+		// Send Embed
 
 		const DiscordEmbed = new Discord.MessageEmbed()
             .setColor('#ff06aa')
             .setTitle(`${splicedName}`)
 			.setDescription(`${resulttext}\n**${love}%** ${loveLevel}`)
+			.setFooter(`${footerText}`)
 		message.channel.send({embeds: [DiscordEmbed]})
 	}
 
@@ -9263,4 +9356,4 @@ process.on('unhandledRejection', error => {
 	console.error('Unhandled promise rejection:', error);
 });
 
-client.login('bot token');
+client.login(process.env.BOT_TOKEN);

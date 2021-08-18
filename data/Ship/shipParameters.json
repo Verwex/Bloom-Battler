@@ -1,100 +1,32 @@
 {
-    "Lacrimal": {
-        "lust": 4,
-        "needForAttention": 27,
-        "humbleEnergy": 38,
-        "excitement": 2,
-        "comfortZoneLevel": 74
+    "Sutela": {
+        "loveParameter": 26
+    },
+    "Patella": {
+        "loveParameter": 93
+    },
+    "Sky": {
+        "loveParameter": 46
+    },
+    "Spectra": {
+        "loveParameter": 82
+    },
+    "Spectrum": {
+        "loveParameter": 28
     },
     "Verwex": {
-        "lust": 47,
-        "needForAttention": 26,
-        "humbleEnergy": 50,
-        "excitement": 87,
-        "comfortZoneLevel": 77
-    },
-    "Bob": {
-        "lust": 10,
-        "needForAttention": 9,
-        "humbleEnergy": 18,
-        "excitement": 87,
-        "comfortZoneLevel": 89
-    },
-    "Bruh": {
-        "lust": 53,
-        "needForAttention": 47,
-        "humbleEnergy": 34,
-        "excitement": 14,
-        "comfortZoneLevel": 18
-    },
-    "Nighthug": {
-        "lust": 11,
-        "needForAttention": 95,
-        "humbleEnergy": 29,
-        "excitement": 74,
-        "comfortZoneLevel": 34
-    },
-    "You": {
-        "lust": 96,
-        "needForAttention": 14,
-        "humbleEnergy": 11,
-        "excitement": 0,
-        "comfortZoneLevel": 79
-    },
-    "Fuck": {
-        "lust": 86,
-        "needForAttention": 30,
-        "humbleEnergy": 67,
-        "excitement": 41,
-        "comfortZoneLevel": 23
-    },
-    "My": {
-        "lust": 21,
-        "needForAttention": 60,
-        "humbleEnergy": 55,
-        "excitement": 11,
-        "comfortZoneLevel": 36
-    },
-    "Ass": {
-        "lust": 48,
-        "needForAttention": 28,
-        "humbleEnergy": 72,
-        "excitement": 13,
-        "comfortZoneLevel": 48
-    },
-    "<@!441198920668938260>": {
-        "lust": 33,
-        "needForAttention": 27,
-        "humbleEnergy": 42,
-        "excitement": 95,
-        "comfortZoneLevel": 47
-    },
-    "<@!877143943702253629>": {
-        "lust": 62,
-        "needForAttention": 20,
-        "humbleEnergy": 89,
-        "excitement": 65,
-        "comfortZoneLevel": 94
-    },
-    "@everyone": {
-        "lust": 62,
-        "needForAttention": 95,
-        "humbleEnergy": 95,
-        "excitement": 28,
-        "comfortZoneLevel": 86
-    },
-    "@here": {
-        "lust": 1,
-        "needForAttention": 24,
-        "humbleEnergy": 32,
-        "excitement": 87,
-        "comfortZoneLevel": 78
+        "loveParameter": 42
     },
     "<#877143757697454123>": {
-        "lust": 5,
-        "needForAttention": 4,
-        "humbleEnergy": 58,
-        "excitement": 28,
-        "comfortZoneLevel": 62
+        "loveParameter": 5
+    },
+    "you": {
+        "loveParameter": 40
+    },
+    "verwex": {
+        "loveParameter": 50
+    },
+    "<@&877184886463668244>": {
+        "loveParameter": 74
     }
 }

@@ -2,3 +2,4 @@ node_modules/
 LICENSE
 package-lock.json
 package.json
+.env
