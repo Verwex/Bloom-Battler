@@ -3936,8 +3936,8 @@
         "target": "one",
         "name": "HealRing"
     },
-    "Undead-Like_(Teammates)": {
-        "name": "Undead-Like_(Teammates)",
+    "Undead-Like(Teammates)": {
+        "name": "Undead-Like",
         "cost": 10,
         "costtype": "hppercent",
         "pow": 110,
@@ -3947,16 +3947,15 @@
         "target": "one",
         "desc": "The user heals one ally with blood & mystical powers of necromancy by 110HP."
     },
-    "Undead-Like_(Newborn)": {
-        "name": "Undead-Like_(Newborn)",
+    "Undead-Like(Newborn)": {
+        "name": "Undead-Like",
         "cost": 10,
         "costtype": "hppercent",
-        "pow": 110,
-        "acc": 80,
-        "type": "heal",
+        "type": "status",
         "atktype": "physical",
         "target": "one",
-        "desc": "The user summons a new ally with mystical powers of necromancy with a 110HP recovery."
+        "desc": "The user summons a new ally with mystical powers of necromancy.",
+        "reincarnate": true
     },
     "EnergyAria": {
         "costtype": "mppercent",
