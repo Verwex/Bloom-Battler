@@ -1,4 +1,4 @@
-//Discord.JS initiation.
+﻿//Discord.JS initiation.
 const Discord = require('discord.js');
 const Voice = require('@discordjs/voice');
 const client = new Discord.Client({
@@ -2033,6 +2033,7 @@ function enemyMove(enmID, btl, channel) {
 							resultText: ''
 						}
 						
+
 						for (const i in embedTexts)
 							embedText.resultText += `\n${embedTexts[i].resultText}`;
 					}
