@@ -2361,6 +2361,8 @@
         "maxmp": 175,
         "basehp": 45,
         "basemp": 30,
+        "status": "none",
+        "statusturns": 0,
         "melee": [
             "Strike Attack",
             "strike"
@@ -2381,6 +2383,7 @@
         "baseint": 5,
         "baseagl": 7,
         "baseluk": 6,
+        "lb": 0,
         "xp": 0,
         "maxxp": 5070,
         "weak": [],
@@ -2388,9 +2391,7 @@
         "block": [],
         "repel": [],
         "drain": [],
-        "skills": [
-            "Undead-Like(Newborn)"
-        ],
+        "skills": [],
         "meleequote": [],
         "physquote": [],
         "magquote": [],
@@ -2883,48 +2884,5 @@
             "voice": "",
             "theme": ""
         }
-    },
-    "Dying_Fox": {
-        "name": "Dying_Fox",
-        "team": "allies",
-        "id": 3,
-        "level": 30,
-        "hp": 73,
-        "mp": 58,
-        "maxhp": 73,
-        "maxmp": 58,
-        "status": "none",
-        "statusturns": 0,
-        "atk": 5,
-        "mag": 3,
-        "prc": 13,
-        "end": 4,
-        "chr": 18,
-        "int": 7,
-        "agl": 1,
-        "luk": 7,
-        "guard": false,
-        "weak": [
-            "pierce",
-            "water",
-            "earth",
-            "poison",
-            "status"
-        ],
-        "resist": [
-            "psychic",
-            "curse"
-        ],
-        "block": [
-            "strike",
-            "bless"
-        ],
-        "repel": [],
-        "drain": [],
-        "skills": [
-            "ExplosiveMist",
-            "Persuit"
-        ],
-        "enemy": true
     }
 }
