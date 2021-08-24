@@ -35,6 +35,7 @@ const fs = require('fs');
 
 // Voice Shit
 const ffmpeg = require('ffmpeg-static');
+const ytdl = require('ytdl-core');
 
 // Games
 var doGSM = false;
@@ -216,30 +217,29 @@ const sendSkillArray = async(channel, theArray) => {
 var voiceChannelShit = {}
 
 function playSong(server, guild, url) {
-	if (!voiceChannelShit[server]) {
-		voiceChannelShit[server] = {
-			connection: null,
-			player: null,
-			cursong: url
+	if (ytdl.validateURL(url)) {
+		if (!voiceChannelShit[server]) {
+			voiceChannelShit[server] = {
+				connection: null,
+				player: null,
+				cursong: url
+			}
 		}
-	}
+	
+		if (voiceChannelShit[server].player || voiceChannelShit[server].player != null) {
+			voiceChannelShit[server].player.stop();
+		}
+		
+		voiceChannelShit[server].player = Voice.createAudioPlayer();
+		voiceChannelShit[server].player.on('error', error => {
+			console.error('Error:', error.message, 'with track', error.resource.metadata.title);
+		});
+		
+		voiceChannelShit[server].connection.subscribe(voiceChannelShit[server].player)
 
-	if (voiceChannelShit[server].player || voiceChannelShit[server].player != null) {
-		voiceChannelShit[server].player.stop();
+		console.log(`URL retrieved: ${url}`)
+		voiceChannelShit[server].player.play(ytdl(url, {filter: 'audioonly'}));
 	}
-	
-	voiceChannelShit[server].player = Voice.createAudioPlayer();
-	voiceChannelShit[server].player.on('error', error => {
-		console.error('Error:', error.message, 'with track', error.resource.metadata.title);
-	});
-	
-	voiceChannelShit[server].connection.subscribe(voiceChannelShit[server].player)
-	
-	const resource = Voice.createAudioResource(url, {
-		inputType: Voice.StreamType.OggOpus
-	});
-
-	voiceChannelShit[server].player.play(resource)
 }
 
 function endSong(server) {
@@ -388,6 +388,8 @@ function writeStatus(name, need, bartype, statustype, extra1, extra2, desc) {
 		skillFile[name].mimic = true
 	} else if (statusType === 'clone' || statusType === 'harmonics') {
 		skillFile[name].clone = true
+	} else if (statusType === 'reincarnate') {
+		skillFile[name].reincarnate = true
 	} else if (statusType === 'shield' || statusType === 'guard' || statusType === 'trap') {
 		skillFile[name].shield = extra1.toLowerCase()
 		skillFile[name].target = extra2.toLowerCase()
@@ -2434,7 +2436,7 @@ function enemyMove(enmID, btl, channel) {
 				return false
 			}
 		} else if (skillDefs.clone) {
-			var cloneDefs = utilityFuncs.cloneObj(charDefs)
+			var cloneDefs = utilityFuncs.cloneObj(oppDefs)
 			cloneDefs.hp = 100
 			cloneDefs.maxhp = 100
 			cloneDefs.mp = 80
@@ -2460,6 +2462,125 @@ function enemyMove(enmID, btl, channel) {
 				.setTitle(`${charName} => Self`)
 				.setDescription(`${charName} cloned themselves!`)
 			message.channel.send({embeds: [DiscordEmbed]})
+		} else if (skillDefs.reincarnate) {
+			var newChar = {}
+
+			//Starting Name
+			newChar.maxhp = Math.round(oppDefs.maxhp / 3)
+			newChar.hp = newChar.maxhp
+			newChar.maxmp = Math.round(oppDefs.maxmp / 3)
+			newChar.mp = newChar.maxmp
+			newChar.enemy = true
+
+			//Assign it a name
+			let statusOfLivingList = [
+				'Demon', 'Fallen', 'Undead', 'Ghouly', 'Skeleton', 'Dead', 'Zombie', 'Soulless', 'Ghostly', 'Spectral',
+				'Impious', 'Ungodly', 'Reincarnated', 'Unfresh', 'Unholy', 'Revenant', 'Rotter', 'Recovering', 'Dying',
+				'Necrotic', 'Non-living', 'Not-dead', 'Nympg', 'Geist', 'Poltergeist', 'Stillborn', 'Exanimated'
+			]
+			let speciesList = [
+				'Hedgehog', 'Fox', 'Echidna', 'Bat', 'Crocodile', 'Bee', 'Wasp', 'Skunk',
+				'Panda', 'Bearcat', 'Bear', 'Polar_Bear', 'Tanuki', 'Raccoon',
+				'Raccoon_Dog', 'Axolotl', 'Pig', 'Cow', 'Chicken', 'Rooster', 'Mole', 'Shark', 'Snake',
+				'Python', 'Cobra', 'Boa', 'Viper', 'Rattlesnake', 'Cod', 'Tuna', 'Seahorse',
+				'Flounder', 'Spot', 'Snapper', 'Dolphin', 'Seal', 'Walrus', 'Cat', 'Dog', 'Chihuahua', 'Lion',
+				'Tiger', 'Elephant', 'Giraffe', 'Hawk', 'Parrot', 'Zebra', 'Kangaroo', 'Spider',
+				'Dragon', 'Ender_Dragon', 'Zombie', 'Wolf', 'Arctic_Wolf', 'Fox', 'Rabbit', 'Altarian',
+				'Lizard', 'Gecko', 'Chameleon', 'Slime', 'Creature', 'Hybrid', 'Abomination', 
+				'Amalgamation', 'Sheep', 'Ram', 'Lamb', 'Llama', 'Jacob_Sheep', 'Velociraptor', 'Raptor', 'Eagle',
+				'Ghost', 'Winteriz', 'Spirit', 'Husk', 'AI', 'Robot', 'Cyborg',
+				'Ocelot', 'Piglin', 'Salmon', 'Snow_Golem', 'Snowman', 'Iron_Golem', 'Mooshroom', 'Strider',
+				'Tropical_Fish', 'Fish', 'Turtle', 'Tortoise', 'Skeleton', 'Strider', 'Drowned',
+				'Illusioner', 'Killer_Bunny', 'Pufferfish', 'Donkey', 'Horse', 'Mule',
+				'Skeleton_Horse', 'Goat', 'Pigman', 'Evoker', 'Vindicator', 'Ravager', 'Vex',
+				'Guardian', 'Phantom', 'Blaze', 'Wither', 'Witch',
+				'Hoglin', 'Warden', 'Jellyfish', 'Crab', 'Shrimp', 'Albatross', 'Duck',
+				'Goose', 'Swan', 'Swallow', 'Sparrow', 'Vulture', 'Thylacine', 'Tenrec', 'Armadillo', 
+				'Sloth', 'Grizzly_Bear', 'Fennec', 'Ostrich', 'Weasel', 'Otter', 'Deer', 'Buffalo',
+				'Water_Buffalo', 'Orca', 'Whale', 'Pika', 'Degu', 'Okapi', 'Bush', 'Tree', 'Chipmunk', 
+				'Squirrel', 'Lemming', 'Woodchuck', 'Flying_Squirrel', 'Koala', 'Monkey', 'Gorilla',
+				'Orangutan', 'Beaver', 'Ibis', 'Mongoose', 'Tamandua', 'Scorpio'
+			]
+
+			var name1 = statusOfLivingList[Math.floor(Math.random() * (statusOfLivingList.length - 1))]
+			var name2 = speciesList[Math.floor(Math.random() * (speciesList.length - 1))]
+
+			newChar.name = `${name1}_${name2}`
+
+			//Assign the new member an ID
+			var battlerID = 0
+			for (const i in allySide) {
+				battlerID++;
+			}
+			for (const i in opposingSide) {
+				battlerID++;
+			}
+
+			newChar.id = battlerID
+
+			// Assign Stats
+			const stats = ["atk", "mag", "end", "chr", "int", "luk", "prc", "agl"]
+			for (const k in stats) {
+				var statNum = Math.floor(Math.random() * (20 - 1) + 1)
+				newChar[stats[k]] = statNum
+			}
+
+			// Assigning Skills
+			newChar.skills = []
+
+			var possibleSkills = []
+			for (const val in skillFile) {
+				if (skillFile[val].type != "heal" && (skillFile[val].type != "status" && !skillFile[val].buff && !skillFile[val].clone && !skillFile[val].reincarnate && !skillFile[val].debuff
+				&& !skillFile[val].mimic && !skillFile[val].unmimic) && skillFile[val].type != "passive" && skillFile[val].type != "almighty")
+				possibleSkills.push(val)
+			}
+
+			for (let k = 0; k < 2; k++) {
+				const skillName = possibleSkills[Math.round(Math.random() * (possibleSkills.length-1))]
+				newChar.skills.push(skillName)
+			}
+
+			// Assigning Affinities
+			newChar.weak = [];
+			newChar.resist = [];
+			newChar.block = [];
+			newChar.repel = [];
+			newChar.drain = [];
+			
+			const affinities = ["weak", "weak", "weak", "normal", "normal", "normal", "normal", "normal", "normal", "normal", "normal", "normal", "resist", "resist", "block", "repel", "drain"]
+			for (const k in Elements) {
+				if (Elements[k].type != "heal" && Elements[k].type != "status" && Elements[k].type != "passive" && Elements[k].type != "almighty"){
+
+				var statusNum = Math.floor(Math.random() * (affinities.length-1))
+				if (affinities[statusNum] != "normal") {newChar[affinities[statusNum]].push(Elements[k])}
+				}
+			}
+
+			//Getting random shit
+			newChar.trueName = newChar.name
+			newChar.team = oppDefs.team
+			newChar.weapon = "none"
+			newChar.buffs = {
+				atk: 0,
+				mag: 0,
+				end: 0,
+				agl: 0,
+				prc: 0
+			}
+			newChar.status = "none"
+			newChar.melee = [
+				"Strike Attack",
+				"strike"
+			]
+			newChar.clone = true
+			newChar.trust = {}
+
+			allySide.push(newChar)
+			const DiscordEmbed = new Discord.MessageEmbed()
+				.setColor('#e36b2b')
+				.setTitle(`${enmName} => Self`)
+				.setDescription(`${enmName} used ${skillDefs.name}!\n${enmName} reincarnated a ${newChar.name}!${(Math.random() > 0.9) ? "\nThis one may or may not look familiar to someone." : ""}`)
+			channel.send({embeds: [DiscordEmbed]})
 		}
 	} else {
 		var embedText = {
@@ -4704,7 +4825,7 @@ client.on('messageCreate', async message => {
                     { name: `${prefix}registerskill`, value: `(Args <Name> <Cost> <CostType> <Status Type> <Extra Value 1> <Extra Value 2> "<Desc>")\nCreates a skill to be used in battle. \nThese skills have certain properties that can change how they're used.\n\nAllow me to explain`, inline: false },
                     { name: 'Cost', value: "To be used in combination with the next one.", inline: true },
                     { name: 'CostType', value: "HP, MP, HP% or MP%. For example, if I set cost to 5, and costtype to MP%, it would take 5% of my MP.", inline: true },
-                    { name: 'Status Type', value: "This is the thing this status skill will do. Input things such as 'buff', 'debuff', 'mimic', 'status' & 'clone' for this. The value of this will change how Extra Value 1 and Extra Value 2 are used.", inline: true },
+                    { name: 'Status Type', value: "This is the thing this status skill will do. Input things such as 'buff', 'debuff', 'mimic', 'status', 'clone' & 'reincarnate' for this. The value of this will change how Extra Value 1 and Extra Value 2 are used.", inline: true },
                     { name: 'Extra Value 1', value: "A value that affects the usage of the skill. For example, if 'Status Type' is 'status', this would be the status effect to inflict.", inline: true },
 					{ name: 'Extra Value 2', value: "A value that affects the usage of the skill. For example, if 'Status Type' is 'status', this would be the chance the status is inflicted.", inline: true },
                     { name: 'Description', value: "This Skills's description. Try to explain what the move does, so your friends can imagine it! Enclose this value in quotation marks.", inline: true },
@@ -8165,6 +8286,130 @@ client.on('messageCreate', async message => {
 						.setTitle(`${charName} => ${oppDefs.name}`)
 						.setDescription(`${charName} used ${skillDefs.name}!\n${charName} swapped stat buffs with ${oppDefs.name}!`)
 					message.channel.send({embeds: [DiscordEmbed]})
+				} else if (skillDefs.reincarnate) {
+					var newChar = {}
+					var allDefs = allySide[arg[1]]
+
+					//Starting Name
+					newChar.maxhp = Math.round(allDefs.maxhp / 3)
+					newChar.hp = newChar.maxhp
+					newChar.maxmp = Math.round(allDefs.maxmp / 3)
+					newChar.mp = newChar.maxmp
+					newChar.npc = true
+
+					//Assign it a name
+					let statusOfLivingList = [
+						'Demon', 'Fallen', 'Undead', 'Ghouly', 'Skeleton', 'Dead', 'Zombie', 'Soulless', 'Ghostly', 'Spectral',
+						'Impious', 'Ungodly', 'Reincarnated', 'Unfresh', 'Unholy', 'Revenant', 'Rotter', 'Recovering', 'Dying',
+						'Necrotic', 'Non-living', 'Not-dead', 'Nympg', 'Geist', 'Poltergeist', 'Stillborn', 'Exanimated'
+					]
+					let speciesList = [
+						'Hedgehog', 'Fox', 'Echidna', 'Bat', 'Crocodile', 'Bee', 'Wasp', 'Skunk',
+						'Panda', 'Bearcat', 'Bear', 'Polar_Bear', 'Tanuki', 'Raccoon',
+						'Raccoon_Dog', 'Axolotl', 'Pig', 'Cow', 'Chicken', 'Rooster', 'Mole', 'Shark', 'Snake',
+						'Python', 'Cobra', 'Boa', 'Viper', 'Rattlesnake', 'Cod', 'Tuna', 'Seahorse',
+						'Flounder', 'Spot', 'Snapper', 'Dolphin', 'Seal', 'Walrus', 'Cat', 'Dog', 'Chihuahua', 'Lion',
+						'Tiger', 'Elephant', 'Giraffe', 'Hawk', 'Parrot', 'Zebra', 'Kangaroo', 'Spider',
+						'Dragon', 'Ender_Dragon', 'Zombie', 'Wolf', 'Arctic_Wolf', 'Fox', 'Rabbit', 'Altarian',
+						'Lizard', 'Gecko', 'Chameleon', 'Slime', 'Creature', 'Hybrid', 'Abomination', 
+						'Amalgamation', 'Sheep', 'Ram', 'Lamb', 'Llama', 'Jacob_Sheep', 'Velociraptor', 'Raptor', 'Eagle',
+						'Ghost', 'Winteriz', 'Spirit', 'Husk', 'AI', 'Robot', 'Cyborg',
+						'Ocelot', 'Piglin', 'Salmon', 'Snow_Golem', 'Snowman', 'Iron_Golem', 'Mooshroom', 'Strider',
+						'Tropical_Fish', 'Fish', 'Turtle', 'Tortoise', 'Skeleton', 'Strider', 'Drowned',
+						'Illusioner', 'Killer_Bunny', 'Pufferfish', 'Donkey', 'Horse', 'Mule',
+						'Skeleton_Horse', 'Goat', 'Pigman', 'Evoker', 'Vindicator', 'Ravager', 'Vex',
+						'Guardian', 'Phantom', 'Blaze', 'Wither', 'Witch',
+						'Hoglin', 'Warden', 'Jellyfish', 'Crab', 'Shrimp', 'Albatross', 'Duck',
+						'Goose', 'Swan', 'Swallow', 'Sparrow', 'Vulture', 'Thylacine', 'Tenrec', 'Armadillo', 
+						'Sloth', 'Grizzly_Bear', 'Fennec', 'Ostrich', 'Weasel', 'Otter', 'Deer', 'Buffalo',
+						'Water_Buffalo', 'Orca', 'Whale', 'Pika', 'Degu', 'Okapi', 'Bush', 'Tree', 'Chipmunk', 
+						'Squirrel', 'Lemming', 'Woodchuck', 'Flying_Squirrel', 'Koala', 'Monkey', 'Gorilla',
+						'Orangutan', 'Beaver', 'Ibis', 'Mongoose', 'Tamandua', 'Scorpio'
+					]
+
+					var name1 = statusOfLivingList[Math.floor(Math.random() * (statusOfLivingList.length - 1))]
+					var name2 = speciesList[Math.floor(Math.random() * (speciesList.length - 1))]
+
+					newChar.name = `${name1}_${name2}`
+
+					//Assign the new member an ID
+					var battlerID = 0
+					for (const i in allySide) {
+						battlerID++;
+					}
+					for (const i in opposingSide) {
+						battlerID++;
+					}
+
+					newChar.id = battlerID
+
+					// Assign Stats
+					const stats = ["atk", "mag", "end", "chr", "int", "luk", "prc", "agl"]
+					for (const k in stats) {
+						var statNum = Math.floor(Math.random() * (20 - 1) + 1)
+						newChar[stats[k]] = statNum
+					}
+
+					// Assigning Skills
+					var skillPath = dataPath+'/skills.json'
+        			var skillRead = fs.readFileSync(skillPath);
+        			var skillFile = JSON.parse(skillRead);
+
+					newChar.skills = []
+
+					var possibleSkills = []
+					for (const val in skillFile) {
+						if (skillFile[val].type != "heal" && (skillFile[val].type != "status" && !skillFile[val].buff && !skillFile[val].clone && !skillFile[val].reincarnate && !skillFile[val].debuff
+						&& !skillFile[val].mimic && !skillFile[val].unmimic) && skillFile[val].type != "passive" && skillFile[val].type != "almighty")
+						possibleSkills.push(val)
+					}
+
+					for (let k = 0; k < 2; k++) {
+						const skillName = possibleSkills[Math.round(Math.random() * (possibleSkills.length-1))]
+						newChar.skills.push(skillName)
+					}
+
+					// Assigning Affinities
+					newChar.weak = [];
+					newChar.resist = [];
+					newChar.block = [];
+					newChar.repel = [];
+					newChar.drain = [];
+					
+					const affinities = ["weak", "weak", "weak", "normal", "normal", "normal", "normal", "normal", "normal", "normal", "normal", "normal", "resist", "resist", "block", "repel", "drain"]
+					for (const k in Elements) {
+						if (Elements[k].type != "heal" && Elements[k].type != "status" && Elements[k].type != "passive" && Elements[k].type != "almighty"){
+		
+						var statusNum = Math.floor(Math.random() * (affinities.length-1))
+						if (affinities[statusNum] != "normal") {newChar[affinities[statusNum]].push(Elements[k])}
+						}
+					}
+
+					//Getting random shit
+					newChar.trueName = newChar.name
+					newChar.team = allDefs.team
+					newChar.weapon = "none"
+					newChar.buffs = {
+						atk: 0,
+						mag: 0,
+						end: 0,
+						agl: 0,
+						prc: 0
+					}
+					newChar.status = "none"
+					newChar.melee = [
+						"Strike Attack",
+						"strike"
+					]
+					newChar.clone = true
+					newChar.trust = {}
+
+					allySide.push(newChar)
+					const DiscordEmbed = new Discord.MessageEmbed()
+						.setColor('#e36b2b')
+						.setTitle(`${charName} => Self`)
+						.setDescription(`${charName} used ${skillDefs.name}!\n${charName} reincarnated a ${newChar.name}!${(Math.random() > 0.9) ? "\nThis one may or may not look familiar to someone." : ""}`)
+					message.channel.send({embeds: [DiscordEmbed]})
                 } else {
                     message.channel.send(`This doesn't work yet!`)
 					message.delete()
@@ -8855,8 +9100,9 @@ client.on('messageCreate', async message => {
 					channelId: message.channel.id,
 					guildId: message.guild.id,
 					adapterCreator: message.channel.guild.voiceAdapterCreator,
+					selfDeaf: false,
 				});
-				
+
 				connection.on(Voice.VoiceConnectionStatus.Ready, (oldState, newState) => {
 					console.log('Connection is in the Ready state!');
 				});
@@ -8879,6 +9125,7 @@ client.on('messageCreate', async message => {
 					channelId: arg[1],
 					guildId: message.guild.id,
 					adapterCreator: channel.guild.voiceAdapterCreator,
+					selfDeaf: false,
 				});
 
 				connection.on(Voice.VoiceConnectionStatus.Ready, (oldState, newState) => {
@@ -8903,7 +9150,6 @@ client.on('messageCreate', async message => {
 		}
 		
 		setTimeout(function() {
-			message.guild.me.voice.setSelfDeaf(false);
 			console.log(message.guild.me.voice);
 		}, 3000);
 	}
@@ -8929,6 +9175,10 @@ client.on('messageCreate', async message => {
 		} else {
 			message.channel.send("Invalid Song.")
 		}
+	}
+
+	if (command === 'endsong') {
+		endSong(message.guild.id)
 	}
 
     /////////////////////////////////////////////
@@ -9937,4 +10187,4 @@ process.on('unhandledRejection', error => {
 	console.error('Unhandled promise rejection:', error);
 });
 
-client.login('help-me');
+client.login(process.env.BOT_TOKEN);

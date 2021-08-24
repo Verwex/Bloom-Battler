@@ -2361,8 +2361,6 @@
         "maxmp": 175,
         "basehp": 45,
         "basemp": 30,
-        "status": "none",
-        "statusturns": 0,
         "melee": [
             "Strike Attack",
             "strike"
@@ -2383,15 +2381,18 @@
         "baseint": 5,
         "baseagl": 7,
         "baseluk": 6,
-        "lb": 0,
-        "xp": 0,
+        "xp": 2504,
         "maxxp": 5070,
         "weak": [],
         "resist": [],
         "block": [],
         "repel": [],
         "drain": [],
-        "skills": [],
+        "skills": [
+            "Undead-Like(Newborn)",
+            "Agilao",
+            "Harmonics"
+        ],
         "meleequote": [],
         "physquote": [],
         "magquote": [],
@@ -2415,7 +2416,9 @@
             "backstory": "",
             "voice": "",
             "theme": ""
-        }
+        },
+        "weapon": "none",
+        "trust": {}
     },
     "Lacrimal": {
         "name": "Lacrimal",
