@@ -1,7 +1,21 @@
-﻿//Discord.JS initiation.
+//Discord.JS initiation.
 const Discord = require('discord.js');
-const client = new Discord.Client({intents:[Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES]});
-require('dotenv').config();
+const Voice = require('@discordjs/voice');
+const client = new Discord.Client({
+	intents: [
+		Discord.Intents.FLAGS.GUILDS,
+		Discord.Intents.FLAGS.GUILD_MEMBERS,
+		Discord.Intents.FLAGS.GUILD_MESSAGES,
+		Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+		Discord.Intents.FLAGS.DIRECT_MESSAGES,
+		Discord.Intents.FLAGS.GUILD_VOICE_STATES
+	],
+	partials: [
+		'MESSAGE',
+		'CHANNEL',
+		'REACTION'
+	]
+});
 
 // Bot Stuff
 const utilityFuncs = require('./Packages/utilityFuncs.js');
@@ -10,12 +24,17 @@ const enemyFuncs = require('./Packages/enemyFuncs.js');
 const attackFuncs = require('./Packages/attackFuncs.js');
 const turnFuncs = require('./Packages/turnFuncs.js');
 
+// Other Required Shit
+require('dotenv').config();
+
 // Path to 'data' folder
 const dataPath = './data'
 
 //FS, for writing files.
 const fs = require('fs');
-const { stringify } = require('querystring');
+
+// Voice Shit
+const ffmpeg = require('ffmpeg-static');
 
 // Games
 var doGSM = false;
@@ -86,7 +105,6 @@ const itemTypeEmoji = {
 	healmp: "⭐",
 	healhpmp: "🔰"
 }
-	
 
 // Status Effects
 const statusEffects = [
@@ -94,6 +112,7 @@ const statusEffects = [
 	"bleed",
     "freeze",
     "paralyze",
+	"sleep",
 	"despair",
     "poison",
     "brainwash",
@@ -107,6 +126,7 @@ const statusEmojis = {
 	bleed: "🩸",
     freeze: "❄",
     paralyze: "⚡",
+	sleep: "😴",
 	despair: "💦",
     poison: "☠️",
 	dizzy: "💫",
@@ -127,6 +147,11 @@ const enmHabitats = [
 	"icy",
 	"unknown"
 ]
+
+// round cuz i can
+function roundNum(num, places) {
+	return +(Math.round(num + "e+" + places)  + "e-" + places);
+}
 
 // Buttons
 const backId = 'back'
@@ -187,107 +212,55 @@ const sendSkillArray = async(channel, theArray) => {
 	})
 }
 
+// Finally, Voice Channel shit
+var voiceChannelShit = {}
+
+function playSong(server, guild, url) {
+	if (!voiceChannelShit[server]) {
+		voiceChannelShit[server] = {
+			connection: null,
+			player: null,
+			cursong: url
+		}
+	}
+
+	if (voiceChannelShit[server].player || voiceChannelShit[server].player != null) {
+		voiceChannelShit[server].player.stop();
+	}
+	
+	voiceChannelShit[server].player = Voice.createAudioPlayer();
+	voiceChannelShit[server].player.on('error', error => {
+		console.error('Error:', error.message, 'with track', error.resource.metadata.title);
+	});
+	
+	voiceChannelShit[server].connection.subscribe(voiceChannelShit[server].player)
+	
+	const resource = Voice.createAudioResource(url, {
+		inputType: Voice.StreamType.OggOpus
+	});
+
+	voiceChannelShit[server].player.play(resource)
+}
+
+function endSong(server) {
+	if (!voiceChannelShit[server]) {
+		voiceChannelShit[server] = {
+			connection: null,
+			player: null,
+			cursong: "none"
+		}
+		
+		return false
+	}
+
+	voiceChannelShit[server].player.stop()
+	return true
+}
+	
+
 /////////////////////
 // Write Functions //
 /////////////////////
-
-// Creates a Character.
-function writeChar(creator, name, health, magicpoints, attack, magic, perception, endurance, charisma, inteligence, agility, luck) {
-    var charPath = dataPath+'/characters.json'
-    var charRead = fs.readFileSync(charPath);
-    var charFile = JSON.parse(charRead);
-
-    charFile[name] = {
-		name: name,
-
-        // Only the owner can move this character, if they don't have admin permissions.
-        owner: creator.id,
-
-        // Level, HP and MP
-        level: 1,
-        hp: health,
-        mp: magicpoints,
-        maxhp: health,
-        maxmp: magicpoints,
-		basehp: health,
-		basemp: magicpoints,
-
-        // Status Effect
-        status: "none",
-        statusturns: 0,
-
-        // Melee Attack
-        melee: ["Strike Attack", "strike"],
-
-        // Main stats
-        atk: attack,
-        mag: magic,
-        prc: perception,
-        end: endurance,
-        chr: charisma,
-        int: inteligence,
-        agl: agility,
-        luk: luck,
-        baseatk: attack,
-        basemag: magic,
-        baseprc: perception,
-        baseend: endurance,
-        basechr: charisma,
-        baseint: inteligence,
-        baseagl: agility,
-        baseluk: luck,
-
-        // Limit Break Meter, XP.
-        lb: 0,
-        xp: 0,
-        maxxp: 100,
-
-        // Affinities & Skills
-        weak: [],
-        resist: [],
-        block: [],
-        repel: [],
-        drain: [],
-        skills: [],
-		
-		// Quotes
-		meleequote: [],
-		physquote: [],
-		magquote: [],
-		strongquote: [],
-		critquote: [],
-		weakquote: [],
-		missquote: [],
-		blockquote: [],
-		repelquote: [],
-		drainquote: [],
-		resistquote: [],
-		hurtquote: [],
-		lbquote: [],
-		healquote: [],
-		helpedquote: [],
-		killquote: [],
-		deathquote: [],
-		
-		// Bio Info
-		bio: {
-			species: "",
-			age: "",
-			info: "",
-			
-			backstory: "",
-			likes: "",
-			dislikes: "",
-			fears: "",
-			
-			voice: "",
-			theme: ""
-		}
-    };
-
-    fs.writeFileSync(charPath, JSON.stringify(charFile, null, '    '));
-    console.log(`Written ${name}.`)
-}
 
 // Gives a character an affinity.
 function writeAffinity(name, type, affinity) {
@@ -415,6 +388,9 @@ function writeStatus(name, need, bartype, statustype, extra1, extra2, desc) {
 		skillFile[name].mimic = true
 	} else if (statusType === 'clone' || statusType === 'harmonics') {
 		skillFile[name].clone = true
+	} else if (statusType === 'shield' || statusType === 'guard' || statusType === 'trap') {
+		skillFile[name].shield = extra1.toLowerCase()
+		skillFile[name].target = extra2.toLowerCase()
 	}
 
 	if (!desc || desc === "none" || desc === "null") {
@@ -464,6 +440,9 @@ function writePassive(name, passivetype, extra1, extra2, desc) {
                 atktype: "physical"
             }
 		}
+	} else if (passiveType === 'swordbreaker') {
+		skillFile[name].pow = parseInt(extra1)
+		skillFile[name].swordbreaker = true
 	}
 
     fs.writeFileSync(skillPath, JSON.stringify(skillFile, null, '    '))
@@ -785,6 +764,41 @@ function doStatusEffect(fighterDef, btl, server) {
 				fs.writeFileSync(dataPath+'/battle.json', JSON.stringify(btl, null, '    '));
 				return [fighterDef, "skip"]
 			}
+        } else if (fighterDef.status === "sleep") {
+			if (fighterDef.boss || fighterDef.statusturns <= 1) {
+				const statusEmbed = new Discord.MessageEmbed()
+					.setColor('#e36b2b')
+					.setTitle(`${fighterDef.name} is asleep.`)
+					.setDescription("They wake up.")
+
+				client.channels.fetch(btl[server].battlechannel)
+					.then(channel => channel.send({embeds: [statusEmbed]}))
+
+				console.log(`TurnOrder: Done ${fighterDef.name}'s ${fighterDef.status} status effect.`);
+
+				fighterDef.status = "none"
+				fighterDef.statusturns = 0
+			} else {
+				var heal = Math.floor(fighterDef.maxhp/10)
+				var healmp = Math.floor(fighterDef.maxmp/10)
+				fighterDef.statusturns--;
+				
+				fighterDef.hp = Math.min(fighterDef.maxhp, fighterDef.hp + heal)
+				fighterDef.mp = Math.min(fighterDef.maxmp, fighterDef.mp + healmp)
+
+				const statusEmbed = new Discord.MessageEmbed()
+					.setColor('#e36b2b')
+					.setTitle(`${fighterDef.name} is asleep...`)
+					.setDescription(`Their HP was restored by ${heal} & MP by ${healmp}.`)
+
+				client.channels.fetch(btl[server].battlechannel)
+					.then(channel => channel.send({embeds: [statusEmbed]}))
+
+				console.log(`TurnOrder: Done ${fighterDef.name}'s ${fighterDef.status} status effect.`);
+
+				fs.writeFileSync(dataPath+'/battle.json', JSON.stringify(btl, null, '    '));
+				return [fighterDef, "skip"]
+			}
         } else if (fighterDef.status === "fear") {
 			if (Math.random() <= 0.5 && !fighterDef.boss) {
 				const statusEmbed = new Discord.MessageEmbed()
@@ -856,19 +870,153 @@ function doStatusEffect(fighterDef, btl, server) {
 			fs.writeFileSync(dataPath+'/battle.json', JSON.stringify(btl, null, '    '));
             return [fighterDef, "continue"]
         } else if (fighterDef.status === "brainwash") {
-            var dmg = attackFuncs.generateDamage(fighterDef.atk, fighterDef.prc, fighterDef.luk, fighterDef.chr, 50, 100, 15, "none", 0, "physical", fighterDef.end, fighterDef.agl, fighterDef.luk, "normal")
-            fighterDef.hp = Math.max(0, fighterDef.hp - Math.round(dmg[0]))
+			var skillPath = dataPath+'/skills.json'
+			var skillRead = fs.readFileSync(skillPath);
+			var skillFile = JSON.parse(skillRead);
 
-            var defeated = ""
-            if (fighterDef.hp <= 0) {
+			var possibleSkills = [];
+			for (const i in fighterDef.skills) {
+				var skillDefs = skillFile[fighterDef.skills[i]]
+				
+				if (!skillDefs.passive && skillDefs.type != "passive") {
+					switch(skillDefs.costtype) {
+						case "hp":
+							if (fighterDef.hp > skillDefs.cost)
+								possibleSkills.push(fighterDef.skills[i]);
+							
+							break
+							
+						case "hppercent":
+							if (fighterDef.hp > (fighterDef.maxhp/100*skillDefs.cost))
+								possibleSkills.push(fighterDef.skills[i]);
+							
+							break
+							
+						case "mppercent":
+							if (fighterDef.mp > (fighterDef.maxmp/100*skillDefs.cost))
+								possibleSkills.push(fighterDef.skills[i]);
+							
+							break
+							
+						default:
+							if (fighterDef.mp > skillDefs.cost)
+								possibleSkills.push(fighterDef.skills[i]);
+					}
+				}
+			}
+			
+			var skillDefs
+			if (possibleSkills.length <= 0) {
+				skillDefs = {
+					name: fighterDef.melee[0],
+					type: fighterDef.melee[1],
+					pow: 10,
+					crit: 10,
+					acc: 90
+				}
+			} else {
+				skillDefs = skillFile[possibleSkills[Math.round(Math.random() * (possibleSkills.length-1))]]
+			}
+			
+			var targets = []
+			switch(skillDefs.target) {
+				case 'ally':
+					if (charFuncs.isOpposingSide(fighterDef, btl[server])) {
+						var targNum = Math.round(Math.random() * (btl[server].allies.members.length - 1))
+						targets.push(btl[server].allies.members[targNum])
+					} else {
+						var targNum = Math.round(Math.random() * (btl[server].enemies.members.length - 1))
+						targets.push(btl[server].enemies.members[targNum])
+					}
+					
+					break
+			
+				case 'allopposing':
+					if (charFuncs.isOpposingSide(fighterDef, btl[server])) {
+						for (const i in btl[server].enemies.members)
+							targets.push(btl[server].enemies.members[i]);
+					} else {
+						for (const i in btl[server].allies.members)
+							targets.push(btl[server].allies.members[i]);
+					}
+					
+					break
+			
+				case 'allallies':
+					if (charFuncs.isOpposingSide(fighterDef, btl[server])) {
+						for (const i in btl[server].allies.members)
+							targets.push(btl[server].allies.members[i]);
+					} else {
+						for (const i in btl[server].enemies.members)
+							targets.push(btl[server].enemies.members[i]);
+					}
+					
+					break
+					
+				case 'everyone':
+					for (const i in btl[server].allies.members)
+						targets.push(btl[server].allies.members[i]);
+					for (const i in btl[server].enemies.members)
+						targets.push(btl[server].enemies.members[i]);
+					
+					break
+				
+				default: 
+					if (charFuncs.isOpposingSide(fighterDef, btl[server])) {
+						var targNum = Math.round(Math.random() * (btl[server].enemies.members.length - 1))
+						targets.push(btl[server].enemies.members[targNum])
+					} else {
+						var targNum = Math.round(Math.random() * (btl[server].allies.members.length - 1))
+						targets.push(btl[server].allies.members[targNum])
+					}
+			}
+
+			var embedTexts = []
+			for (const i in targets) {
+				var targDefs = targets[i]
+				const targName = targets[i].name
+				
+				if (targDefs.hp > 0) {
+					var embedTxt = attackFuncs.attackFoe(fighterDef.name, targName, fighterDef, targDefs, skillDefs, false, server)
+					if (embedTxt.oneMore == true && turnFuncs.oneMores(server)) {
+						btl[message.guild.id].onemore = true
+					}
+
+					embedTexts.push(embedTxt)
+				}
+			}
+			
+			embedText = {
+				targetText: `${fighterDef.name} => ???`,
+				attackText: `**${fighterDef.name} is brainwashed!**\n${fighterDef.name} used ${skillDefs.name}!`,
+				resultText: ''
+			}
+			
+			for (const i in embedTexts)
+				embedText.resultText += `\n${embedTexts[i].resultText}`;
+
+			if (skillDefs.resistremove) {
+				embedText.resultText += `\n${fighterDef.name} lost all resisting affinities toward ${skillDefs.resistremove} type skills.`
+				
+				const affinities = ["resist", "block", "repel", "drain"]
+				for (const i in affinities) {
+					for (const k in fighterDef[affinities[i]]) {
+						if (fighterDef[affinities[i]][k] === skillDefs.resistremove) {
+							fighterDef[affinities[i]].splice(k)
+						}
+					}
+				}
+			}
+			
+			if (skillDefs.sacrifice) {
+				embedText.resultText += `\n${fighterDef.name} sacrificed themselves in the process.`;
 				fighterDef.hp = 0
-                defeated = "and was defeated"
-            }
+			}
 
-            const DiscordEmbed = new Discord.MessageEmbed()
-                .setColor('#e36b2b')
-                .setTitle(`${fighterDef.name} => Self`)
-				.setDescription(`**${fighterDef.name} is brainwashed!**\n${fighterDef.name} strikes themselves!\nThey took ${Math.round(dmg[0])} damage${defeated}!`)
+			const DiscordEmbed = new Discord.MessageEmbed()
+				.setColor('#e36b2b')
+				.setTitle(`${embedText.targetText}`)
+				.setDescription(`${embedText.attackText}!\n${embedText.resultText}`)
 
 			fighterDef.statusturns--;
             if (fighterDef.statusturns == 0 || fighterDef.hp <= 0 || fighterDef.boss) {
@@ -885,14 +1033,14 @@ function doStatusEffect(fighterDef, btl, server) {
 		} else if (fighterDef.status === "rage") {
 			var targ;
             if (charFuncs.isOpposingSide(fighterDef, btl[server])) {
-				var targNum = Math.round(Math.random() * (btl[server].enemies.members.length - 1))
-				targ = btl[server].enemies.members[targNum]
-			} else {
 				var targNum = Math.round(Math.random() * (btl[server].allies.members.length - 1))
 				targ = btl[server].allies.members[targNum]
+			} else {
+				var targNum = Math.round(Math.random() * (btl[server].enemies.members.length - 1))
+				targ = btl[server].enemies.members[targNum]
 			}
 			
-			var embedText = attackFuncs.meleeFoe(fighterDef, targ, server)
+			var embedText = attackFuncs.meleeFoe(fighterDef, targ, server, true)
 			const DiscordEmbed = new Discord.MessageEmbed()
 				.setColor('#fcba03')
 				.setTitle(`${embedText.targetText}`)
@@ -994,8 +1142,23 @@ function sendTurnBrief(btl, channel) {
         const enemy = opposingSide[i]
         if (enemy.hp > 0) {
 			targets += `**${i}**: `
-			if (enemy.status != "none") {targets += `(${statusEmojis[enemy.status]}) `}
-			if (turnFuncs.oneMores(channel.guild.id) && enemy.down) {targets += "🡇"; downCount++}
+
+			if (enemy.status != "none") 
+				targets += `(${statusEmojis[enemy.status]}) `;
+
+			if (turnFuncs.oneMores(channel.guild.id) && enemy.down) {
+				targets += "🡇"; 
+				downCount++;
+			}
+			
+			if (enemy.enemy && enemy.limitbreak) {
+				if (enemy.lb >= enemy.limitbreak.cost)
+					targets += '<:warning:878094052208296007>';
+			} else if (!enemy.enemy && enemy.lb1) {
+				if (enemy.lb >= enemy.lb1.cost)
+					targets += '<:warning:878094052208296007>';
+			}
+
 			targets += `${enemy.name} *(${enemy.hp}/${enemy.maxhp}HP) (${enemy.mp}/${enemy.maxmp}MP)`
 			
 			if (charFuncs.hasPassive(enemy, "affinitypoint") && enemy.affinitypoint && enemy.affinitypoint > 0) {
@@ -1010,7 +1173,8 @@ function sendTurnBrief(btl, channel) {
         }
     }
 	
-	if (downCount == opposingSide.length) {allDown = true}
+	if (downCount == opposingSide.length)
+		allDown = true;
 
 	var skills = ""
 	for (const i in charDefs.skills) {
@@ -1025,9 +1189,8 @@ function sendTurnBrief(btl, channel) {
 	var hasItems = false
 	
 	var party = btl[channel.guild.id].parties[btl[channel.guild.id].battleteam]
-	if (charFuncs.isOpposingSide(charDefs, btl[channel.guild.id])) {
-		party = (btl[channel.guild.id].battleteam2.toLowerCase() != "none") ? btl[channel.guild.id].parties[btl[channel.guild.id].battleteam2] : null
-	}
+	if (charFuncs.isOpposingSide(charDefs, btl[channel.guild.id]))
+		party = (btl[channel.guild.id].battleteam2.toLowerCase() != "none") ? btl[channel.guild.id].parties[btl[channel.guild.id].battleteam2] : null;
 
 	var itemPath = dataPath+'/items.json'
 	var itemRead = fs.readFileSync(itemPath);
@@ -1035,8 +1198,7 @@ function sendTurnBrief(btl, channel) {
 	
 	if (party && party.items) {
 		for (const i in party.items) {
-			console.log(party.items[i])
-			skills += `${itemFile[party.items[i]].name}\n`
+			skills += `${itemFile[i].name}: ${party.items[i]}\n`
 			hasItems = true
 		}
 	}
@@ -1082,21 +1244,39 @@ function sendTurnBrief(btl, channel) {
 function advanceTurn(btl, server) {
     // Begin with doing checks to see if they should end the battle.
     // Should the player side win?
+	// Clear clones & undead too.
     var enemiesLeft = 0;
     for (const enm in btl[server].enemies.members) {
         const enemy = btl[server].enemies.members[enm]
         if (enemy.hp > 0) {
             enemiesLeft = enemiesLeft + 1
-        }
+        } else {
+			enemy.status = "none"
+			enemy.statusturns = 0
+			enemy.lb = 0
+
+			if (enemy.clone || enemy.undead) {
+				btl[server].enemies.members.splice(enm, 1)
+			}
+		}
     }
 
     // Should the Enemy Side win?
+	// Clear clones & undead too.
     var playersLeft = 0;
     for (const player in btl[server].allies.members) {
         const p = btl[server].allies.members[player]
         if (p.hp > 0) {
             playersLeft = playersLeft + 1
-        }
+        } else {
+			p.status = "none"
+			p.statusturns = 0
+			p.lb = 0
+
+			if (p.clone || p.undead) {
+				btl[server].allies.members.splice(player, 1)
+			}
+		}
     }
 
 	// LOl we have a draw here folks cause 	WE SUCK ASSs
@@ -1200,8 +1380,12 @@ function advanceTurn(btl, server) {
 		console.log(`StartTurn: Checking ${fighterDefs.name}'s skills for passives`)
 		for (const i in fighterDefs.skills) {
 			const skillDefs = skillFile[fighterDefs.skills[i]]
+			
+			if (!skillFile[fighterDefs.skills[i]]) {
+				console.log(fighterDefs.skills[i] + " doesn't exist")
+			}
 
-			if (skillDefs.type && skillDefs.type === "passive" && fighterDefs.hp > 0) {
+			if (skillDefs && skillDefs.type && skillDefs.type === "passive" && fighterDefs.hp > 0) {
 				if (skillDefs.passive === "healonturn") {
 					charDefs.hp = Math.min(fighterDefs.maxhp, fighterDefs.hp + skillDefs.pow)
 					client.channels.fetch(btl[server].battlechannel)
@@ -1215,15 +1399,15 @@ function advanceTurn(btl, server) {
 				}
 				
 				if (skillDefs.passive === "regen") {
-					charDefs.hp = Math.min(fighterDefs.maxhp, fighterDefs.hp + (fighterDefs.maxhp/100)*skillDefs.pow)
+					fighterDefs.hp = Math.round(Math.min(fighterDefs.maxhp, fighterDefs.hp + fighterDefs.maxhp/100*skillDefs.pow))
 					client.channels.fetch(btl[server].battlechannel)
-						.then(channel => channel.send(`${fighterDefs.name}'s ${skillDefs.name} allowed them to heal themselves by ${skillDefs.pow}!`))
+						.then(channel => channel.send(`${fighterDefs.name}'s ${skillDefs.name} allowed them to heal themselves by ${Math.round((fighterDefs.maxhp/100)*skillDefs.pow)}!`))
 				}
 
 				if (skillDefs.passive === "invig") {
-					fighterDefs.mp = Math.min(fighterDefs.maxmp, fighterDefs.mp + (fighterDefs.maxmp/100)*skillDefs.pow)
+					fighterDefs.mp = Math.round(Math.min(fighterDefs.maxmp, fighterDefs.mp + fighterDefs.maxmp/100*skillDefs.pow))
 					client.channels.fetch(btl[server].battlechannel)
-						.then(channel => channel.send(`${fighterDefs.name}'s ${skillDefs.name} allowed them to restore their MP by ${skillDefs.pow}!`))
+						.then(channel => channel.send(`${fighterDefs.name}'s ${skillDefs.name} allowed them to restore their MP by ${Math.round(fighterDefs.maxmp/100*skillDefs.pow)}!`))
 				}
 			}
 		}
@@ -1232,7 +1416,7 @@ function advanceTurn(btl, server) {
 
 		if (result[1] && result[1] === "continue") {
 			setTimeout(function() {
-				if (fighterDefs.enemy) {
+				if (fighterDefs.enemy || fighterDefs.npc) {
 					client.channels.fetch(btl[server].battlechannel)
 						.then(channel => enemyMove(fighterDefs.id, btl, channel))
 				} else {
@@ -1250,6 +1434,37 @@ function advanceTurn(btl, server) {
     fs.writeFileSync(dataPath+'/battle.json', JSON.stringify(btl, null, '    '), function (err) { if (err) throw err });
 
     return btl
+}
+
+function sendCharStats(user, charDefs) {
+	var charAffs = "";
+	for (const i in charDefs.weak) {charAffs += `${charDefs.weak[i]} weakness.\n`}
+	for (const i in charDefs.resist) {charAffs += `${charDefs.resist[i]} resist.\n`}
+	for (const i in charDefs.block) {charAffs += `${charDefs.block[i]} block.\n`}
+	for (const i in charDefs.repel) {charAffs += `${charDefs.repel[i]} repel.\n`}
+	for (const i in charDefs.drain) {charAffs += `${charDefs.drain[i]} drain.\n`}
+	if (charAffs === "") {charAffs = "No Affinities that battle."}
+	
+	var charPassives = ''
+	for (const i in charDefs.skills) {
+		var skillDefs = readSkill(charDefs.skills[i])
+		
+		if (skillDefs && skillDefs.passive)
+			charPassives += skillDefs.name;
+	}
+
+	if (charPassives === '') {charPassives = 'No Passives that battle.'}
+
+	var DiscordEmbed = new Discord.MessageEmbed()
+		.setColor('#9c39ed')
+		.setTitle(`These were ${charDefs.name}'s stats in that RandStats battle.`)
+		.addFields(
+			{ name: 'Stats', value: `${charDefs.maxhp}HP\n${charDefs.maxmp}MP\n${charDefs.atk}ATK\n${charDefs.mag}MAG\n${charDefs.prc}PRC\n${charDefs.end}END\n${charDefs.chr}CHR\n${charDefs.int}INT\n${charDefs.agl}AGL\n${charDefs.luk}LUK`, inline: true },
+			{ name: 'Affinities', value: charAffs, inline: true },
+			{ name: 'Passive Skills', value: charPassives, inline: true }
+		)
+
+	return user.send({embeds: [DiscordEmbed]})
 }
 
 function drawBattle(btl, server) {
@@ -1277,19 +1492,7 @@ function drawBattle(btl, server) {
 		if ((btl[server].pvpmode === 'randstats' || btl[server].pvpmode === 'charfuck') && charDefs.owner) {			
 			var owner = client.users.fetch(charDefs.owner)
 			owner.then(function(owner) {
-				var charAffs = "";
-				for (const i in charDefs.weak) {charAffs += `${charDefs.weak[i]} weakness.\n`}
-				for (const i in charDefs.resist) {charAffs += `${charDefs.resist[i]} resist.\n`}
-				for (const i in charDefs.block) {charAffs += `${charDefs.block[i]} block.\n`}
-				for (const i in charDefs.repel) {charAffs += `${charDefs.repel[i]} repel.\n`}
-				for (const i in charDefs.drain) {charAffs += `${charDefs.drain[i]} drain.\n`}
-				if (charAffs === ``) {charAffs = "No Affinities that battle."}
-
-				var DiscordEmbed = new Discord.MessageEmbed()
-					.setColor('#9c39ed')
-					.setTitle(`These were ${charDefs.name}'s stats in that RandStats battle.`)
-					.setDescription(`${charDefs.maxhp}HP\n${charDefs.maxmp}MP\n\n${charDefs.atk}ATK\n${charDefs.mag}MAG\n${charDefs.prc}PRC\n${charDefs.end}END\n${charDefs.chr}CHR\n${charDefs.int}INT\n${charDefs.agl}AGL\n${charDefs.luk}LUK\n\n${charAffs}`)
-				owner.send({embeds: [DiscordEmbed]})
+				sendCharStats(owner, charDefs)
 			})
 		}
 	}
@@ -1300,19 +1503,7 @@ function drawBattle(btl, server) {
 		if ((btl[server].pvpmode === 'randstats' || btl[server].pvpmode === 'charfuck') && charDefs.owner) {			
 			var owner = client.users.fetch(charDefs.owner)
 			owner.then(function(owner) {
-				var charAffs = "";
-				for (const i in charDefs.weak) {charAffs += `${charDefs.weak[i]} weakness.\n`}
-				for (const i in charDefs.resist) {charAffs += `${charDefs.resist[i]} resist.\n`}
-				for (const i in charDefs.block) {charAffs += `${charDefs.block[i]} block.\n`}
-				for (const i in charDefs.repel) {charAffs += `${charDefs.repel[i]} repel.\n`}
-				for (const i in charDefs.drain) {charAffs += `${charDefs.drain[i]} drain.\n`}
-				if (charAffs === ``) {charAffs = "No Affinities that battle."}
-
-				var DiscordEmbed = new Discord.MessageEmbed()
-					.setColor('#9c39ed')
-					.setTitle(`These were ${charDefs.name}'s stats in that RandStats battle.`)
-					.setDescription(`${charDefs.maxhp}HP\n${charDefs.maxmp}MP\n\n${charDefs.atk}ATK\n${charDefs.mag}MAG\n${charDefs.prc}PRC\n${charDefs.end}END\n${charDefs.chr}CHR\n${charDefs.int}INT\n${charDefs.agl}AGL\n${charDefs.luk}LUK\n\n${charAffs}`)
-				owner.send({embeds: [DiscordEmbed]})
+				sendCharStats(owner, charDefs)
 			})
 		}
 	}
@@ -1353,6 +1544,7 @@ function winBattle(btl, server) {
 				showtimes: false,
 				onemores: false,
 				currency: "RPGBot Token",
+				xprate: 1,
 				pvpstuff: {
 					none: {},
 					metronome: {},
@@ -1409,19 +1601,7 @@ function winBattle(btl, server) {
 				if ((btl[server].pvpmode === 'randstats' || btl[server].pvpmode === 'charfuck') && charDefs.owner) {			
 					var owner = client.users.fetch(charDefs.owner)
 					owner.then(function(owner) {
-						var charAffs = "";
-						for (const i in charDefs.weak) {charAffs += `${charDefs.weak[i]} weakness.\n`}
-						for (const i in charDefs.resist) {charAffs += `${charDefs.resist[i]} resist.\n`}
-						for (const i in charDefs.block) {charAffs += `${charDefs.block[i]} block.\n`}
-						for (const i in charDefs.repel) {charAffs += `${charDefs.repel[i]} repel.\n`}
-						for (const i in charDefs.drain) {charAffs += `${charDefs.drain[i]} drain.\n`}
-						if (charAffs === ``) {charAffs = "No Affinities that battle."}
-
-						var DiscordEmbed = new Discord.MessageEmbed()
-							.setColor('#9c39ed')
-							.setTitle(`These were ${charDefs.name}'s stats in that RandStats battle.`)
-							.setDescription(`${charDefs.maxhp}HP\n${charDefs.maxmp}MP\n\n${charDefs.atk}ATK\n${charDefs.mag}MAG\n${charDefs.prc}PRC\n${charDefs.end}END\n${charDefs.chr}CHR\n${charDefs.int}INT\n${charDefs.agl}AGL\n${charDefs.luk}LUK\n\n${charAffs}`)
-						owner.send({embeds: [DiscordEmbed]})
+						sendCharStats(owner, charDefs)
 					})
 				}
 			}
@@ -1433,19 +1613,7 @@ function winBattle(btl, server) {
 			if ((btl[server].pvpmode === 'randstats' || btl[server].pvpmode === 'charfuck') && charDefs.owner) {			
 				var owner = client.users.fetch(charDefs.owner)
 				owner.then(function(owner) {
-					var charAffs = "";
-					for (const i in charDefs.weak) {charAffs += `${charDefs.weak[i]} weakness.\n`}
-					for (const i in charDefs.resist) {charAffs += `${charDefs.resist[i]} resist.\n`}
-					for (const i in charDefs.block) {charAffs += `${charDefs.block[i]} block.\n`}
-					for (const i in charDefs.repel) {charAffs += `${charDefs.repel[i]} repel.\n`}
-					for (const i in charDefs.drain) {charAffs += `${charDefs.drain[i]} drain.\n`}
-					if (charAffs === ``) {charAffs = "No Affinities that battle."}
-
-					var DiscordEmbed = new Discord.MessageEmbed()
-						.setColor('#9c39ed')
-						.setTitle(`These were ${charDefs.name}'s stats in that RandStats battle.`)
-						.setDescription(`${charDefs.maxhp}HP\n${charDefs.maxmp}MP\n\n${charDefs.atk}ATK\n${charDefs.mag}MAG\n${charDefs.prc}PRC\n${charDefs.end}END\n${charDefs.chr}CHR\n${charDefs.int}INT\n${charDefs.agl}AGL\n${charDefs.luk}LUK\n\n${charAffs}`)
-					owner.send({embeds: [DiscordEmbed]})
+					sendCharStats(owner, charDefs)
 				})
 			}
 		}
@@ -1497,16 +1665,14 @@ function winBattle(btl, server) {
 
             var discordEmbed = new Discord.MessageEmbed()
                 .setColor('#9c39ed')
-                .addFields(
-                    { name: `Team ${btl[server].battleteam} defeated the enemies!`, value: 'The next wave is coming!', inline: false },
-                )
+                .setTitle(`Team ${btl[server].battleteam} defeated the enemies!`)
+				.setDescription('The next wave is coming!')
                 .setFooter(`Wave ${btl[server].colosseum[1]}`);
             if (bossWave == true) {
                 discordEmbed = new Discord.MessageEmbed()
                     .setColor('#9c0029')
-                    .addFields(
-                        { name: `Team ${btl[server].battleteam} defeated the enemies!`, value: 'The next wave is coming!\nA strong enemy resonates within...', inline: false },
-                    )
+                    .setTitle(`Team ${btl[server].battleteam} defeated the enemies!`)
+					.setDescription('The next wave is coming!\nA strong enemy resonates within...')
                     .setFooter(`Wave ${btl[server].colosseum[1]} - Boss Wave`);
             }
 
@@ -1539,33 +1705,43 @@ function winBattle(btl, server) {
 	var isBigBoss = false;
     for (const enemy in btl[server].enemies.members) {
 		const enmDefs = readEnm(btl[server].enemies.members[enemy].name)
-        totalXP += parseInt(enmDefs.awardxp * servFile[server].xprate)
+        totalXP += parseInt(enmDefs.awardxp) * parseFloat(servFile[server].xprate)
 
-        if (enmDefs.boss) {
-            totalRings = Math.round(Math.random() * 600)
-        } else {
-            totalRings = Math.round(Math.random() * 100)
-        }
-		
-		if (enmDefs.diety || enmDefs.bigboss) {
-			isBigBoss = true
-		}
+		if (enmDefs.diety || enmDefs.bigboss)
+			isBigBoss = true;
+
+		if (isBigBoss)
+            totalRings = Math.round(Math.random() * 1500);
+        else if (enmDefs.boss)
+            totalRings = Math.round(Math.random() * 600);
+        else
+            totalRings = Math.round(Math.random() * 100);
     }
 
     // Reset Battle stuff and award XP
     for (const i in btl[server].allies.members) {
+		const battlerDefs = btl[server].allies.members[i]
 		const charDefs = charFile[btl[server].allies.members[i].name]
+		
+		// Reset Mimic
+		charFuncs.resetMimic(battlerDefs)
+		charFuncs.resetMimic(charDefs)
+		
+		// Trust Levels
+		for (const k in btl[server].allies.members) {
+			const allyDefs = btl[server].allies.members[k]
+			charFuncs.trustUp(charDefs, allyDefs, 5, server)
+		}
 
 		// Award XP now
-		charDefs.xp += totalXP
+		charDefs.xp += totalXP;
 		console.log(`BattleStatus: ${charDefs.name} got ${totalXP}XP. (${charDefs.xp}/${charDefs.maxxp}XP)`)
 		client.channels.fetch(btl[server].battlechannel)
 			.then(channel => channel.send(`${charDefs.name} got **${totalXP}EXP**!`))
 
 		var shouldLevelUp = false;
-		if (charDefs.xp >= charDefs.maxxp) {
+		if (charDefs.xp >= charDefs.maxxp)
 			shouldLevelUp = true;
-		}
 
 		if (shouldLevelUp == true) {
 			var levelCount = 0
@@ -1573,6 +1749,7 @@ function winBattle(btl, server) {
 				charFuncs.lvlUp(charDefs)
 				levelCount++;
 			}
+
 			console.log(`BattleStatus: ${charDefs.name} levelled up ${levelCount} time(s)`)
 			
 			var lvlQuote = ""
@@ -1592,9 +1769,13 @@ function winBattle(btl, server) {
 		
 		// Full HP if this is a diety/big boss whatever
 		if (isBigBoss) {
-			charFile[charDefs.name].hp = charFile[charDefs.name].maxhp
-			charFile[charDefs.name].mp = charFile[charDefs.name].maxmp
+			charDefs.hp = charDefs.maxhp
+			charDefs.mp = charDefs.maxmp
 		}
+		
+		// Values to copy
+		charDefs.weapon = battlerDefs.weapon
+		charDefs.trust = battlerDefs.trust
     }
 
     // Award Rings
@@ -1628,6 +1809,7 @@ function loseBattle(btl, server) {
 				showtimes: false,
 				onemores: false,
 				currency: "RPGBot Token",
+				xprate: 1,
 				pvpstuff: {},
 				banned: []
             }
@@ -1678,19 +1860,7 @@ function loseBattle(btl, server) {
 				if ((btl[server].pvpmode === 'randstats' || btl[server].pvpmode === 'charfuck') && charDefs.owner) {			
 					var owner = client.users.fetch(charDefs.owner)
 					owner.then(function(owner) {
-						var charAffs = "";
-						for (const i in charDefs.weak) {charAffs += `${charDefs.weak[i]} weakness.\n`}
-						for (const i in charDefs.resist) {charAffs += `${charDefs.resist[i]} resist.\n`}
-						for (const i in charDefs.block) {charAffs += `${charDefs.block[i]} block.\n`}
-						for (const i in charDefs.repel) {charAffs += `${charDefs.repel[i]} repel.\n`}
-						for (const i in charDefs.drain) {charAffs += `${charDefs.drain[i]} drain.\n`}
-						if (charAffs === ``) {charAffs = "No Affinities that battle."}
-
-						var DiscordEmbed = new Discord.MessageEmbed()
-							.setColor('#9c39ed')
-							.setTitle(`These were ${charDefs.name}'s stats in that RandStats battle.`)
-							.setDescription(`${charDefs.maxhp}HP\n${charDefs.maxmp}MP\n\n${charDefs.atk}ATK\n${charDefs.mag}MAG\n${charDefs.prc}PRC\n${charDefs.end}END\n${charDefs.chr}CHR\n${charDefs.int}INT\n${charDefs.agl}AGL\n${charDefs.luk}LUK\n\n${charAffs}`)
-						owner.send({embeds: [DiscordEmbed]})
+						sendCharStats(owner, charDefs)
 					})
 				}
 			}
@@ -1702,19 +1872,7 @@ function loseBattle(btl, server) {
 			if ((btl[server].pvpmode === 'randstats' || btl[server].pvpmode === 'charfuck') && charDefs.owner) {			
 				var owner = client.users.fetch(charDefs.owner)
 				owner.then(function(owner) {
-					var charAffs = "";
-					for (const i in charDefs.weak) {charAffs += `${charDefs.weak[i]} weakness.\n`}
-					for (const i in charDefs.resist) {charAffs += `${charDefs.resist[i]} resist.\n`}
-					for (const i in charDefs.block) {charAffs += `${charDefs.block[i]} block.\n`}
-					for (const i in charDefs.repel) {charAffs += `${charDefs.repel[i]} repel.\n`}
-					for (const i in charDefs.drain) {charAffs += `${charDefs.drain[i]} drain.\n`}
-					if (charAffs === ``) {charAffs = "No Affinities that battle."}
-
-					var DiscordEmbed = new Discord.MessageEmbed()
-						.setColor('#9c39ed')
-						.setTitle(`These were ${charDefs.name}'s stats in that RandStats battle.`)
-						.setDescription(`${charDefs.maxhp}HP\n${charDefs.maxmp}MP\n\n${charDefs.atk}ATK\n${charDefs.mag}MAG\n${charDefs.prc}PRC\n${charDefs.end}END\n${charDefs.chr}CHR\n${charDefs.int}INT\n${charDefs.agl}AGL\n${charDefs.luk}LUK\n\n${charAffs}`)
-					owner.send({embeds: [DiscordEmbed]})
+					sendCharStats(owner, charDefs)
 				})
 			}
 		}
@@ -1746,18 +1904,9 @@ function loseBattle(btl, server) {
         const name = charDefs.name
 
 		charFuncs.resetMimic(charDefs)
-		
-		for (const val in charDefs) {
-			if (charDefs[val] && charFile[name][val]) {charFile[name][val] = charDefs[val]}
-		}
 
         if (charFile[name]) {
             charFile[name].hp = Math.round(charFile[name].maxhp)
-            charFile[name].lb = 0;
-            charFile[name].status = "none";
-            charFile[name].statusturns = 0;
-            charFile[name].guard = false;
-			charFile[name].weapon = "none"
         }
     }
 
@@ -1771,8 +1920,9 @@ function loseBattle(btl, server) {
         .setColor('#d613cc')
         .setTitle(`Team ${btl[server].battleteam} lost...`)
 		.setDescription(`You were all defeated...\nThe party dropped all of their items, and ${totalRings} ${servFile[server].currency}s.`)
-    client.channels.fetch(btl[server].battlechannel)
-        .then(channel => channel.send({embeds: [DiscordEmbed]}))
+    
+	client.channels.fetch(btl[server].battlechannel)
+        .then(channel => channel.send({embeds: [discordEmbed]}))
 
     turnFuncs.clearBTL(btl[server])
     fs.writeFile(dataPath+'/battle.json', JSON.stringify(btl, null, '    '), function (err) { if (err) throw err });
@@ -1860,12 +2010,34 @@ function enemyMove(enmID, btl, channel) {
 					statuschance: lbSkill.statuschance ? lbSkill.statuschance : 0,
 					atktype: "magic",
 					hits: lbSkill.hits ? lbSkill.hits : null,
+					target: lbSkill.target ? lbSkill.target : "one",
 					drain: lbSkill.drain ? lbSkill.drain : null,
 					affinitypow: lbSkill.affinitypow ? lbSkill.affinitypow : null,
 					limitbreak: true
 				};
+				
+				var embedText = {}
+				if (skillDefs.target === "allopposing") {
+					var embedTexts = []
+					for (const i in opposingSide) {
+						var targDefs = opposingSide[i]
 
-				var embedText = attackFuncs.attackFoe(enmName, oppDefs.name, userDefs, oppDefs, skillDefs, false, channel.guild.id)
+						if (userDefs.hp > 0) {
+							var embedTxt = attackFuncs.attackFoe(enmName, targDefs.name, userDefs, targDefs, skillDefs, false, channel.guild.id);
+							embedTexts.push(embedTxt)
+						}
+						
+						embedText = {
+							targetText: `${userDefs.name} => All Opposing`,
+							attackText: `${enmName} used ${skillDefs.name} on the opposing side!`,
+							resultText: ''
+						}
+						
+						for (const i in embedTexts)
+							embedText.resultText += `\n${embedTexts[i].resultText}`;
+					}
+				} else
+					embedText = attackFuncs.attackFoe(enmName, oppDefs.name, userDefs, oppDefs, skillDefs, false, channel.guild.id);
 
 				const DiscordEmbed = new Discord.MessageEmbed()
 					.setColor('#fcba03')
@@ -2124,46 +2296,13 @@ function enemyMove(enmID, btl, channel) {
 			}
 		}
 	} else if (skillDefs.type === "status") {
-		if (skillDefs.autoguard) {
-			userDefs.shield = "guard"
+		if (skillDefs.shield) {
+			userDefs.shield = skillDefs.shield.toLowerCase()
 
 			const DiscordEmbed = new Discord.MessageEmbed()
 				.setColor('#e36b2b')
 				.setTitle(`${enmName} => Self`)
-				.setDescription(`${enmName} used ${skillName}!\n${enmName} is protected by ${skillDefs.protectitem ? skillDefs.protectitem : "Their own technique"}!`)
-				.setFooter(`${enmName}'s turn`);
-			channel.send({embeds: [DiscordEmbed]})
-		} else if (skillDefs.makarakarn) {
-			userDefs.shield = "makarakarn"
-
-			const DiscordEmbed = new Discord.MessageEmbed()
-				.setColor('#e36b2b')
-				.setTitle(`${enmName} => Self`)
-				.setDescription(`${enmName} used ${skillName}!\n${enmName} is protected from magic attacks with ${skillDefs.protectitem ? skillDefs.protectitem : "Their own technique"}!`)
-				.setFooter(`${enmName}'s turn`);
-			channel.send({embeds: [DiscordEmbed]})
-		} else if (skillDefs.tetrakarn) {
-			userDefs.shield = "tetrakarn"
-
-			const DiscordEmbed = new Discord.MessageEmbed()
-				.setColor('#e36b2b')
-				.setTitle(`${enmName} => Self`)
-				.setDescription(`${enmName} used ${skillName}!\n${enmName} is protected from physical attacks with ${skillDefs.protectitem ? skillDefs.protectitem : "Their own technique"}!`)
-				.setFooter(`${enmName}'s turn`);
-			channel.send({embeds: [DiscordEmbed]})
-		} else if (skillDefs.autoguardall) {
-			for (const i in allySide) {
-				var partyDef = allySide[i]
-				if (partyDef.hp > 0) {
-					partyDef.shield = "guard"
-				}
-			}
-
-			const DiscordEmbed = new Discord.MessageEmbed()
-				.setColor('#e36b2b')
-				.setTitle(`${enmName} => Party`)
-				.setDescription(`${enmName} used ${skillName}!\nTheir allies are protected by ${skillDefs.protectitem ? skillDefs.protectitem : enmName}`)
-				.setFooter(`${enmName}'s turn`);
+				.setDescription(`${enmName} used ${skillName}!\n${enmName} is protected from attacks with a ${skillDefs.shield}!`)
 			channel.send({embeds: [DiscordEmbed]})
 		} else if (skillDefs.status && skillDefs.statuschance) {
 			if (skillDefs.statuschance > 0) {
@@ -2172,55 +2311,7 @@ function enemyMove(enmID, btl, channel) {
 
 				var finaltext = `${enmName} used ${skillName} on ${oppDefs.name}!`;
 				if (chance > targChance || skillDefs.statuschance >= 100) {
-					if (skillDefs.status === "burn") {
-						finaltext = finaltext + " They were burned!"
-						oppDefs.status = "burn"
-						oppDefs.statusturns = 3
-					} else if (skillDefs.status === "bleed") {
-						finaltext = finaltext + " They were inflicted with bleed!"
-						oppDefs.status = "bleed"
-						oppDefs.statusturns = 5
-					} else if (skillDefs.status === "poison" || skillDefs.status === "toxic") {
-						finaltext = finaltext + " They were poisoned!"
-						oppDefs.status = "poison"
-						oppDefs.statusturns = 3
-					} else if (skillDefs.status === "freeze") {
-						finaltext = finaltext + " They were frozen!"
-						oppDefs.status = "freeze"
-						oppDefs.statusturns = 1
-					} else if (skillDefs.status === "paralyze") {
-						finaltext = finaltext + " They were paralyzed!"
-						oppDefs.status = "paralyze"
-						oppDefs.statusturns = 1
-					} else if (skillDefs.status === "dizzy") {
-						finaltext += " They were inflicted with dizziness!"
-						oppDefs.status = "dizzy"
-						oppDefs.statusturns = 3
-					} else if (skillDefs.status === "brainwash") {
-						finaltext = finaltext + " They were brainwashed!"
-						oppDefs.status = "brainwash"
-						oppDefs.statusturns = 2
-					} else if (skillDefs.status === "rage") {
-						finaltext = finaltext + " They were enraged!"
-						oppDefs.status = "rage"
-						oppDefs.statusturns = 3
-					} else if (skillDefs.status === "fear") {
-						finaltext = finaltext + " They got scared!"
-						oppDefs.status = "fear"
-						oppDefs.statusturns = 2
-					} else if (skillDefs.status === "ego") {
-						finaltext = finaltext + " They were made egotistic!"
-						oppDefs.status = "ego"
-						oppDefs.statusturns = 3
-					} else if (skillDefs.status === "paranoia") {
-						finaltext = finaltext + " They were made paranoid!"
-						oppDefs.status = "paranoia"
-						oppDefs.statusturns = 2
-					} else if (skillDefs.status === "despair") {
-						finaltext = finaltext + " They were inflicted with despair!"
-						oppDefs.status = "despair"
-						oppDefs.statusturns = -1
-					}
+					finaltext += ' ' + attackFuncs.inflictStatus(oppDefs, skillDefs)
 				} else {
 					finaltext = finaltext + " But they dodged it!"
 
@@ -2347,7 +2438,7 @@ function enemyMove(enmID, btl, channel) {
 			cloneDefs.maxhp = 100
 			cloneDefs.mp = 80
 			cloneDefs.maxmp = 80
-			cloneDefs.enemy = true
+			cloneDefs.npc = true
 			
 			var battlerID = 0
 			for (const i in allySide) {
@@ -2531,12 +2622,10 @@ const statusList = [
     "Burning down the Forest.",
     '"GOD IS TOO POWERFUL" - DJ Prower',
     "Simply don't get hit.",
-    '"Spectra is short! Hehe! Short! PFFFHAHAHAHAHAHAHAAHHAH!" - RPGBot',
     "I'm out of breath here...",
     "Bulbasaur.",
     "cries in a corner",
 	"Women are real.",
-	"Women are not bad.",
 	"What is 2021 humour anymore?",
 	"Just try me.",
 	"I suck.",
@@ -2713,7 +2802,7 @@ client.once('ready', () => {
 })
 
 //Commands
-client.on('messageCreate', message => {
+client.on('messageCreate', async message => {
     // DMs.
     if (message.channel.type === 'dm') {
         if (doGSM === true) {
@@ -2916,10 +3005,10 @@ client.on('messageCreate', message => {
                 .addFields(
                     { name: `${prefix}ping`, value: 'Pong.', inline: true },
                     { name: `${prefix}diceroll`, value: '(Args <Amount> <Sides>)\nRolls the specified amount of dice with the specified amount of sides.', inline: true },
-                    { name: `${prefix}scenario`, value: `(Args <Optional: Person>)\nI'll think of a little scenario with you and whoever you specify...`, inline: true },
-                    { name: `${prefix}guessmyword`, value: `(Args <Person>)\nThe pinged persom must guess your word! Good luck to both of you.`, inline: true },
-                    { name: `${prefix}quote`, value: `I'll recite one of the quotes I remember... I don't remember many.`, inline: true },
-					{ name: `${prefix}ship`, value: `(Args <Person> <Person> <Person>...) Ships any number of people of your choice based on certain variables. Supports as many people as one wants, should you pick at least one of them.`, inline: true },
+                    { name: `${prefix}scenario`, value: "(Args <Optional: Person>)\nI'll think of a little scenario with you and whoever you specify...", inline: true },
+                    { name: `${prefix}guessmyword`, value: '(Args <Person>)\nThe pinged persom must guess your word! Good luck to both of you.', inline: true },
+                    { name: `${prefix}quote`, value: "I'll recite one of the quotes I remember... I don't remember many.", inline: true },
+					{ name: `${prefix}ship`, value: '(Args <Person> <Person> <Person>...) Ships any number of people of your choice based on certain variables. Supports as many people as one wants, should you pick at least two people.', inline: true },
                 )
             message.channel.send({embeds: [DiscordEmbed]})
         } else if (arg2 === 'relics') {
@@ -2969,7 +3058,6 @@ client.on('messageCreate', message => {
                     { name: `${prefix}limitbreaks`, value: `\nThis command is Admin Only. Implements a custom Limit Break mechanic. \n**Currently "${(servFile[message.guild.id].limitbreaks == true) ? "true" : "false"}"**`, inline: true },
                     { name: `${prefix}onemores`, value: `\nThis command is Admin Only. Implements the "One More" mechanic from the Persona Series. \n**Currently "${(servFile[message.guild.id].onemores == true) ? "true" : "false"}"**`, inline: true },
                     { name: `${prefix}showtimes`, value: `\nThis command is Admin Only. Implements the "Showtime" mechanic from Persona 5 Royal. \n**Currently "${(servFile[message.guild.id].showtimes == true) ? "true" : "false"}"**`, inline: true },
-					{ name: `${prefix}xprate`, value: `\nThis command is Admin Only. Changes the rate of xp gained with battles. \n**Currently "${servFile[message.guild.id].xprate}x"**`, inline: true },
                 )
             message.channel.send({embeds: [DiscordEmbed]})
         } else {
@@ -3136,36 +3224,15 @@ client.on('messageCreate', message => {
             if (message.mentions.users.first()) {
                 const taggedUser = message.mentions.users.first();
                 var sceneText = `${message.author.username} & ${taggedUser.username} `
-                const scenePath = dataPath+'/scenarios.json'
-                const sceneRead = fs.readFileSync(scenePath);
-                const sceneFile = JSON.parse(sceneRead);
 
-                if (!sceneFile[message.author.id]) {
-                    sceneFile[message.author.id] = {}
-                }
-
-                if (sceneFile[message.author.id][taggedUser.id]) {
-                    sceneText = sceneText + sceneFile[message.author.id][taggedUser.id]
-                    const DiscordEmbed = new Discord.MessageEmbed()
-                        .setColor('#0099ff')
-						.setTitle(`${message.author.username} & ${taggedUser.username}`)
-						.setDescription(`${sceneText}`)
-                        .setFooter('rpg!scenario');
-                    message.channel.send({embeds: [DiscordEmbed]})
-                    return true
-                } else {
-                    var scenario = duoScenarios[Math.round(Math.random() * (duoScenarios.length - 1))]
-                    sceneFile[message.author.id][taggedUser.id] = scenario
-                    sceneText = sceneText + scenario
-                    const DiscordEmbed = new Discord.MessageEmbed()
-                        .setColor('#0099ff')
-						.setTitle(`${message.author.username} & ${taggedUser.username}`)
-						.setDescription(`${sceneText}`)
-                        .setFooter('rpg!scenario');
-                    message.channel.send({embeds: [DiscordEmbed]})
-                    fs.writeFileSync(scenePath, JSON.stringify(sceneFile, null, '    '));
-                    return true
-                }
+				var scenario = duoScenarios[Math.round(Math.random() * (duoScenarios.length - 1))]
+				sceneText = sceneText + scenario
+				const DiscordEmbed = new Discord.MessageEmbed()
+					.setColor('#0099ff')
+					.setTitle(`${message.author.username} & ${taggedUser.username}`)
+					.setDescription(`${sceneText}`)
+					.setFooter('rpg!scenario');
+				message.channel.send({embeds: [DiscordEmbed]})
             } else {
                 const DiscordEmbed = new Discord.MessageEmbed()
                     .setColor('#0099ff')
@@ -3418,8 +3485,8 @@ client.on('messageCreate', message => {
 
         const DiscordEmbed = new Discord.MessageEmbed()
             .setColor('#ffffff')
-            .setTitle("Uno!")
-            .setDescription(`You know this game.\n\n*(React with the emoji (🃏) to join.)*`)
+            .setTitle('Uno - The card game made to destroy.')
+            .setDescription('You know this game.\n\n*(React with the emoji (🃏) to join.)*')
             .setFooter("Uno");
         message.channel.send({embeds: [DiscordEmbed]})
 
@@ -3431,6 +3498,36 @@ client.on('messageCreate', message => {
 
 		if (!arg[1]) {
 			message.channel.send(`Please specify at least one person who you want to ship yourself with, or two if you want to ship two different people.`)
+			return false
+		}
+		
+		// Undefined
+		var allUndefined = true;
+		for (const i in arg) {
+			if (i < 1)
+				continue;
+
+			if (arg[i].toLowerCase() != 'undefined')
+				allUndefined = false;
+		}
+		
+		if (allUndefined) {
+			// Getting Candidates
+			var resulttext = "**Candidates:** \n"
+			for (const i in arg) {
+				if (i < 1)
+					continue;
+				
+				resulttext = resulttext + `:small_orange_diamond: ${arg[i]} \n`
+			}
+
+			const DiscordEmbed = new Discord.MessageEmbed()
+				.setColor('#ff06aa')
+				.setTitle('undefined')
+				.setDescription(`${resulttext}\n**NaN%** ${':black_medium_square:'.repeat(10)}`)
+				.setFooter('undefined')
+			message.channel.send({embeds: [DiscordEmbed]})
+			
 			return false
 		}
 
@@ -3463,7 +3560,7 @@ client.on('messageCreate', message => {
 		// Converting Mentions
 		for (i in shipCandidates) {
 			if (shipCandidates[i].mention)
-				console.log("true")
+				console.log("true");
 		}
 
 		// Getting Candidates
@@ -3510,8 +3607,7 @@ client.on('messageCreate', message => {
 		for (i in loveParameters) {
 			var secondID = parseInt(i) + 1
 
-			if (loveParameters.length > 1)
-			{
+			if (loveParameters.length > 1) {
 				if (loveParameters[secondID] != undefined) {
 					loveResults.push(loveParameters[i])
 					loveResults.push(loveParameters[secondID])
@@ -3547,52 +3643,86 @@ client.on('messageCreate', message => {
 			`${(love <= 99 && love > 90) ? true : false}`
 		]
 		var footerText = ""
+		
+		const footerTexts = [
+			[
+				"This one, for sure, isn't happening.",
+				"Forget about even trying with this.",
+				"lol suck!"
+			],
+			
+			[
+				"This one won't work out at all.",
+				"bruh.",
+				"This is sad"
+			],
+			
+			[
+				"There's no chance this one's happening.",
+				'Here is a cookie for your troubles: "🍪"',
+				"Sad."
+			],
+			
+			[
+				"Possible, but don't get your hopes up.",
+				"try harder lol",
+				"Well this is... unfortunate."
+			],
+			
+			[
+				"Maybe if you try hard enough...",
+				"In another timeline, this would work!",
+				"Perhaps they'll be together if you hope"
+			],
+			
+			[
+				"Interesting outcome.",
+				"I see, I see.",
+				"Almost."
+			],
+			
+			[
+				"This ship's not tooooo bad.",
+				"nice NICE",
+				"Very cool"
+			],
+			
+			[
+				"I like where this is going.",
+				"This could go places!",
+				"Avoid the fanfic sites."
+			],
+			
+			[
+				"This one could turn into something...",
+				"They have a high chance of being together!!",
+				"Fanfic time."
+			],
+			
+			[
+				"Awww, they fit so well together!",
+				"They're so nice together.",
+				"Cute couple.",
+			],
+			
+			[
+				"Almost, almost!",
+				"Just barely!",
+				"So close."
+			]
+		]
 
 		for (i in footerConditions) {
 			if (footerConditions[i].endsWith('true')) {
-				switch (parseInt(i)) {
-					case 0:
-						footerText = "Forget about even trying with this."
-						break;
-					case 1:
-						footerText = "This is definitely not gonna work out at all."
-						break;
-					case 2:
-						footerText = "There is no chance this is happening."
-						break;
-					case 3:
-						footerText = "There might be a slight chance, but don't get your hopes up."
-						break;
-					case 4:
-						footerText = "Maybe if you try hard enough, they'll be together."
-						break;
-					case 5:
-						footerText = "Pretty meh, to be honest."
-						break;
-					case 6:
-						footerText = "This ship is pretty alright, I'll tell you."
-						break;
-					case 7:
-						footerText = "I like where this is going."
-						break;
-					case 8:
-						footerText = "Great ship, they have a high chance of being together."
-						break;
-					case 9:
-						footerText = "Awesome. They fit so well together!"
-						break;
-					case 10:
-						footerText = "Almost perfection!"
-						break;
-				}
+				footerText = footerTexts[i][Math.round(Math.random() * footerTexts[i].length-1)]
 			}
 		}
 
 		if (love === 69)
-			footerText = "Nice."
+			footerText = 'Nice. ( ͡° ͜ʖ ͡°)'
 
 		if (love === 100)
-			footerText = "OTP!"
+			footerText = 'OTP!'
 
 		// Send Embed
 
@@ -4107,8 +4237,246 @@ client.on('messageCreate', message => {
             }
         }
     }
+	
+	///////////
+	// Shops //
+	///////////
+    if (command === 'openshop') {
+		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
+			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
+			return false
+		}
+		
+        if (!message.member.permissions.serialize().ADMINISTRATOR) {
+            message.channel.send("You lack sufficient permissions, I'm so sorry!");
+            return
+        }
 
-    /////////////////////
+        const arg = message.content.slice(prefix.length).trim().split(/ +/);
+        if (!arg[1]) {
+            const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}openshop`)
+				.setDescription('(Args <Name> <Channel> <Items...>)\nCreates a shop that characters can buy items from.')
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+        }
+
+		if (!arg[2] || !client.channels.cache.get(arg[2])) {
+			message.channel.send("Please specify a valid channel.")
+			return false
+		}
+
+		const shopChannel = client.channels.cache.get(arg[2])
+		var shopPath = dataPath+'/shops.json'
+		var shopRead = fs.readFileSync(shopPath);
+		var shopFile = JSON.parse(shopRead);
+        var itemPath = dataPath+'/items.json'
+        var itemRead = fs.readFileSync(itemPath);
+        var itemFile = JSON.parse(itemRead);
+        var servPath = dataPath+'/Server Settings/server.json'
+        var servRead = fs.readFileSync(servPath);
+        var servFile = JSON.parse(servRead);
+		
+        if (!servFile[message.guild.id]) {
+            servFile[message.guild.id] = {
+				prefix: "rpg!",
+				limitbreaks: false,
+				showtimes: false,
+				onemores: false,
+				currency: "RPGBot Token",
+				xprate: 1,
+				pvpstuff: {
+					none: {},
+					metronome: {},
+					randskills: {},
+					randstats: {},
+					charfuck: {}
+				},
+				banned: []
+			}
+        }
+		
+		if (!shopFile[message.guild.id]) {
+			shopFile[message.guild.id] = {}
+		}
+
+		shopFile[message.guild.id][shopChannel.id] = {
+			name: arg[1],
+			items: [],
+			party: "none"
+		}
+
+		for (const i in arg) {
+			if (i > 2) {
+				if (!itemFile[arg[i]]) {
+					message.channel.send(`${arg[i]} isn't a valid item.`)
+				}
+				
+				shopFile[message.guild.id][shopChannel.id].items.push(arg[i])
+			}
+		}
+
+		fs.writeFileSync(shopPath, JSON.stringify(shopFile, null, '    '));
+		
+		var itemString = ''
+		for (const i in shopFile[message.guild.id][shopChannel.id].items) {
+			var itemDefs = itemFile[shopFile[message.guild.id][shopChannel.id].items[i]]
+			itemString += `\n**${itemDefs.name}**\nCosts ${itemDefs.cost} ${servFile[message.guild.id].currency}s.\n*${itemDefs.desc}*\n`
+		}
+		
+		var itemEmbed = new Discord.MessageEmbed()
+			.setColor('#c2907e')
+			.setTitle(`${shopFile[message.guild.id][shopChannel.id].name}`)
+			.setDescription(`*The shop has been opened!*\n${itemString}`)
+		shopChannel.send({embeds: [itemEmbed]})
+	}
+
+    if (command === 'entershop') {
+		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
+			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
+			return false
+		}
+		
+        if (!message.member.permissions.serialize().ADMINISTRATOR) {
+            message.channel.send("You lack sufficient permissions, I'm so sorry!");
+            return
+        }
+
+        const arg = message.content.slice(prefix.length).trim().split(/ +/);
+        if (!arg[1]) {
+            const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}entershop`)
+				.setDescription('(Args <Party>)\nEnters a created shop with the specified party.')
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+        }
+		
+		var shopPath = dataPath+'/shops.json'
+		var shopRead = fs.readFileSync(shopPath);
+		var shopFile = JSON.parse(shopRead);   
+		var btlPath = dataPath+'/battle.json'
+		var btlRead = fs.readFileSync(btlPath);
+		var btl = JSON.parse(btlRead);
+		
+		var shop = shopFile[message.guild.id][message.channel.id]
+		var servBtl = btl[message.guild.id]
+
+		if (servBtl.parties[arg[1]]) {
+			shop.party = arg[1]
+			fs.writeFileSync(shopPath, JSON.stringify(shopFile, null, '    '));
+			
+			message.channel.send(`Team ${arg[2]} entered the shop.`)
+			message.delete()
+		} else {
+			message.channel.send("Invalid Party!")
+			return false
+		}
+	}
+
+    if (command === 'leaveshop') {
+		var shopPath = dataPath+'/shops.json'
+		var shopRead = fs.readFileSync(shopPath);
+		var shopFile = JSON.parse(shopRead);
+		var shop = shopFile[message.guild.id][message.channel.id];
+		
+        if (!message.member.permissions.serialize().ADMINISTRATOR) {
+            message.channel.send("You lack sufficient permissions, I'm so sorry!");
+            return
+        }
+
+		message.channel.send(`Team ${shop.party} left the shop.`)
+		message.delete()
+
+		shop.party = "none"
+		fs.writeFileSync(shopPath, JSON.stringify(shopFile, null, '    '));
+	}
+
+    if (command === 'buyitem') {
+        const arg = message.content.slice(prefix.length).trim().split(/ +/);
+        if (!arg[1]) {
+            const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}buyitem`)
+				.setDescription('(Args <Item> <Quantity>)\nBuys an amount of the specified item.')
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+        }
+
+		// so much shit ffs
+		var shopPath = dataPath+'/shops.json'
+        var itemPath = dataPath+'/items.json'
+        var servPath = dataPath+'/Server Settings/server.json'
+		var btlPath = dataPath+'/battle.json'
+		var shopRead = fs.readFileSync(shopPath);
+        var itemRead = fs.readFileSync(itemPath);
+        var servRead = fs.readFileSync(servPath);
+		var btlRead = fs.readFileSync(btlPath);
+		var shopFile = JSON.parse(shopRead);
+        var itemFile = JSON.parse(itemRead);
+        var servFile = JSON.parse(servRead);
+		var btl = JSON.parse(btlRead);
+		
+		if (!shopFile[message.guild.id][message.channel.id].party || shopFile[message.guild.id][message.channel.id].party === "none") {
+			message.channel.send("There's nobody in the shop!")
+			message.delete()
+			return false
+		}
+		
+		if (!itemFile[arg[1]]) {
+			message.channel.send("This item doesn't exist!")
+			message.delete()
+			return false
+		}
+		
+		var hasItem = false
+		for (const i in shopFile[message.guild.id][message.channel.id].items) {
+			var itemName = shopFile[message.guild.id][message.channel.id].items[i]
+			if (arg[1] == itemName) {
+				hasItem = true
+			}
+		}
+		
+		if (hasItem == false) {
+			message.channel.send("The shop isn't selling this item.")
+			message.delete()
+			return false
+		}
+		
+		var totalCost = 0;
+		var totalQuantity = arg[2] ? parseInt(arg[2]) : 1
+		for (var i = 1; i < totalQuantity; i++) {
+			totalCost += itemFile[arg[1]].cost
+		}
+		
+		var party = btl[message.guild.id].parties[shopFile[message.guild.id][message.channel.id].party]
+		
+		if (party.rings < totalCost) {
+			message.channel.send("The party doesn't have enough rings!")
+			message.delete()
+			return false
+		}
+		
+		var itemName = itemFile[arg[1]].name
+
+		if (totalQuantity > 1) {
+			message.channel.send(`Team ${shopFile[message.guild.id][message.channel.id].party} bought **${totalQuantity} ${itemName}s**.\n*(${party.rings -= totalCost} ${servFile[message.guild.id].currency}s left.)*`)
+		} else {
+			message.channel.send(`Team ${shopFile[message.guild.id][message.channel.id].party} bought a **${itemName}**.\n*(${party.rings -= totalCost} ${servFile[message.guild.id].currency}s left.)*`)
+		}
+
+		party.rings -= totalCost
+		
+		if (!party.items[arg[1]]) {
+			party.items[arg[1]] = 0
+		}
+		
+		party.items[arg[1]] += totalQuantity
+		fs.writeFileSync(btlPath, JSON.stringify(btl, null, '    '));
+	}
+
+	/////////////////////
     // Battle Commands //
     /////////////////////
     if (command === 'registerskill') {
@@ -4118,7 +4486,7 @@ client.on('messageCreate', message => {
 		}
 
         const arg = message.content.slice(prefix.length).trim().split(/ +/);
-        if (arg[1] == null) {
+        if (!arg[1]) {
             const DiscordEmbed = new Discord.MessageEmbed()
                 .setColor('#0099ff')
                 .addFields(
@@ -4371,7 +4739,7 @@ client.on('messageCreate', message => {
 		
 		var skillDesc = message.content.slice(prefix.length).trim().split('"')[1]
 
-		writeStatus(arg[1], parseInt(arg[2]), costType, arg[4].toLowerCase(), arg[5].toLowerCase(), parseInt(arg[6]), skillDesc)
+		writeStatus(arg[1], parseInt(arg[2]), costType, arg[4].toLowerCase(), arg[5], arg[6], skillDesc)
 		if (readSkill(arg[1])) {
 			const skillName = arg[1]
 			const skillDefs = readSkill(skillName)
@@ -4757,7 +5125,7 @@ client.on('messageCreate', message => {
             const DiscordEmbed = new Discord.MessageEmbed()
                 .setColor('#0099ff')
 				.setTitle(`${prefix}registerchar`)
-				.setDescription("(Args <Name> <Base HP> <Base MP> <Strength> <Magic> <Perception> <Endurance> <Charisma> <Inteligence> <Agility> <Luck>)\nCreates a character to be used in battle.\nFor balancing purposes, Base HP should be 50 or below, Base MP should be 35 or below , and all other stats should be 10 or below.\nI'm not going to stop you if you want to mess around with me however, just don't make it unfair for others.\n\nOh right! I should explain what each stat does, huh.")
+				.setDescription("(Args <Name> <Base HP> <Base MP> <Strength> <Magic> <Perception> <Endurance> <Charisma> <Inteligence> <Agility> <Luck>)\nCreates a character to be used in battle.\nFor balancing purposes, Base HP should be 50 or below, Base MP should be 35 or below, and all other stats should be 10 or below.\nI'm not going to stop you if you want to mess around with me however, just don't make it unfair for others.\n\nOh right! I should explain what each stat does, huh.")
                 .addFields(
                     { name: 'Strength', value: "Affects the power of physical attacks.", inline: true },
                     { name: 'Magic', value: "Affects the power of Magical, Special, Ranged or Non-Contact moves.", inline: true },
@@ -4784,17 +5152,47 @@ client.on('messageCreate', message => {
                 return false
             }
         }
+		
+		// Balance Checks
+		if (parseInt(arg[2]) > 50) {
+			message.channel.send('This is too much base HP.')
+			return false
+		} else if (parseInt(arg[3]) > 35) {
+			message.channel.send('This is too much base MP.')
+			return false
+		} else if ((parseInt(arg[2]) + parseInt(arg[3])) > 65) {
+			message.channel.send('Base HP + Base MP should be below 65.')
+			return false
+		} else {
+			var BST = 0;
+			for (i = 4; i <= 11; i++) {
+				if (parseInt(arg[i]) > 10) {
+					message.channel.send('One of your 8 stats are over 10.')
+					return false
+				} else {
+					BST += parseInt(arg[i])
+				}
+			}
+			
+			if (BST > 45) {
+				message.channel.send('Your Base Stat Total should be 45.')
+				return false
+			} else if (BST < 25) {
+				message.channel.send(`<:warning:878094052208296007>You're asking for pain. (${BST} BST)`)
+			} else if (BST < 45) {
+				message.channel.send(`<:warning:878094052208296007>Your Base Stat Total is below 45. (${BST})\nYou may be underpowered!`)
+			}
+		}
 
-        writeChar(message.author, arg[1], parseInt(arg[2]), parseInt(arg[3]), parseInt(arg[4]), parseInt(arg[5]), parseInt(arg[6]), parseInt(arg[7]), parseInt(arg[8]), parseInt(arg[9]), parseInt(arg[10]), parseInt(arg[11]))
+        charFuncs.writeChar(message.author, arg[1], parseInt(arg[2]), parseInt(arg[3]), parseInt(arg[4]), parseInt(arg[5]), parseInt(arg[6]), parseInt(arg[7]), parseInt(arg[8]), parseInt(arg[9]), parseInt(arg[10]), parseInt(arg[11]))
         if (readChar(arg[1])) {
             const charName = arg[1]
             const charDefs = readChar(charName)
-            message.channel.send(`👍 ${charName} has been registered!`);
             const DiscordEmbed = new Discord.MessageEmbed()
                 .setColor('#f2c055')
 				.setTitle(`${charName}'s Stats:`)
                 .setDescription(`${charDefs.hp}/${charDefs.maxhp}HP\n${charDefs.mp}/${charDefs.maxmp}MP\n\n${charDefs.atk}ATK\n${charDefs.mag}MAG\n${charDefs.prc}PRC\n${charDefs.end}END\n${charDefs.chr}CHR\n${charDefs.int}INT\n${charDefs.agl}AGL\n${charDefs.luk}LUK`)
-            message.channel.send({embeds: [DiscordEmbed]});
+            message.channel.send({content: `👍 ${charName} has been registered!`, embeds: [DiscordEmbed]});
         } else {
             message.channel.send(`${arg[1]} isn't a valid character.`);
             return
@@ -4806,42 +5204,87 @@ client.on('messageCreate', message => {
 			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
 			return false
 		}
-
-		var charPath = dataPath+'/characters.json'
-		var charRead = fs.readFileSync(charPath);
-		var charFile = JSON.parse(charRead);
 		
-		for (const i in charFile) {
-			var newCharDefs = utilityFuncs.cloneObj(charFile[i])
-			
-			newCharDefs.level = 1
-			newCharDefs.xp = 0
-			newCharDefs.maxxp = 100
+		message.channel.send("This will take a while, so be patient! I will react with 👍 once I'm done.")
 
-			newCharDefs.hp = newCharDefs.basehp
-			newCharDefs.mp = newCharDefs.basemp
-			newCharDefs.maxhp = newCharDefs.basehp
-			newCharDefs.maxmp = newCharDefs.basemp
+		setTimeout(function() {
+			var charPath = dataPath+'/characters.json'
+			var charRead = fs.readFileSync(charPath);
+			var charFile = JSON.parse(charRead);
 			
-			newCharDefs.atk = newCharDefs.baseatk
-			newCharDefs.mag = newCharDefs.basemag
-			newCharDefs.prc = newCharDefs.baseprc
-			newCharDefs.end = newCharDefs.baseend
-			newCharDefs.chr = newCharDefs.basechr
-			newCharDefs.int = newCharDefs.baseint
-			newCharDefs.agl = newCharDefs.baseagl
-			newCharDefs.luk = newCharDefs.baseluk
-			
-			for (k = 1; k < charFile[i].level; k++) {
-				charFuncs.lvlUp(newCharDefs)
+			for (const i in charFile) {
+				// Stat Updates
+				var newCharDefs = utilityFuncs.cloneObj(charFile[i])
+				
+				newCharDefs.level = 1
 				newCharDefs.xp = 0
-			}
+				newCharDefs.maxxp = 100
 
-			charFile[i] = utilityFuncs.cloneObj(newCharDefs)
-		}
-		
-		fs.writeFileSync(charPath, JSON.stringify(charFile, null, '    '));
-		message.react('👍')
+				newCharDefs.hp = newCharDefs.basehp
+				newCharDefs.mp = newCharDefs.basemp
+				newCharDefs.maxhp = newCharDefs.basehp
+				newCharDefs.maxmp = newCharDefs.basemp
+				
+				newCharDefs.atk = newCharDefs.baseatk
+				newCharDefs.mag = newCharDefs.basemag
+				newCharDefs.prc = newCharDefs.baseprc
+				newCharDefs.end = newCharDefs.baseend
+				newCharDefs.chr = newCharDefs.basechr
+				newCharDefs.int = newCharDefs.baseint
+				newCharDefs.agl = newCharDefs.baseagl
+				newCharDefs.luk = newCharDefs.baseluk
+				
+				for (k = 1; k < charFile[i].level; k++) {
+					charFuncs.lvlUp(newCharDefs)
+					newCharDefs.xp = 0
+				}
+
+				newCharDefs.xp = charFile[i].xp
+				charFile[i] = utilityFuncs.cloneObj(newCharDefs)
+				
+				// Trust
+				if (!charFile[i].trust)
+					charFile[i].trust = {};
+				
+				// Bio
+				if (!charFile[i].bio) {
+					charFile[i].bio = {
+						species: "",
+						age: "",
+						info: "",
+						
+						backstory: "",
+						likes: "",
+						dislikes: "",
+						fears: "",
+						
+						voice: "",
+						theme: ""
+					}
+				}
+				
+				var bioDef = [
+					'species',
+					'age',
+					'info',
+					'backstory',
+					'likes',
+					'dislikes',
+					'fears',
+					'voice',
+					'theme'
+				]
+				
+				for (const val in bioDef) {
+					if (!charFile[i].bio[bioDef[val]]) {
+						charFile[i].bio[bioDef[val]] = ""
+					}
+				}
+			}
+			
+			fs.writeFileSync(charPath, JSON.stringify(charFile, null, '    '));
+			message.react('👍')
+		}, 1000)
 	}
 
     if (command === 'setaffinity') {
@@ -4871,6 +5314,147 @@ client.on('messageCreate', message => {
             message.channel.send(`${arg[1]} isn't a valid character.`);
         }
     }
+
+    if (command === 'changestats') {
+		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
+			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
+			return false
+		}
+
+        const arg = message.content.slice(prefix.length).trim().split(/ +/);
+        if (arg[1] == null) {
+            const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+				.setTitle(`${prefix}changestats`)
+				.setDescription("(Args <Name> <Base HP> <Base MP> <Strength> <Magic> <Perception> <Endurance> <Charisma> <Inteligence> <Agility> <Luck>)\nChanges the stats of an existing character.\nFor balancing purposes, Base HP should be 50 or below, Base MP should be 35 or below, and all other stats should be 10 or below.\nI'm not going to stop you if you want to mess around with me however, just don't make it unfair for others.\n\nOh right! I should explain what each stat does, huh.")
+                .addFields(
+                    { name: 'Strength', value: "Affects the power of physical attacks.", inline: true },
+                    { name: 'Magic', value: "Affects the power of Magical, Special, Ranged or Non-Contact moves.", inline: true },
+                    { name: 'Perception', value: "Affects the chance of a move landing.", inline: true },
+                    { name: 'Endurance', value: "Lowers the power of an attack that targets you.", inline: true },
+                    { name: 'Charisma', value: "Raises the chances of inflicting a mental status ailment.", inline: true },
+                    { name: 'Inteligence', value: "More MP & Lower XP for each level up", inline: true },
+                    { name: 'Agility', value: "Raises the chance of you dodging an attack that targets you.", inline: true },
+                    { name: 'Luck', value: "Raises the chance of landing a critical hit, as well as the chance of inflicting a physical status ailment.", inline: true },
+                )
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+        }
+		
+		var charPath = dataPath+'/characters.json'
+		var charRead = fs.readFileSync(charPath);
+		var charFile = JSON.parse(charRead);
+		
+		if (!charFile[arg[1]]) {
+			message.channel.send("This is a nonexistant character.")
+			return false
+		}
+		
+		// Balance Checks
+		if (parseInt(arg[2]) > 50) {
+			message.channel.send('This is too much base HP.')
+			return false
+		} else if (parseInt(arg[3]) > 35) {
+			message.channel.send('This is too much base MP.')
+			return false
+		} else if ((parseInt(arg[2]) + parseInt(arg[3])) > 65) {
+			message.channel.send('Base HP + Base MP should be below 65.')
+			return false
+		} else {
+			var BST = 0;
+			for (i = 4; i <= 11; i++) {
+				if (parseInt(arg[i]) > 10) {
+					message.channel.send('One of your 8 stats are over 10.')
+					return false
+				} else {
+					BST += parseInt(arg[i])
+				}
+			}
+			
+			if (BST > 45) {
+				message.channel.send('Your Base Stat Total should be 45.')
+				return false
+			} else if (BST < 25) {
+				message.channel.send(`<:warning:878094052208296007>You're asking for pain. (${BST} BST)`)
+			} else if (BST < 45) {
+				message.channel.send(`<:warning:878094052208296007>Your Base Stat Total is below 45. (${BST})\nYou may be underpowered!`)
+			}
+		}
+		
+		var oldLvl = charFile[arg[1]].level
+		var oldXP = charFile[arg[1]].xp
+
+		charFile[arg[1]].level = 1
+		charFile[arg[1]].basehp = parseInt(arg[2])
+		charFile[arg[1]].basemp = parseInt(arg[3])
+		charFile[arg[1]].baseatk = parseInt(arg[4])
+		charFile[arg[1]].basemag = parseInt(arg[5])
+		charFile[arg[1]].baseprc = parseInt(arg[6])
+		charFile[arg[1]].baseend = parseInt(arg[7])
+		charFile[arg[1]].basechr = parseInt(arg[8])
+		charFile[arg[1]].baseint = parseInt(arg[9])
+		charFile[arg[1]].baseagl = parseInt(arg[10])
+		charFile[arg[1]].baseluk = parseInt(arg[11])
+
+		charFile[arg[1]].maxhp = parseInt(arg[2])
+		charFile[arg[1]].maxmp = parseInt(arg[3])
+		charFile[arg[1]].atk = parseInt(arg[4])
+		charFile[arg[1]].mag = parseInt(arg[5])
+		charFile[arg[1]].prc = parseInt(arg[6])
+		charFile[arg[1]].end = parseInt(arg[7])
+		charFile[arg[1]].chr = parseInt(arg[8])
+		charFile[arg[1]].int = parseInt(arg[9])
+		charFile[arg[1]].agl = parseInt(arg[10])
+		charFile[arg[1]].luk = parseInt(arg[11])
+		
+		charFile[arg[1]].maxxp = 100
+		
+		for (let i = 1; i < oldLvl; i++) {
+			charFuncs.lvlUp(charFile[arg[1]])
+			charFile[arg[1]].xp = 0
+		}
+		
+		charFile[arg[1]].level = oldLvl
+		charFile[arg[1]].xp = oldXP
+		
+		charFile[arg[1]].hp = Math.min(charFile[arg[1]].maxhp, charFile[arg[1]].hp)
+		charFile[arg[1]].mp = Math.min(charFile[arg[1]].maxmp, charFile[arg[1]].mp)
+
+		const charName = arg[1]
+		const charDefs = charFile[arg[1]]
+		const DiscordEmbed = new Discord.MessageEmbed()
+			.setColor('#f2c055')
+			.setTitle(`${charName}'s Stats:`)
+			.setDescription(`Level ${charDefs.level}\n${charDefs.hp}/${charDefs.maxhp}HP\n${charDefs.mp}/${charDefs.maxmp}MP\n\n${charDefs.atk}ATK\n${charDefs.mag}MAG\n${charDefs.prc}PRC\n${charDefs.end}END\n${charDefs.chr}CHR\n${charDefs.int}INT\n${charDefs.agl}AGL\n${charDefs.luk}LUK`)
+		message.channel.send({content: `👍 ${charName}'s stats were changed.`, embeds: [DiscordEmbed]});
+		
+		fs.writeFileSync(charPath, JSON.stringify(charFile, null, '    '));
+    }
+
+    if (command === 'trustxp') {
+		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
+			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
+			return false
+		}
+
+        const arg = message.content.slice(prefix.length).trim().split(/ +/);
+		
+		var charPath = dataPath+'/characters.json'
+		var charRead = fs.readFileSync(charPath);
+		var charFile = JSON.parse(charRead);
+		if (charFile[arg[1]] && charFile[arg[2]]) {
+			charFuncs.trustUp(charFile[arg[1]], charFile[arg[2]], parseInt(arg[3]), message.guild.id)
+			fs.writeFileSync(charPath, JSON.stringify(charFile, null, '    '));
+			message.react('👍')
+
+			setTimeout(function() {
+				message.delete()
+			}, 2000)
+		} else {
+			message.channel.send("One of two characters are nonexistant.")
+			message.delete()
+		}
+	}
 
     if (command === 'givexp') {
 		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
@@ -5003,13 +5587,18 @@ client.on('messageCreate', message => {
         }
 
         if (readChar(arg[1])) {
+			const charDefs = readChar(arg[1])
             if (!utilityFuncs.RPGBotAdmin(message.author.id)) {
-                const charDefs = readChar(arg[1])
                 if (message.author.id != charDefs.owner) {
                     message.channel.send("You can't edit someone else's character!")
                     return false
                 }
             }
+			
+			if (charDefs.skills.length > 8) {
+				message.channel.send("You cannot have more than 8 skills.")
+				return false
+			}
 
             if (readSkill(arg[2])) {
                 learnSkill(arg[1], arg[2]);
@@ -5023,6 +5612,44 @@ client.on('messageCreate', message => {
             return
         }
     }
+	
+    if (command === 'replaceskill') {
+		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
+			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
+			return false
+		}
+
+        var arg = message.content.slice(prefix.length).trim().split(/ +/);
+        var charPath = dataPath+'/characters.json'
+        var charRead = fs.readFileSync(charPath);
+        var charFile = JSON.parse(charRead);
+		
+		if (!charFile[arg[1]])
+			return message.channel.send(`${arg[1]} is an invalid character.`)
+		
+		var knowsSkill = false
+		for (const i in charFile[arg[1]].skills) {
+			if (arg[2] == charFile[arg[1]].skills[i])
+				knowsSkill = true;
+		}
+		
+		if (!knowsSkill)
+			return message.channel.send(`${arg[1]} doesn't know this skill!`);
+		
+		if (!readSkill(arg[3]))
+			return message.channel.send(`${arg[3]} is an invalid skill.`);
+		
+		// Now replace the skill.
+		for (const i in charFile[arg[1]].skills) {
+			if (charFile[arg[1]].skills[i] === arg[2]) {
+				charFile[arg[1]].skills[i] = arg[3];
+				break
+			}
+		}
+		
+		message.react('👍')
+		fs.writeFileSync(charPath, JSON.stringify(charFile, null, '    '));
+	}
 
     // Set LB
     // (CharName, LBName, Power, LB% Required, Status Effect, Status Effect Chance, Limit Break Level)
@@ -5646,6 +6273,68 @@ client.on('messageCreate', message => {
 			}
 		}
 	}
+
+    if (command === 'setpet') {
+		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
+			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
+			return false
+		}
+
+        var arg = message.content.slice(prefix.length).trim().split(/ +/);
+        var charPath = dataPath+'/characters.json'
+        var charRead = fs.readFileSync(charPath);
+        var charFile = JSON.parse(charRead);
+		
+		if (!charFile[arg[1]])
+			return message.channel.send(`${arg[1]} is not a valid character.`);
+		
+		if (charFile[arg[1]].npcchar)
+			return message.channel.send(`${arg[1]} is an npc character.`);
+		
+		if (!charFile[arg[2]])
+			return message.channel.send(`${arg[1]} is not a valid npc character to have as a pet.`);
+		
+		if (!charFile[arg[2]].npcchar)
+			return message.channel.send(`${arg[1]} is not an npc character.`);
+		
+		charFile[arg[1]].pet = arg[2]
+		charFile[arg[2]].petowner = arg[1]
+		fs.writeFileSync(charPath, JSON.stringify(charFile, null, '    '));
+		
+		message.channel.send(`${arg[2]} will now be carried on adventures with ${arg[1]}`);
+	}
+
+    if (command === 'removepet' || command === 'returnpet') {
+		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
+			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
+			return false
+		}
+
+        var arg = message.content.slice(prefix.length).trim().split(/ +/);
+        var charPath = dataPath+'/characters.json'
+        var charRead = fs.readFileSync(charPath);
+        var charFile = JSON.parse(charRead);
+		
+		if (!charFile[arg[1]])
+			return message.channel.send(`${arg[1]} is not a valid character.`);
+		
+		if (!charFile[arg[1]].pet)
+			return message.channel.send(`${arg[1]} has no pet.`);
+		
+		if (charFile[arg[1]].npcchar)
+			return message.channel.send(`${arg[1]} is an npc character.`);
+		
+		var petChar = charFile[arg[1]].pet
+		
+		if (charFile[petChar])
+			delete charFile[petChar].petowner;
+		
+		delete charFile[arg[1]].pet
+
+		fs.writeFileSync(charPath, JSON.stringify(charFile, null, '    '));
+		
+		message.channel.send(`${arg[2]} will no-longer be carried on adventures ${arg[1]}`);
+	}
 	
 	if (command === 'setbioinfo') {
 		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
@@ -5667,22 +6356,39 @@ client.on('messageCreate', message => {
                 }
             }
 			
+			const bioSetting = arg[2].toLowerCase()
+
 			if (!charDefs.bio) {
 				charDefs.bio = {
+					age: "",
+					species: "",
 					info: "",
 					backstory: "",
 					voice: "",
-					theme: ""
+					theme: "",
+					likes: "",
+					dislikes: "",
+					fears: ""
 				}
 			}
 
-			if (arg[2]) {
+			if (arg[2] && arg[3]) {
 				const quote = message.content.slice(prefix.length).trim().split('"');
-				charDefs.bio[arg[2].toLowerCase()] = quote[1]
-			}
 
-            fs.writeFileSync(charPath, JSON.stringify(charFile, null, '    '));
-			message.react('👍')
+				if (bioSetting === "age")
+					charDefs.bio.age = parseInt(arg[3]);
+				else if (bioSetting === "species") {
+					if (!quote[1])
+						charDefs.bio.species = arg[3]
+					else
+						charDefs.bio.species = quote[1]
+				} else
+					charDefs.bio[bioSetting] = quote[1];
+
+				fs.writeFileSync(charPath, JSON.stringify(charFile, null, '    '));
+				message.react('👍')
+			} else
+				message.channel.send("Invalid Field, or lack of argument. Try one of these:```diff\n- Age\n- Species\n- Info\n- Backstory\n- Voice\n- Theme\n- Likes\n- Dislikes\n- Fears```");
         } else {
             message.channel.send(`${arg[1]} isn't a valid character.`);
         }
@@ -5705,12 +6411,12 @@ client.on('messageCreate', message => {
 
         var charTXT = ``
         for (const charName in charFile) {
-            if (charName.includes(arg[1])) {
-                charTXT += `${charName}\n`
-            }
+            if (charName.includes(arg[1]))
+                charTXT += `${charName}\n`;
         }
         
-        if (charTXT == ``) {charTXT = "No results."}
+        if (charTXT == ``)
+			charTXT = "No results.";
 
         const DiscordEmbed = new Discord.MessageEmbed()
             .setColor('#4b02c9')
@@ -5731,43 +6437,45 @@ client.on('messageCreate', message => {
 
             var i;
             var charSkills = ``;
-            for (i = 0; i < charDefs.skills.length; i++) {
-                charSkills = charSkills + `${charDefs.skills[i]}\n`
-            }
+            for (i = 0; i < charDefs.skills.length; i++)
+                charSkills += `${elementEmoji[readSkill(charDefs.skills[i]).type]}${charDefs.skills[i]}\n`;
 
-            if (charSkills === ``) {charSkills = "none"}
+            if (charSkills === ``)
+				charSkills = "none";
 
             var charLBs = ``;
             for (i = 0; i <= 5; i++) {
                 if (charDefs["lb" + i]) {
                     if (charDefs["lb" + i].name && charDefs["lb" + i].name.toLowerCase() != "none") {
-                        charLBs += `\n**${i}** :${charDefs["lb" + i].name}\n${charDefs["lb" + i].pow} Power\nRequires ${charDefs["lb" + i].cost}% of the Limit Break Meter.\n`
+                        charLBs += `\n**${i}**: ${charDefs["lb" + i].name}\n${charDefs["lb" + i].pow} Power\nRequires ${charDefs["lb" + i].cost}% of the Limit Break Meter.\n`
                     }
                 }
             }
 
-            if (charLBs === ``) {charLBs = "None."}
+            if (charLBs === ``)
+				charLBs = "None.";
 
             var charAffs = "";
-            for (const i in charDefs.weak) {charAffs += `${charDefs.weak[i]} weakness.\n`}
-            for (const i in charDefs.resist) {charAffs += `${charDefs.resist[i]} resist.\n`}
-            for (const i in charDefs.block) {charAffs += `${charDefs.block[i]} block.\n`}
-            for (const i in charDefs.repel) {charAffs += `${charDefs.repel[i]} repel.\n`}
-            for (const i in charDefs.drain) {charAffs += `${charDefs.drain[i]} drain.\n`}
+            for (const i in charDefs.weak) {charAffs += `*${charDefs.weak[i].toUpperCase()}* weakness.\n`}
+            for (const i in charDefs.resist) {charAffs += `*${charDefs.resist[i].toUpperCase()}* resist.\n`}
+            for (const i in charDefs.block) {charAffs += `*${charDefs.block[i].toUpperCase()}* block.\n`}
+            for (const i in charDefs.repel) {charAffs += `*${charDefs.repel[i].toUpperCase()}* repel.\n`}
+            for (const i in charDefs.drain) {charAffs += `*${charDefs.drain[i].toUpperCase()}* drain.\n`}
             if (charAffs === ``) {charAffs = "None."}	
+			
+			var charTrust = ''
+			for (const i in charDefs.trust) {
+				var trustVal = charDefs.trust[i]
+				var percent = (trustVal.value/trustVal.nextLevel)*100
+				percent = roundNum(percent, 2)
+				
+				charTrust += `**${i}**: *${percent}/100%* Trust, Trust Level *${trustVal.level}*\n`
+			}
+			
+			if (charTrust === '')
+				charTrust = 'No Trust.';
 
 			var isNPC = charDefs.npcchar ? true : false
-			
-			if (!charDefs.bio) {
-				charDefs.bio = {
-					info: "",
-					backstory: "",
-					voice: "",
-					theme: ""
-				}
-				
-				fs.writeFileSync(charPath, JSON.stringify(charFile, null, '    '));
-			}
 			
 			if (isNPC) {
 				const DiscordEmbed = new Discord.MessageEmbed()
@@ -5775,10 +6483,10 @@ client.on('messageCreate', message => {
 					.setTitle(`${charName} *(NPC)*`)
 					.addFields(
 						{ name: `${charName}'s Stats:`, value: `Level ${charDefs.level}\n${charDefs.xp}/${charDefs.maxxp}XP\n\n${charDefs.hp}/${charDefs.maxhp}HP (${charDefs.basehp} Base)\n${charDefs.mp}/${charDefs.maxmp}MP (${charDefs.basemp} Base)\n\n${charDefs.atk}ATK (${charDefs.baseatk} Base)\n${charDefs.mag}MAG (${charDefs.basemag} Base)\n${charDefs.prc}PRC (${charDefs.baseprc} Base)\n${charDefs.end}END (${charDefs.baseend} Base)\n${charDefs.chr}CHR (${charDefs.basechr} Base)\n${charDefs.int}INT (${charDefs.baseint} Base)\n${charDefs.agl}AGL (${charDefs.baseagl} Base)\n${charDefs.luk}LUK (${charDefs.baseluk} Base)`, inline: true },
-						{ name: `${charName}'s Skills:`, value: `${charSkills}`, inline: true },
+						{ name: `${charName}'s Skills:`, value: `**Melee Attack**\n${elementEmoji[charDefs.melee[1]]}${charDefs.melee[0]}\n\n**Skills**\n${charSkills}`, inline: true },
 						{ name: `${charName}'s Limit Break Capabilities:`, value: `${charLBs}`, inline: true },
 						{ name: `${charName}'s Affinities`, value: `${charAffs}`, inline: true },
-						{ name: `${charName}'s Bio`, value: `**Info**\n${charDefs.bio.info}\n\n**Backstory**\n${charDefs.bio.backstory}\n\n**Headcanon Voice:** ${charDefs.bio.voice} \n**Theme:** ${charDefs.bio.theme}`, inline: true }
+						{ name: `${charName}'s Trust Toward Others`, value: `${charTrust}`, inline: true }
 					)
 				message.channel.send({embeds: [DiscordEmbed]});
 			} else {
@@ -5789,14 +6497,72 @@ client.on('messageCreate', message => {
 						.setTitle(`${charName} *(${user.username})*`)
 						.addFields(
 							{ name: `${charName}'s Stats:`, value: `Level ${charDefs.level}\n${charDefs.xp}/${charDefs.maxxp}XP\n\n${charDefs.hp}/${charDefs.maxhp}HP (${charDefs.basehp} Base)\n${charDefs.mp}/${charDefs.maxmp}MP (${charDefs.basemp} Base)\n\n${charDefs.atk}ATK (${charDefs.baseatk} Base)\n${charDefs.mag}MAG (${charDefs.basemag} Base)\n${charDefs.prc}PRC (${charDefs.baseprc} Base)\n${charDefs.end}END (${charDefs.baseend} Base)\n${charDefs.chr}CHR (${charDefs.basechr} Base)\n${charDefs.int}INT (${charDefs.baseint} Base)\n${charDefs.agl}AGL (${charDefs.baseagl} Base)\n${charDefs.luk}LUK (${charDefs.baseluk} Base)`, inline: true },
-							{ name: `${charName}'s Skills:`, value: `${charSkills}`, inline: true },
+							{ name: `${charName}'s Skills:`, value: `**Melee Attack**\n${elementEmoji[charDefs.melee[1]]}${charDefs.melee[0]}\n\n**Skills**\n${charSkills}`, inline: true },
 							{ name: `${charName}'s Limit Break Capabilities:`, value: `${charLBs}`, inline: true },
 							{ name: `${charName}'s Affinities`, value: `${charAffs}`, inline: true },
-							{ name: `${charName}'s Bio`, value: `**Info**\n${charDefs.bio.info}\n\n**Backstory**\n${charDefs.bio.backstory}\n\n**Headcanon Voice:** ${charDefs.bio.voice} \n**Theme:** ${charDefs.bio.theme}`, inline: true }
+							{ name: `${charName}'s Trust Toward Others`, value: `${charTrust}`, inline: true }
 						)
 					message.channel.send({embeds: [DiscordEmbed]});
 				});
 			}
+        } else {
+            message.channel.send(`There's been an issue finding your character!`);
+            return
+        }
+    }
+	
+    if (command === 'getbio') {
+        const arg = message.content.slice(prefix.length).trim().split(/ +/);
+		
+        var charPath = dataPath+'/characters.json'
+        var charRead = fs.readFileSync(charPath);
+        var charFile = JSON.parse(charRead);
+        if (charFile[arg[1]]) {
+            const charName = arg[1]
+            const charDefs = charFile[arg[1]]
+			
+			var bioTxt = `<Name> ${charName}\n`
+
+			if (charDefs.bio.species != "")
+				bioTxt += `<Species> ${charDefs.bio.species}\n`
+			else
+				bioTxt += '<Species> N/A\n'
+
+			if (charDefs.bio.age != "")
+				bioTxt += `<Age> ${charDefs.bio.age}\n`
+			else
+				bioTxt += '<Age> N/A\n'
+			
+			if (charDefs.bio.info != "")
+				bioTxt += `<Info> ${charDefs.bio.info}\n`
+			
+			bioTxt += '\n'
+
+			if (charDefs.bio.backstory != "")
+				bioTxt += `<Backstory> ${charDefs.bio.backstory}\n`
+
+			if (charDefs.bio.likes != "")
+				bioTxt += `<Likes> ${charDefs.bio.likes}\n`
+
+			if (charDefs.bio.dislikes != "")
+				bioTxt += `<Dislikes> ${charDefs.bio.dislikes}\n`
+
+			if (charDefs.bio.fears != "")
+				bioTxt += `<Fears> ${charDefs.bio.fears}\n`
+			
+			bioTxt += '\n'
+
+			if (charDefs.bio.voice != "")
+				bioTxt += `<Headcanon Voice> ${charDefs.bio.voice}\n`
+
+			if (charDefs.bio.theme != "")
+				bioTxt += `<Battle Themes> ${charDefs.bio.theme}`
+
+			const DiscordEmbed = new Discord.MessageEmbed()
+				.setColor('#12de6a')
+				.setTitle(`${charName}'s Bio`)
+				.setDescription(bioTxt)
+			message.channel.send({embeds: [DiscordEmbed]});
         } else {
             message.channel.send(`There's been an issue finding your character!`);
             return
@@ -5837,20 +6603,14 @@ client.on('messageCreate', message => {
                     { name: `${enmName}'s Skills:`, value: `${enmSkills}`, inline: true },
                     { name: `${enmName}'s Limit Break Capabilities:`, value: `${enmLB}`, inline: true }
                 )
+
+
             if (enmDefs.image) {
-                DiscordEmbed = new Discord.MessageEmbed()
-                    .setColor('#12de6a')
-                    .setTitle(`${enmName}`)
-                    .attachFiles([`../RPGBot/images/enemies/${enmDefs.image}`])
-                    .setThumbnail(`attachment://${enmDefs.image}`)
-                    .setDescription(`${enmDefs.journal}`)
-                    .addFields(
-                        { name: `${enmName}'s Stats:`, value: `Level ${enmDefs.level}\nWorth ${enmDefs.awardxp}XP\n\n${enmDefs.hp} Max HP\n${enmDefs.mp} Max MP\n\n${enmDefs.atk}ATK\n${enmDefs.mag}MAG\n${enmDefs.prc}PRC\n${enmDefs.end}END\n${enmDefs.chr}CHR\n${enmDefs.int}INT\n${enmDefs.agl}AGL\n${enmDefs.luk}LUK`, inline: true },
-                        { name: `${enmName}'s Skills:`, value: `${enmSkills}`, inline: true },
-                        { name: `${enmName}'s Limit Break Capabilities:`, value: `${enmLB}`, inline: true }
-                    )
-            }
-            message.channel.send({embeds: [DiscordEmbed]});
+				const file = new Discord.MessageAttachment(`./images/enemies/${enmDefs.image}`);
+                DiscordEmbed.setThumbnail(`attachment://${enmDefs.image}`)
+				message.channel.send({embeds: [DiscordEmbed], files: [file]});
+			} else
+				message.channel.send({embeds: [DiscordEmbed]});
         } else {
             message.channel.send(`Invalid Enemy.`);
             return
@@ -5868,6 +6628,7 @@ client.on('messageCreate', message => {
                 return
             }
         }
+
         if (!message.member.permissions.serialize().ADMINISTRATOR) {
             message.channel.send("You lack sufficient permissions, I'm so sorry!");
             return
@@ -6381,8 +7142,8 @@ client.on('messageCreate', message => {
 						charDefs.skills.push(skillName)
 					}
 					
-					charDefs.maxhp = Math.max(150, Math.floor(Math.random()*550))
-					charDefs.maxmp = Math.max(150, Math.floor(Math.random()*550))
+					charDefs.maxhp = 300 + Math.floor(Math.random()*300)
+					charDefs.maxmp = 300 + Math.floor(Math.random()*400)
 					charDefs.hp = charDefs.maxhp
 					charDefs.mp = charDefs.maxmp
 
@@ -6400,6 +7161,9 @@ client.on('messageCreate', message => {
 					
 					const affinities = ["weak", "weak", "weak", "normal", "normal", "normal", "normal", "resist", "resist", "block", "repel", "drain"]
 					for (const k in Elements) {
+						if (Elements[k] === "status" || Elements[k] === "heal" || Elements[k] === "passive" || Elements[k] === "almighty")
+							continue;
+		
 						var statusNum = Math.floor(Math.random() * (affinities.length-1))
 						if (affinities[statusNum] != "normal") {charDefs[affinities[statusNum]].push(Elements[k])}
 					}
@@ -6545,12 +7309,12 @@ client.on('messageCreate', message => {
 		var skillPath = dataPath+'/skills.json'
         var skillRead = fs.readFileSync(skillPath);
         var skillFile = JSON.parse(skillRead);
+
+		var charPath = dataPath+'/characters.json'
+		var charRead = fs.readFileSync(charPath);
+		var charFile = JSON.parse(charRead);
 		
-        if (btl[message.guild.id].battling == false) {
-			var charPath = dataPath+'/characters.json'
-			var charRead = fs.readFileSync(charPath);
-			var charFile = JSON.parse(charRead);
-			
+        if (btl[message.guild.id].battling == false) {			
 			if (charFile[arg[1]]) {
 				var skillDefs = skillFile[arg[2]]
 				if (!skillDefs.name) {skillDefs.name = arg[2]}
@@ -6799,26 +7563,14 @@ client.on('messageCreate', message => {
                             if (partyDef.hp > 0) {
                                 partyDef.hp = partyDef.maxhp
 							
-								if (charFuncs.hasPassive(partyDef, "affinitypoint")) {
-									if (!partyDef.affinitypoint) {
-										partyDef.affinitypoint = 0
-									}
-
-									if (partyDef.affinitypoint < 10) {
-										affinityMessage += `\n${partyDef.name} got an affinity point!`
-										partyDef.affinitypoint = Math.min(10, partyDef.affinitypoint+1);
-										if (partyDef.affinitypoint >= 10) {
-											affinityMessage += " (MAX)"
-										}
-									} else {
-										affinityMessage += `\n${partyDef.name} has 10 affinity points.`
-									}
-								}
+								affinityMessage += turnFuncs.healPassives(partyDef)
 							
 								if (partyDef.helpedquote && partyDef.helpedquote.length > 0) {
 									var possibleQuote = Math.round(Math.random() * (partyDef.helpedquote.length-1))
 									healedQuote += `\n*${partyDef.name}: "${partyDef.helpedquote[possibleQuote]}"*`
 								}
+								
+								charFuncs.trustUp(partyDef, charDefs, 5, message.guild.id)
                             }
                         }
 
@@ -6835,26 +7587,14 @@ client.on('messageCreate', message => {
                                 partyDef.status = "none";
                                 partyDef.statusturns = 0;
 							
-								if (charFuncs.hasPassive(partyDef, "affinitypoint")) {
-									if (!partyDef.affinitypoint) {
-										partyDef.affinitypoint = 0
-									}
-
-									if (partyDef.affinitypoint < 10) {
-										affinityMessage += `\n${partyDef.name} got an affinity point!`
-										partyDef.affinitypoint = Math.min(10, partyDef.affinitypoint+1);
-										if (partyDef.affinitypoint >= 10) {
-											affinityMessage += " (MAX)"
-										}
-									} else {
-										affinityMessage += `\n${partyDef.name} has 10 affinity points.`
-									}
-								}
+								affinityMessage += turnFuncs.healPassives(partyDef)
 							
 								if (partyDef.helpedquote && partyDef.helpedquote.length > 0) {
 									var possibleQuote = Math.round(Math.random() * (partyDef.helpedquote.length-1))
 									healedQuote += `\n*${partyDef.name}: "${partyDef.helpedquote[possibleQuote]}"*`
 								}
+								
+								charFuncs.trustUp(partyDef, charDefs, 5, message.guild.id)
                             }
                         }
 
@@ -6867,30 +7607,27 @@ client.on('messageCreate', message => {
                     } else if (skillDefs.healmp) {
                         var txt = ``
                         for (const i in allySide) {
-                            var partyDef = allySide[i]
-                            partyDef.mp = Math.min(partyDef.maxmp, partyDef.mp + skillDefs.pow)
-                            txt = txt + `\n${partyDef.name}'s MP was restored by ${skillDefs.pow}. (${partyDef.mp}/${partyDef.maxmp}MP)`
+                            var partyDef = allySide[i]								
 							
-							if (charFuncs.hasPassive(partyDef, "affinitypoint")) {
-								if (!partyDef.affinitypoint) {
-									partyDef.affinitypoint = 0
-								}
-
-								if (partyDef.affinitypoint < 10) {
-									txt += `\n${partyDef.name} got an affinity point!`
-									partyDef.affinitypoint = Math.min(10, partyDef.affinitypoint+1);
-									if (partyDef.affinitypoint >= 10) {
-										txt += " (MAX)"
-									}
-								} else {
-									txt += `\n${partyDef.name} has 10 affinity points.`
+							// Trust Level 10+ will have 10% increased healing.
+							var heal = skillDefs.pow
+							if (!btl[message.guild.id].pvp) {
+								if (charDefs.id != partyDef.id && charDefs.trust[partyDef.truename] && charDefs.trust[partyDef.truename].level >= 10) {
+									heal *= 1.1
 								}
 							}
+							
+                            partyDef.mp = Math.round(Math.min(partyDef.maxmp, partyDef.mp + heal))
+                            txt += `\n${partyDef.name}'s MP was restored by ${Math.round(heal)}. (${partyDef.mp}/${partyDef.maxmp}MP)`
+							
+							txt += turnFuncs.healPassives(partyDef)
 							
 							if (partyDef.helpedquote && partyDef.helpedquote.length > 0) {
 								var possibleQuote = Math.round(Math.random() * (partyDef.helpedquote.length-1))
 								txt += `\n*${partyDef.name}: "${partyDef.helpedquote[possibleQuote]}"*`
 							}
+							
+							charFuncs.trustUp(partyDef, charDefs, 5, message.guild.id)
                         }
 
                         const DiscordEmbed = new Discord.MessageEmbed()
@@ -6904,204 +7641,202 @@ client.on('messageCreate', message => {
                         for (const i in allySide) {
                             var partyDef = allySide[i]
                             if (partyDef.hp > 0) {
-                                partyDef.hp = Math.min(partyDef.maxhp, partyDef.hp + skillDefs.pow)
-                                txt = txt + `\n${partyDef.name}'s HP was restored by ${skillDefs.pow}. (${partyDef.hp}/${partyDef.maxhp}HP)`
-							
-								if (charFuncs.hasPassive(partyDef, "affinitypoint")) {
-									if (!partyDef.affinitypoint) {
-										partyDef.affinitypoint = 0
-									}
-
-									if (partyDef.affinitypoint < 10) {
-										txt += `\n${partyDef.name} got an affinity point!`
-										partyDef.affinitypoint = Math.min(10, partyDef.affinitypoint+1);
-										if (partyDef.affinitypoint >= 10) {
-											txt += " (MAX)"
-										}
-									} else {
-										txt += `\n${partyDef.name} has 10 affinity points.`
+								// Trust Level 10+ will have 10% increased healing.
+								var heal = skillDefs.pow
+								if (!btl[message.guild.id].pvp) {
+									if (charDefs.id != partyDef.id && charDefs.trust[partyDef.truename] && charDefs.trust[partyDef.truename].level >= 10) {
+										heal *= 1.1
 									}
 								}
+		
+								partyDef.hp = Math.round(Math.min(partyDef.maxhp, partyDef.hp + heal))
+								
+                                txt += `\n${partyDef.name}'s HP was restored by ${Math.round(heal)}. (${partyDef.hp}/${partyDef.maxhp}HP)`							
+								txt += turnFuncs.healPassives(partyDef)
 							
 								if (partyDef.helpedquote && partyDef.helpedquote.length > 0) {
 									var possibleQuote = Math.round(Math.random() * (partyDef.helpedquote.length-1))
 									txt += `\n*${partyDef.name}: "${partyDef.helpedquote[possibleQuote]}"*`
 								}
+								
+								charFuncs.trustUp(partyDef, charDefs, 5, message.guild.id)
                             }
                         }
 
                         const DiscordEmbed = new Discord.MessageEmbed()
                             .setColor('#e36b2b')
 							.setTitle(`${charName} => Party`)
-							.setDescription(`${healQuote}${charName} used ${skillName}!\nThe Party's HP was restored by ${skillDefs.pow}\n${txt}`)
+							.setDescription(`${healQuote}${charName} used ${skillName}!\nThe Party's HP!\n${txt}`)
                             .setFooter(`${charName}'s turn`);
                         message.channel.send({embeds: [DiscordEmbed]});
                     }
                 } else {
-                    if (allySide[arg[2]]) {
-                        var charDefs2 = allySide[arg[2]]
-                        var charName2 = allySide[arg[2]].name
+//					var closerQuote = ''
 
-                        if (skillDefs.revive) {
-                            if (charDefs2.hp > 0) {
-                                message.channel.send(`You can't revive an alive character!`)
-                                message.delete()
-                                return
-                            }
+					var charDefs2 = charDefs
+					var charName2 = charName
+                    if (skillDefs.target != 'caster') {
+						if (allySide[arg[2]]) {
+							charDefs2 = allySide[arg[2]]
+							charName2 = allySide[arg[2]].name
+						} else {
+							message.channel.send(`${arg[2]} is a nonexistant battler number.`)
+							message.delete()
+							return
+						}
+					}
 
-                            charDefs2.hp = Math.floor(charDefs2.maxhp / skillDefs.revive)
-							
-							if (charDefs2.helpedquote && charDefs2.helpedquote.length > 0) {
-								var possibleQuote = Math.round(Math.random() * (charDefs2.helpedquote.length-1))
-								healedQuote += `\n*${charDefs2.name}: "${charDefs2.helpedquote[possibleQuote]}"*`
+					if (skillDefs.revive) {
+						if (charDefs2.hp > 0) {
+							message.channel.send(`You can't revive an alive character!`)
+							message.delete()
+							return
+						}
+
+						charDefs2.hp = Math.floor(charDefs2.maxhp / skillDefs.revive)
+						
+						if (charDefs2.helpedquote && charDefs2.helpedquote.length > 0) {
+							var possibleQuote = Math.round(Math.random() * (charDefs2.helpedquote.length-1))
+							healedQuote += `\n*${charDefs2.name}: "${charDefs2.helpedquote[possibleQuote]}"*`
+						}
+
+						// Trust Levels
+						charFuncs.trustUp(charDefs2, charDefs, 20, message.guild.id)
+
+						const DiscordEmbed = new Discord.MessageEmbed()
+							.setColor('#e36b2b')
+							.setTitle(`${charName} => ${charName2}`)
+							.setDescription(`${healQuote}${charName} used ${skillName}!\n${charName2} was revived by ${charName}!${healedQuote}`)
+							.setFooter(`${charName}'s turn`);
+						message.channel.send({embeds: [DiscordEmbed]});
+					} else if (skillDefs.fullheal) {
+						if (charDefs2.hp < 0) {
+							message.channel.send(`You can't heal a dead character!`)
+							message.delete()
+							return
+						}
+
+						charDefs2.hp = charDefs2.maxhp
+						var passives = turnFuncs.healPassives(charDefs2)
+						
+						if (charDefs2.helpedquote && charDefs2.helpedquote.length > 0) {
+							var possibleQuote = Math.round(Math.random() * (charDefs2.helpedquote.length-1))
+							healedQuote += `\n*${charDefs2.name}: "${charDefs2.helpedquote[possibleQuote]}"*`
+						}
+
+						// Trust Levels
+						charFuncs.trustUp(charDefs2, charDefs, 15, message.guild.id)
+
+						const DiscordEmbed = new Discord.MessageEmbed()
+							.setColor('#e36b2b')
+							.setTitle(`${charName} => ${charName2}`)
+							.setDescription(`${healQuote}${charName} used ${skillName}!\n${charName2}'s HP was fully restored!\n${passives}${healedQuote}`)
+							.setFooter(`${charName}'s turn`);
+						message.channel.send({embeds: [DiscordEmbed]});
+					} else if (skillDefs.statusheal) {
+						if (charDefs2.hp < 0) {
+							message.channel.send(`You can't cure a dead character!`)
+							message.delete()
+							return
+						}
+
+						charDefs2.status = "none";
+						charDefs2.statusturns = 0;
+						var passives = turnFuncs.healPassives(charDefs2)
+						
+						if (charDefs2.helpedquote && charDefs2.helpedquote.length > 0) {
+							var possibleQuote = Math.round(Math.random() * (charDefs2.helpedquote.length-1))
+							healedQuote += `\n*${charDefs2.name}: "${charDefs2.helpedquote[possibleQuote]}"*`
+						}
+
+						// Trust Levels
+						charFuncs.trustUp(charDefs2, charDefs, 15, message.guild.id)
+
+						const DiscordEmbed = new Discord.MessageEmbed()
+							.setColor('#e36b2b')
+							.setTitle(`${charName} => ${charName2}`)
+							.setDescription(`${healQuote}${charName} used ${skillName}!\n${charName2} was cured of their status!\n${passives}${healedQuote}`)
+							.setFooter(`${charName}'s turn`);
+						message.channel.send({embeds: [DiscordEmbed]});
+					} else if (skillDefs.healmp) {
+						// Trust Level 10+ will have 10% increased healing.
+						var heal = skillDefs.pow
+						if (!btl[message.guild.id].pvp) {
+							if (charDefs.id != charDefs2.id && charDefs.trust[charDefs2.truename] && charDefs.trust[charDefs2.truename].level >= 10) {
+								heal *= 1.1
 							}
+						}
 
-                            const DiscordEmbed = new Discord.MessageEmbed()
-                                .setColor('#e36b2b')
-								.setTitle(`${charName} => ${charName2}`)
-								.setDescription(`${healQuote}${charName} used ${skillName}!\n${charName2} was revived by ${charName}!${healedQuote}`)
-                                .setFooter(`${charName}'s turn`);
-                            message.channel.send({embeds: [DiscordEmbed]});
-                        } else if (skillDefs.fullheal) {
-                            if (charDefs2.hp < 0) {
-                                message.channel.send(`You can't heal a dead character!`)
-                                message.delete()
-                                return
-                            }
+						charDefs2.mp = Math.min(charDefs2.maxmp, charDefs2.mp + Math.round(heal))
+						var passives = turnFuncs.healPassives(charDefs2)
+						
+						if (charDefs2.helpedquote && charDefs2.helpedquote.length > 0) {
+							var possibleQuote = Math.round(Math.random() * (charDefs2.helpedquote.length-1))
+							healedQuote += `\n*${charDefs2.name}: "${charDefs2.helpedquote[possibleQuote]}"*`
+						}
 
-                            charDefs2.hp = charDefs2.maxhp
-							if (charFuncs.hasPassive(charDefs2, "affinitypoint")) {
-								if (!charDefs2.affinitypoint) {
-									charDefs2.affinitypoint = 0
-								}
+						// Trust Levels
+						charFuncs.trustUp(charDefs2, charDefs, 15)
 
-								if (charDefs2.affinitypoint < 10) {
-									affinityMessage += `\n${charName2} got an affinity point!`
-									charDefs2.affinitypoint = Math.min(10, charDefs2.affinitypoint+1);
-									if (charDefs2.affinitypoint >= 10) {
-										affinityMessage += " (MAX)"
-									}
-								} else {
-									affinityMessage += `\n${charName2} has 10 affinity points.`
-								}
+						const DiscordEmbed = new Discord.MessageEmbed()
+							.setColor('#e36b2b')
+							.setTitle(`${charName} => ${charName2}`)
+							.setDescription(`${healQuote}${charName} used ${skillName}!\n${charName2}'s MP was restored by ${Math.round(heal)}! ${passives}${healedQuote}`)
+							.setFooter(`${charName}'s turn`);
+						message.channel.send({embeds: [DiscordEmbed]});
+					} else if (skillDefs.mptohp) {
+						charDefs2.hp = Math.min(charDefs2.maxhp, charDefs2.hp + charDefs.mp)
+						charDefs2.mp = 0
+
+						var passives = turnFuncs.healPassives(charDefs2)
+						
+						if (charDefs2.helpedquote && charDefs2.helpedquote.length > 0) {
+							var possibleQuote = Math.round(Math.random() * (charDefs2.helpedquote.length-1))
+							healedQuote += `\n*${charDefs2.name}: "${charDefs2.helpedquote[possibleQuote]}"*`
+						}
+
+						// Trust Levels
+						charFuncs.trustUp(charDefs2, charDefs, 15)
+
+						const DiscordEmbed = new Discord.MessageEmbed()
+							.setColor('#e36b2b')
+							.setTitle(`${charName} => ${charName2}`)
+							.setDescription(`${healQuote}${charName} used ${skillName}!\n${charName2}'s remaining MP was converted into HP. ${passives}${healedQuote}`)
+							.setFooter(`${charName}'s turn`);
+						message.channel.send({embeds: [DiscordEmbed]});
+					} else {
+						if (charDefs2.hp <= 0) {
+							message.channel.send(`You can't heal a dead character!`)
+							message.delete()
+							return
+						}
+
+						// Trust Level 10+ will have 10% increased healing.
+						var heal = skillDefs.pow
+						if (!btl[message.guild.id].pvp) {
+							if (charDefs.id != charDefs2.id && charDefs.trust[charDefs2.truename] && charDefs.trust[charDefs2.truename].level >= 10) {
+								heal *= 1.1
 							}
-							
-							if (charDefs2.helpedquote && charDefs2.helpedquote.length > 0) {
-								var possibleQuote = Math.round(Math.random() * (charDefs2.helpedquote.length-1))
-								healedQuote += `\n*${charDefs2.name}: "${charDefs2.helpedquote[possibleQuote]}"*`
-							}
+						}
 
-                            const DiscordEmbed = new Discord.MessageEmbed()
-                                .setColor('#e36b2b')
-								.setTitle(`${charName} => ${charName2}`)
-								.setDescription(`${healQuote}${charName} used ${skillName}!\n${charName2}'s HP was fully restored!\n${affinityMessage}${healedQuote}`)
-                                .setFooter(`${charName}'s turn`);
-                            message.channel.send({embeds: [DiscordEmbed]});
-                        } else if (skillDefs.statusheal) {
-                            if (charDefs2.hp < 0) {
-                                message.channel.send(`You can't cure a dead character!`)
-                                message.delete()
-                                return
-                            }
+						charDefs2.hp = Math.min(charDefs2.maxhp, charDefs2.hp + Math.round(heal))
+						var passivesMsg = turnFuncs.healPassives(charDefs2)
+						
+						if (charDefs2.helpedquote && charDefs2.helpedquote.length > 0) {
+							var possibleQuote = Math.round(Math.random() * (charDefs2.helpedquote.length-1))
+							healedQuote += `\n*${charDefs2.name}: "${charDefs2.helpedquote[possibleQuote]}"*`
+						}
 
-                            charDefs2.status = "none";
-                            charDefs2.statusturns = 0;
-							if (charFuncs.hasPassive(charDefs2, "affinitypoint")) {
-								if (!charDefs2.affinitypoint) {
-									charDefs2.affinitypoint = 0
-								}
+						// Trust Levels
+						charFuncs.trustUp(charDefs2, charDefs, 15, message.guild.id)
 
-								if (charDefs2.affinitypoint < 10) {
-									affinityMessage += `\n${charName2} got an affinity point!`
-									charDefs2.affinitypoint = Math.min(10, charDefs2.affinitypoint+1);
-									if (charDefs2.affinitypoint >= 10) {
-										affinityMessage += " (MAX)"
-									}
-								} else {
-									affinityMessage += `\n${charName2} has 10 affinity points.`
-								}
-							}
-							
-							if (charDefs2.helpedquote && charDefs2.helpedquote.length > 0) {
-								var possibleQuote = Math.round(Math.random() * (charDefs2.helpedquote.length-1))
-								healedQuote += `\n*${charDefs2.name}: "${charDefs2.helpedquote[possibleQuote]}"*`
-							}
-
-                            const DiscordEmbed = new Discord.MessageEmbed()
-                                .setColor('#e36b2b')
-								.setTitle(`${charName} => ${charName2}`)
-								.setDescription(`${healQuote}${charName} used ${skillName}!\n${charName2} was cured of their status!${healedQuote}`)
-                                .setFooter(`${charName}'s turn`);
-                            message.channel.send({embeds: [DiscordEmbed]});
-                        } else if (skillDefs.healmp) {
-                            charDefs2.mp = Math.min(charDefs2.maxmp, charDefs2.mp + skillDefs.pow)
-							if (charFuncs.hasPassive(charDefs2, "affinitypoint")) {
-								if (!charDefs2.affinitypoint) {
-									charDefs2.affinitypoint = 0
-								}
-
-								if (charDefs2.affinitypoint < 10) {
-									affinityMessage += `\n${charName2} got an affinity point!`
-									charDefs2.affinitypoint = Math.min(10, charDefs2.affinitypoint+1);
-									if (charDefs2.affinitypoint >= 10) {
-										affinityMessage += " (MAX)"
-									}
-								} else {
-									affinityMessage += `\n${charName2} has 10 affinity points.`
-								}
-							}
-							
-							if (charDefs2.helpedquote && charDefs2.helpedquote.length > 0) {
-								var possibleQuote = Math.round(Math.random() * (charDefs2.helpedquote.length-1))
-								healedQuote += `\n*${charDefs2.name}: "${charDefs2.helpedquote[possibleQuote]}"*`
-							}
-
-                            const DiscordEmbed = new Discord.MessageEmbed()
-                                .setColor('#e36b2b')
-								.setTitle(`${charName} => ${charName2}`)
-								.setDescription(`${healQuote}${charName} used ${skillName}!\n${charName2}'s MP was restored by ${skillDefs.pow}! ${affinityMessage}${healedQuote}`)
-                                .setFooter(`${charName}'s turn`);
-                            message.channel.send({embeds: [DiscordEmbed]});
-                        } else {
-                            if (charDefs2.hp <= 0) {
-                                message.channel.send(`You can't heal a dead character!`)
-                                message.delete()
-                                return
-                            }
-
-                            charDefs2.hp = Math.min(charDefs2.maxhp, charDefs2.hp + skillDefs.pow)
-							if (charFuncs.hasPassive(charDefs2, "affinitypoint")) {
-								if (!charDefs2.affinitypoint) {
-									charDefs2.affinitypoint = 0
-								}
-
-								if (charDefs2.affinitypoint < 10) {
-									affinityMessage += `\n${charName2} got an affinity point!`
-									charDefs2.affinitypoint = Math.min(10, charDefs2.affinitypoint+1);
-									if (charDefs2.affinitypoint >= 10) {
-										affinityMessage += " (MAX)"
-									}
-								} else {
-									affinityMessage += `\n${charName2} has 10 affinity points.`
-								}
-							}
-							
-							if (charDefs2.helpedquote && charDefs2.helpedquote.length > 0) {
-								var possibleQuote = Math.round(Math.random() * (charDefs2.helpedquote.length-1))
-								healedQuote += `\n*${charDefs2.name}: "${charDefs2.helpedquote[possibleQuote]}"*`
-							}
-
-                            const DiscordEmbed = new Discord.MessageEmbed()
-                                .setColor('#e36b2b')
-								.setTitle(`${charName} => ${charName2}`)
-								.setDescription(`${charName} used ${skillName}!\n${charName2}'s HP was restored by ${skillDefs.pow}! ${affinityMessage}${healedQuote}`)
-                                .setFooter(`${charName}'s turn`);
-                            message.channel.send({embeds: [DiscordEmbed]});
-                        }
-                    } else {
-                        message.channel.send(`${arg[2]} is a nonexistant battler number.`)
-                        return
-                    }
+						const DiscordEmbed = new Discord.MessageEmbed()
+							.setColor('#e36b2b')
+							.setTitle(`${charName} => ${charName2}`)
+							.setDescription(`${charName} used ${skillName}!\n${charName2}'s HP was restored by ${Math.round(heal)}! ${passivesMsg}${healedQuote}`)
+							.setFooter(`${charName}'s turn`);
+						message.channel.send({embeds: [DiscordEmbed]});
+					}
                 }
 				
 				if (skillDefs.pow && turnFuncs.limitBreaks(message.guild.id)) {
@@ -7128,7 +7863,7 @@ client.on('messageCreate', message => {
 								.setColor('#e36b2b')
 								.addFields(
 									{ name: `${charName} => ${enmName}`, value: `${charName} used ${skillName}!`, inline: false },
-									{ name: `${enmName} was analysed!`, value: `${enmStats.hp} Max HP\n${enmStats.atk} Strength\n${enmStats.mag} Magic\n${enmStats.prc} Perception\n${enmStats.end} Endurance\n${enmStats.chr} Charisma\n${enmStats.int} Intelligence\n${enmStats.agl} Agility\n${enmStats.luk} Luck\n*"${enmDefs.bio.info}"*`, inline: false },
+									{ name: `${enmName} was analysed!`, value: `${enmStats.maxhp} Max HP\n${enmStats.atk} Strength\n${enmStats.mag} Magic\n${enmStats.prc} Perception\n${enmStats.end} Endurance\n${enmStats.chr} Charisma\n${enmStats.int} Intelligence\n${enmStats.agl} Agility\n${enmStats.luk} Luck\n*"${enmDefs.bio.info}"*`, inline: false },
 								)
 								.setFooter(`${charName}'s turn`);
 							message.channel.send({embeds: [DiscordEmbed]})
@@ -7136,86 +7871,42 @@ client.on('messageCreate', message => {
                     } else {
                         message.channel.send("This enemy isn't in battle!")
                     }
-                } else if (skillDefs.autoguard) {
+                } else if (skillDefs.shield) {
 					var healedQuote = ""
-                    if (allySide[arg[2]]) {
-                        allySide[arg[2]].shield = "guard"
-						var charName2 = allySide[arg[2]].name
-							
-						if (allySide[arg[2]].helpedquote && allySide[arg[2]].helpedquote.length > 0) {
-							var possibleQuote = Math.round(Math.random() * (allySide[arg[2]].helpedquote.length-1))
-							healedQuote += `\n*${charName2}: "${allySide[arg[2]].helpedquote[possibleQuote]}"*`
-						}
-
+					
+					if (skillDefs.target === "caster") {
+                        charDefs.shield = skillDefs.shield.toLowerCase()
+	
                         const DiscordEmbed = new Discord.MessageEmbed()
                             .setColor('#e36b2b')
-							.setTitle(`${charName} => ${charName2}`)
-							.setDescription(`${charName} used ${skillName}!\n${charName2} was protected by ${skillDefs.protectitem ? skillDefs.protectitem : charName}.${healedQuote}`)
+							.setTitle(`${charName} => Self`)
+							.setDescription(`${charName} used ${skillName}!\n${charName} was protected by a ${skillDefs.shield}.`)
                             .setFooter(`${charName}'s turn`);
                         message.channel.send({embeds: [DiscordEmbed]})
-                    } else {
-						message.channel.send("Invalid Ally Position")
-						message.delete()
-						return false
-					}
-                } else if (skillDefs.makarakarn) {
-					var healedQuote = ""
-                    if (allySide[arg[2]]) {
-                        allySide[arg[2]].shield = "makarakarn"
-						var charName2 = allySide[arg[2]].name
-							
-						if (allySide[arg[2]].helpedquote && allySide[arg[2]].helpedquote.length > 0) {
-							var possibleQuote = Math.round(Math.random() * (allySide[arg[2]].helpedquote.length-1))
-							healedQuote += `\n*${charName2}: "${allySide[arg[2]].helpedquote[possibleQuote]}"*`
+					} else {
+						if (allySide[arg[2]]) {
+							allySide[arg[2]].shield = skillDefs.shield.toLowerCase()
+							var charName2 = allySide[arg[2]].name
+								
+							if (allySide[arg[2]].helpedquote && allySide[arg[2]].helpedquote.length > 0) {
+								var possibleQuote = Math.round(Math.random() * (allySide[arg[2]].helpedquote.length-1))
+								healedQuote += `\n*${charName2}: "${allySide[arg[2]].helpedquote[possibleQuote]}"*`
+							}
+
+							charFuncs.trustUp(allySide[arg[2]], charDefs, 15, message.guild.id)
+
+							const DiscordEmbed = new Discord.MessageEmbed()
+								.setColor('#e36b2b')
+								.setTitle(`${charName} => ${charName2}`)
+								.setDescription(`${charName} used ${skillName}!\n${charName2} was protected by a ${skillDefs.shield}.${healedQuote}`)
+								.setFooter(`${charName}'s turn`);
+							message.channel.send({embeds: [DiscordEmbed]})
+						} else {
+							message.channel.send("Invalid Ally Position")
+							message.delete()
+							return false
 						}
-
-                        const DiscordEmbed = new Discord.MessageEmbed()
-                            .setColor('#e36b2b')
-							.setTitle(`${charName} => ${charName2}`)
-							.setDescription(`${charName} used ${skillName}!\n${charName2} was protected from magic with ${skillDefs.protectitem ? skillDefs.protectitem : charName}.${healedQuote}`)
-                            .setFooter(`${charName}'s turn`);
-                        message.channel.send({embeds: [DiscordEmbed]})
-                    } else {
-						message.channel.send("Invalid Ally Position")
-						message.delete()
-						return false
 					}
-                } else if (skillDefs.tetrakarn) {
-					var healedQuote = ""
-                    if (allySide[arg[2]]) {
-                        allySide[arg[2]].shield = "tetrakarn"
-						var charName2 = allySide[arg[2]].name
-							
-						if (allySide[arg[2]].helpedquote && allySide[arg[2]].helpedquote.length > 0) {
-							var possibleQuote = Math.round(Math.random() * (allySide[arg[2]].helpedquote.length-1))
-							healedQuote += `\n*${charName2}: "${allySide[arg[2]].helpedquote[possibleQuote]}"*`
-						}
-
-                        const DiscordEmbed = new Discord.MessageEmbed()
-                            .setColor('#e36b2b')
-							.setTitle(`${charName} => ${charName2}`)
-							.setDescription(`${charName} used ${skillName}!\n${charName2} was protected from physical attacks with ${skillDefs.protectitem ? skillDefs.protectitem : charName}.${healedQuote}`)
-                            .setFooter(`${charName}'s turn`);
-                        message.channel.send({embeds: [DiscordEmbed]})
-                    } else {
-						message.channel.send("Invalid Ally Position")
-						message.delete()
-						return false
-					}
-                } else if (skillDefs.autoguardall) {
-                    for (const i in allySide) {
-                        var partyDef = allySide[i]
-                        if (partyDef.hp > 0) {
-                            partyDef.shield = "guard"
-                        }
-                    }
-
-                    const DiscordEmbed = new Discord.MessageEmbed()
-                        .setColor('#e36b2b')
-						.setTitle(`${charName} => Party`)
-						.setDescription(`${charName} used ${skillName}!\nThe entire party was protected by ${skillDefs.protectitem ? skillDefs.protectitem : charName}`)
-                        .setFooter(`${charName}'s turn`);
-                    message.channel.send({embeds: [DiscordEmbed]})
                 } else if (skillDefs.status && skillDefs.statuschance) {
                     var enmStats = opposingSide[parseInt(arg[2])]
                     const enmName = enmStats.name
@@ -7229,55 +7920,7 @@ client.on('messageCreate', message => {
 		
                         var finaltext = `${charName} used ${skillName} on ${enmName}!`;
                         if (chance <= targ || skillDefs.statuschance >= 100) {
-                            if (movestatus === "burn") {
-                                finaltext = finaltext + " They were burned!"
-                                enmStats.status = "burn"
-                                enmStats.statusturns = 3
-                            } else if (movestatus === "bleed") {
-                                finaltext = finaltext + " They were inflicted with bleed!"
-                                enmStats.status = "bleed"
-                                enmStats.statusturns = 5
-                            } else if (movestatus === "poison" || movestatus === "toxic") {
-                                finaltext = finaltext + " They were poisoned!"
-                                enmStats.status = "poison"
-                                enmStats.statusturns = 3
-                            } else if (movestatus === "freeze") {
-                                finaltext = finaltext + " They were frozen!"
-                                enmStats.status = "freeze"
-                                enmStats.statusturns = 1
-                            } else if (movestatus === "paralyze") {
-                                finaltext = finaltext + " They were paralyzed!"
-                                enmStats.status = "paralyze"
-                                enmStats.statusturns = 1
-							} else if (movestatus === "dizzy") {
-								finaltext = finaltext + " They were inflicted with dizziness!"
-								enmStats.status = "dizzy"
-								enmStats.statusturns = 3
-                            } else if (movestatus === "brainwash") {
-                                finaltext = finaltext + " They were brainwashed!"
-                                enmStats.status = "brainwash"
-                                enmStats.statusturns = 2
-                            } else if (movestatus === "rage") {
-								finaltext = finaltext + " They were enraged!"
-								enmStats.status = "rage"
-								enmStats.statusturns = 3
-							} else if (movestatus === "fear") {
-								finaltext = finaltext + " They got scared!"
-								enmStats.status = "fear"
-								enmStats.statusturns = 2
-							} else if (movestatus === "ego") {
-								finaltext = finaltext + " They were made egotistic!"
-								enmStats.status = "ego"
-								enmStats.statusturns = 3
-							} else if (movestatus === "paranoia") {
-								finaltext = finaltext + " They were made paranoid!"
-								enmStats.status = "paranoia"
-								enmStats.statusturns = 2
-							} else if (movestatus === "despair") {
-								finaltext = finaltext + " They were inflicted with despair!"
-								enmStats.status = "despair"
-								enmStats.statusturns = -1
-							}
+                            finaltext += ' ' + attackFuncs.inflictStatus(enmStats, skillDefs)
                         } else {
                             finaltext = finaltext + " But they dodged it!"
 
@@ -7476,7 +8119,7 @@ client.on('messageCreate', message => {
 					cloneDefs.maxhp = 100
 					cloneDefs.mp = 80
 					cloneDefs.maxmp = 80
-					cloneDefs.enemy = true
+					cloneDefs.npc = true
 
 					var battlerID = 1
 					for (const i in allySide) {
@@ -7527,265 +8170,10 @@ client.on('messageCreate', message => {
                     return false
                 }
             } else {
-				var embedText = {}
-
-				var preText = "";
-				if (charDefs.magquote && charDefs.magquote.length > 0 && skillDefs.atktype === "magic") {
-					var possibleQuote = Math.round(Math.random() * (charDefs.magquote.length-1))
-					preText = `*${charName}: "${charDefs.magquote[possibleQuote]}"*\n`
-				}
-				if (charDefs.physquote && charDefs.physquote.length > 0 && skillDefs.atktype === "physical") {
-					var possibleQuote = Math.round(Math.random() * (charDefs.physquote.length-1))
-					preText = `*${charName}: "${charDefs.physquote[possibleQuote]}"*\n`
-				}
-
-				if (!skillDefs.name) {skillDefs.name = skillName}
-
-                if (!skillDefs.target || skillDefs.target === "one") {
-                    if (opposingSide[parseInt(arg[2])]) {
-						var enmDefs = opposingSide[parseInt(arg[2])]
-                        const enmName = enmDefs.name
-						
-						if (enmDefs.hp <= 0) {
-							message.channel.send("You can't attack a dead foe!")
-							message.delete()
-							return false
-						}
-
-                        embedText = attackFuncs.attackFoe(charName, enmName, charDefs, enmDefs, skillDefs, false, message.guild.id)
-						if (embedText.oneMore == true && turnFuncs.oneMores(message.guild.id)) {
-							btl[message.guild.id].onemore = true
-						}
-
-						if (skillDefs.resistremove) {
-							embedText.resultText += `\n${charName} lost all resisting affinities toward ${skillDefs.resistremove} type skills.`
-							
-							const affinities = ["resist", "block", "repel", "drain"]
-							for (const i in affinities) {
-								for (const k in charDefs[affinities[i]]) {
-									if (charDefs[affinities[i]][k] === skillDefs.resistremove) {
-										charDefs[affinities[i]].splice[k]
-									}
-								}
-							}
-						}
-
-						if (skillDefs.sacrifice) {
-							embedText.resultText += `\n${charName} sacrificed themselves in the process.`
-							charDefs.hp = 0
-						}
-
-						const DiscordEmbed = new Discord.MessageEmbed()
-							.setColor('#e36b2b')
-							.setTitle(`${embedText.targetText}`)
-							.setDescription(`${preText}${embedText.attackText}!\n${embedText.resultText}`)
-							.setFooter(`${charName}'s turn`);
-						message.channel.send({embeds: [DiscordEmbed]});
-                    } else {
-                        message.channel.send(`${arg[2]} is an invalid enemy/enemy position.`)
-                        message.delete()
-                        return false
-                    }
-				} else if (skillDefs.target === "caster") {
-					embedText = attackFuncs.attackFoe(charName, charName, charDefs, charDefs, skillDefs, false, message.guild.id)
-					if (embedText.oneMore == true && turnFuncs.oneMores(message.guild.id)) {
-						btl[message.guild.id].onemore = true
-					}
-
-					if (skillDefs.resistremove) {
-						embedText.resultText += `\n${charName} lost all resisting affinities toward ${skillDefs.resistremove} type skills.`
-						
-						const affinities = ["resist", "block", "repel", "drain"]
-						for (const i in affinities) {
-							for (const k in charDefs[affinities[i]]) {
-								if (charDefs[affinities[i]][k] === skillDefs.resistremove) {
-									charDefs[affinities[i]].splice[k]
-								}
-							}
-						}
-					}
-					
-					if (skillDefs.sacrifice) {
-						embedText.resultText += `\n${charName} sacrificed themselves in the process.`
-						charDefs.hp = 0
-					}
-
-					const DiscordEmbed = new Discord.MessageEmbed()
-						.setColor('#e36b2b')
-						.setTitle(`${embedText.targetText}`)
-						.setDescription(`${preText}${embedText.attackText}!\n${embedText.resultText}`)
-						.setFooter(`${charName}'s turn`);
-						message.channel.send({embeds: [DiscordEmbed]});
-                } else if (skillDefs.target === "allopposing") {
-                    var damages = []
-                    var finaltext = ``
-					
-					var embedTexts = []
-
-                    for (const i in opposingSide) {
-                        var enmDefs = opposingSide[i]
-                        const enmName = enmDefs.name
-
-						if (enmDefs.hp > 0) {
-							var embedTxt = attackFuncs.attackFoe(charName, enmName, charDefs, enmDefs, skillDefs, false, message.guild.id)
-							if (embedTxt.oneMore == true && turnFuncs.oneMores(message.guild.id)) {
-								btl[message.guild.id].onemore = true
-							}
-
-							embedTexts.push(embedTxt)
-						}
-                    }
-					
-					embedText = {
-						targetText: `${charName} => All Opposing`,
-						attackText: `${charName} used ${skillName} on the opposing side!`,
-						resultText: `${preText}`
-					}
-					
-					for (const i in embedTexts) {
-						embedText.resultText += `\n${embedTexts[i].resultText}`
-					}
-
-					if (skillDefs.resistremove) {
-						embedText.resultText += `\n${charName} lost all resisting affinities toward ${skillDefs.resistremove} type skills.`
-						
-						const affinities = ["resist", "block", "repel", "drain"]
-						for (const i in affinities) {
-							for (const k in charDefs[affinities[i]]) {
-								if (charDefs[affinities[i]][k] === skillDefs.resistremove) {
-									charDefs[affinities[i]].splice[k]
-								}
-							}
-						}
-					}
-
-                    const DiscordEmbed = new Discord.MessageEmbed()
-                        .setColor('#e36b2b')
-						.setTitle(`${embedText.targetText}`)
-						.setDescription(`${embedText.attackText}!\n${embedText.resultText}`)
-                        .setFooter(`${charName}'s turn`);
-                    message.channel.send({embeds: [DiscordEmbed]});
-                } else if (skillDefs.target === "allallies") {
-                    var damages = []
-                    var finaltext = ``
-					
-					var embedTexts = []
-
-                    for (const i in allySide) {
-                        var targDefs = allySide[i]
-                        const targName = enmDefs.name
-						
-						if (targDefs.hp > 0 && charName != targName) {
-							var embedTxt = attackFuncs.attackFoe(charName, targName, charDefs, targDefs, skillDefs, false, message.guild.id)
-							if (embedTxt.oneMore == true && turnFuncs.oneMores(message.guild.id)) {
-								btl[message.guild.id].onemore = true
-							}
-
-							embedTexts.push(embedTxt)
-						}
-                    }
-					
-					embedText = {
-						targetText: `${charName} => All Allies`,
-						attackText: `${charName} used ${skillName} on their own side!`,
-						resultText: `${preText}`
-					}
-					
-					for (const i in embedTexts) {
-						embedText.resultText += `\n${embedTexts[i].resultText}`
-					}
-
-					if (skillDefs.resistremove) {
-						embedText.resultText += `\n${charName} lost all resisting affinities toward ${skillDefs.resistremove} type skills.`
-						
-						const affinities = ["resist", "block", "repel", "drain"]
-						for (const i in affinities) {
-							for (const k in charDefs[affinities[i]]) {
-								if (charDefs[affinities[i]][k] === skillDefs.resistremove) {
-									charDefs[affinities[i]].splice[k]
-								}
-							}
-						}
-					}
-					
-					if (skillDefs.sacrifice) {
-						embedText.resultText += `\n${charName} sacrificed themselves in the process.`
-						charDefs.hp = 0
-					}
-
-                    const DiscordEmbed = new Discord.MessageEmbed()
-                        .setColor('#e36b2b')
-						.setTitle(`${embedText.targetText}`)
-						.setDescription(`${embedText.attackText}!\n${embedText.resultText}`)
-                        .setFooter(`${charName}'s turn`);
-                    message.channel.send({embeds: [DiscordEmbed]});
-                } else if (skillDefs.target === "everyone") {
-                    var damages = []
-                    var finaltext = ``;
-                    var embedTexts = [];
-					var fighters = [];
-
-                    for (const i in btl[message.guild.id].allies.members) {
-                        if (btl[message.guild.id].allies.members[i].name != charName) {
-                            if (btl[message.guild.id].allies.members[i].hp > 0) {
-                                fighters.push(btl[message.guild.id].allies.members[i])
-                            }
-                        }
-                    }
-
-                    for (const i in btl[message.guild.id].enemies.members) {
-                        if (btl[message.guild.id].enemies.members[i].name != charName) {
-                            if (btl[message.guild.id].enemies.members[i].hp > 0) {
-                                fighters.push(btl[message.guild.id].enemies.members[i])
-                            }
-                        }
-                    }
-
-                    for (const i in fighters) {
-						var embedTxt = attackFuncs.attackFoe(charName, fighters[i].name, charDefs, fighters[i], skillDefs, false, message.guild.id)
-						if (embedTxt.oneMore == true && turnFuncs.oneMores(message.guild.id)) {
-							btl[message.guild.id].onemore = true
-						}
-						
-                        embedTexts.push(embedTxt)
-                    }
-					
-					embedText = {
-						targetText: `${charName} => All Opposing`,
-						attackText: `${charName} used ${skillName} on all fighters!`,
-						resultText: `${preText}`
-					}
-					
-					for (const i in embedTexts) {
-						embedText.resultText = embedText.resultText + `\n${embedTexts[i].resultText}`
-					}
-
-					if (skillDefs.resistremove) {
-						embedText.resultText += `\n${charName} lost all resisting affinities toward ${skillDefs.resistremove} type skills.`
-						
-						const affinities = ["resist", "block", "repel", "drain"]
-						for (const i in affinities) {
-							for (const k in charDefs[affinities[i]]) {
-								if (charDefs[affinities[i]][k] === skillDefs.resistremove) {
-									charDefs[affinities[i]].splice[k]
-								}
-							}
-						}
-					}
-					
-					if (skillDefs.sacrifice) {
-						embedText.resultText += `\n${charName} sacrificed themselves in the process.`
-						charDefs.hp = 0
-					}
-
-                    const DiscordEmbed = new Discord.MessageEmbed()
-                        .setColor('#e36b2b')
-						.setTitle(`${embedText.targetText}`)
-						.setDescription(`${embedText.attackText}!\n${embedText.resultText}`)
-                        .setFooter(`${charName}'s turn`);
-                    message.channel.send({embeds: [DiscordEmbed]});
-                }
-            }
+				var server = message.guild.id
+				var DiscordEmbed = attackFuncs.attackWithSkill(charDefs, arg[2], allySide, opposingSide, btl, skillDefs, server)
+				message.channel.send({embeds: [DiscordEmbed]});
+			}
 
             if (skillDefs.cost && skillDefs.costtype) {
                 if (skillDefs.costtype === "hp" && !charDefs.boss) {
@@ -7798,6 +8186,60 @@ client.on('messageCreate', message => {
                     charDefs.mp = Math.round(Math.max(0, charDefs.mp - ((charDefs.maxmp / 100) * skillDefs.cost)))
                 }
             }
+			
+			// Pets
+			if (charDefs.pet && charDefs.pet != null && charFile[charDefs.pet]) {
+				var targChance = 0.1
+				if (charFile[charDefs.pet].trust[charName] && charFile[charDefs.pet].trust[charName].level >= 45)
+					targChance = 1;
+				else if (charFile[charDefs.pet].trust[charName] && charFile[charDefs.pet].trust[charName].level >= 20)
+					targChance = 0.7;
+				else if (charFile[charDefs.pet].trust[charName] && charFile[charDefs.pet].trust[charName].level >= 10)
+					targChance = 0.3;
+				
+				var randChance = Math.random()
+				
+				console.log(`PetAttack: ${randChance} < ${targChance}?`)
+				
+				if (randChance <= targChance) {
+					var possibleSkills = [];
+					for (const i in charFile[charDefs.pet].skills) {
+						var skillDefs = skillFile[charFile[charDefs.pet].skills[i]]
+						
+						if (!skillDefs.passive && skillDefs.type != "passive" && skillDefs.target === "one") {
+							possibleSkills.push(charFile[charDefs.pet].skills[i]);
+						}
+					}
+					
+					var skillDefs
+					if (possibleSkills.length <= 0) {
+						skillDefs = {
+							name: charFile[charDefs.pet].melee[0],
+							type: charFile[charDefs.pet].melee[1],
+							pow: 10,
+							crit: 10,
+							acc: 90
+						}
+					} else {
+						skillDefs = skillFile[possibleSkills[Math.round(Math.random() * (possibleSkills.length-1))]]
+					}
+
+					var targNum = Math.round(Math.random() * (opposingSide.length-1))	
+					if (opposingSide[targNum]) {
+						while (opposingSide[targNum].hp <= 0) {
+							targNum = Math.round(Math.random() * (opposingSide.length-1))
+						}
+					}
+
+					var attackerDefs = charFuncs.genChar(charFile[charDefs.pet])
+					
+					var DiscordEmbed = attackFuncs.attackWithSkill(attackerDefs, targNum, allySide, opposingSide, btl, skillDefs, message.guild.id)
+					DiscordEmbed.setFooter(`${charDefs.name}'s pet`)
+
+					message.channel.send({embeds: [DiscordEmbed]})
+				}
+			}
+				
 			
 			fs.writeFileSync(dataPath+'/battle.json', JSON.stringify(btl, null, '    '));
             
@@ -7872,7 +8314,7 @@ client.on('messageCreate', message => {
 			
 			var allySide = btl[message.guild.id].allies.members
 			var opposingSide = btl[message.guild.id].enemies.members
-			if (charFuncs.isOpposingSide(userDefs, btl[message.guild.id])) {
+			if (charFuncs.isOpposingSide(charDefs, btl[message.guild.id])) {
 				allySide = btl[message.guild.id].enemies.members
 				opposingSide = btl[message.guild.id].allies.members
 			}
@@ -7890,11 +8332,11 @@ client.on('messageCreate', message => {
             const itemName = arg[2]
             const itemDefs = itemFile[itemName]
 
-            const party = []
+            var party = []
 			if (charFuncs.isOpposingSide(charDefs, btl[message.guild.id])) {
-				party = btl[message.guild.id].parties[btl[message.guild.id].battleteam]
-			} else {
 				party = btl[message.guild.id].parties[btl[message.guild.id].battleteam2]
+			} else {
+				party = btl[message.guild.id].parties[btl[message.guild.id].battleteam]
 			}
 			
 			btl[message.guild.id].canshowtime = false
@@ -7968,6 +8410,7 @@ client.on('messageCreate', message => {
                 }
 
                 charDefs2.hp = Math.min(charDefs2.maxhp, charDefs2.hp + (itemDefs.heal ? itemDefs.heal : 50))
+				charFuncs.trustUp(charDefs2, charDefs, 20, message.guild.id)
 
                 const DiscordEmbed = new Discord.MessageEmbed()
                     .setColor('#fcba03')
@@ -7995,6 +8438,7 @@ client.on('messageCreate', message => {
                 }
 
                 charDefs2.mp = Math.min(charDefs2.maxmp, charDefs2.mp + (itemDefs.heal ? itemDefs.heal : 50))
+				charFuncs.trustUp(charDefs2, charDefs, 20, message.guild.id)
 
                 const DiscordEmbed = new Discord.MessageEmbed()
                     .setColor('#fcba03')
@@ -8023,6 +8467,7 @@ client.on('messageCreate', message => {
 
                 charDefs2.hp = Math.min(charDefs2.maxhp, charDefs2.hp + (itemDefs.healhp ? itemDefs.healhp : 50))
                 charDefs2.mp = Math.min(charDefs2.maxmp, charDefs2.mp + (itemDefs.healmp ? itemDefs.healmp : 35))
+				charFuncs.trustUp(charDefs2, charDefs, 20, message.guild.id)
 
                 const DiscordEmbed = new Discord.MessageEmbed()
                     .setColor('#fcba03')
@@ -8030,6 +8475,32 @@ client.on('messageCreate', message => {
                         { name: `${charName} => ${charDefs2.name}`, value: `${charName} used the *${itemName}* on **${charDefs2.name}**!`, inline: false },
                         { name: `${charDefs2.name}'s HP was restored by ${itemDefs.healhp ? itemDefs.healhp : 50}, and MP by ${itemDefs.healmp ? itemDefs.healmp : 35}!`, value: `${charDefs2.name}'s HP: ${charDefs2.hp}/${charDefs2.maxhp}\n${arg[3]}'s MP: ${charDefs2.mp}/${charDefs2.maxmp}`, inline: false },
                     )
+                    .setFooter(`${charName}'s turn`);
+                message.channel.send({embeds: [DiscordEmbed]});
+				
+				party.items[arg[2]]--
+            } else if (itemDefs.type === "revive") {
+                var charDefs2 = charFighters[arg[3]]
+
+                if (charFighters[arg[3]]) {
+                    if (charDefs2.hp > 0) {
+                        message.channel.send(`${charDefs2.name} is alive, so you cannot use this item on them.`)
+                        message.delete()
+                        return false
+                    }
+                } else {
+                    message.channel.send(`${arg[3] ? arg[3] : "<Undefined>"} is not a valid character position.`)
+                    message.delete()
+                    return false
+                }
+
+                charDefs2.hp = Math.round(charDefs2.maxhp/itemDefs.revive)
+				charFuncs.trustUp(charDefs2, charDefs, 20, message.guild.id)
+
+                const DiscordEmbed = new Discord.MessageEmbed()
+                    .setColor('#fcba03')
+                    .setTitle(`${charName} => ${charDefs2.name}`)
+					.setDescription(`${charName} used the *${itemName}* on **${charDefs2.name}**!\n${charDefs2.name} was revived!`)
                     .setFooter(`${charName}'s turn`);
                 message.channel.send({embeds: [DiscordEmbed]});
 				
@@ -8250,6 +8721,7 @@ client.on('messageCreate', message => {
 				status: lbSkill.status,
 				statuschance: lbSkill.statuschance,
 				atktype: "magic",
+				target: lbSkill.target ? lbSkill.target : "one",
 				hits: lbSkill.hits ? lbSkill.hits : null,
 				drain: lbSkill.drain ? lbSkill.drain : null,
 				affinitypow: lbSkill.affinitypow ? lbSkill.affinitypow : null,
@@ -8364,6 +8836,99 @@ client.on('messageCreate', message => {
         fs.writeFileSync(dataPath+'/battle.json', JSON.stringify(btl, null, '    '));
         message.react('👍')
     }
+
+    ///////////////////////////
+    // Battle Themes Channel //
+    ///////////////////////////
+	if (command === 'battlethemechannel' || command === 'themechannel' || command === 'joinvc') {
+        if (!message.member.permissions.serialize().ADMINISTRATOR) {
+            message.channel.send("You lack sufficient permissions, I'm so sorry!");
+            return
+        }
+
+		const arg = message.content.slice(prefix.length).trim().split(/ +/);
+		
+		if (!arg[1]) {
+			if (message.member.voice.channel) {
+				const connection = Voice.joinVoiceChannel({
+					channelId: message.channel.id,
+					guildId: message.guild.id,
+					adapterCreator: message.channel.guild.voiceAdapterCreator,
+				});
+				
+				connection.on(Voice.VoiceConnectionStatus.Ready, (oldState, newState) => {
+					console.log('Connection is in the Ready state!');
+				});
+
+				voiceChannelShit[message.guild.id] = {
+					connection: connection,
+					player: null,
+					cursong: "none"
+				}
+
+				message.react('👍')
+			} else {
+				message.channel.send("Join a voice channel or specify it's ID please.")
+				return false
+			}
+		} else {
+			if (client.channels.cache.get(arg[1])) {
+				const channel = client.channels.cache.get(arg[1])
+				const connection = Voice.joinVoiceChannel({
+					channelId: arg[1],
+					guildId: message.guild.id,
+					adapterCreator: channel.guild.voiceAdapterCreator,
+				});
+
+				connection.on(Voice.VoiceConnectionStatus.Ready, (oldState, newState) => {
+					console.log('Connection is in the Ready state!');
+				});
+				
+				connection.on('stateChange', (oldState, newState) => {
+					console.log(`Connection transitioned from ${oldState.status} to ${newState.status}`);
+				});
+
+				voiceChannelShit[message.guild.id] = {
+					connection: connection,
+					player: null,
+					cursong: "none"
+				}
+
+				message.react('👍')
+			} else {
+				message.channel.send("Invalid Channel.")
+				return false
+			}
+		}
+		
+		setTimeout(function() {
+			message.guild.me.voice.setSelfDeaf(false);
+			console.log(message.guild.me.voice);
+		}, 3000);
+	}
+	
+	if (command === 'playsong') {
+		if (!voiceChannelShit[message.guild.id]) {
+			voiceChannelShit[message.guild.id] = {
+				connection: null,
+				cursong: {
+					name: "None",
+					url: "none"
+				}
+			}
+			
+			message.channel.send("Join a VC first!")
+			return false
+		}
+		
+		const arg = message.content.slice(prefix.length).trim().split(/ +/);
+		if (arg[1]) {
+			playSong(message.guild.id, message.guild, arg[1])
+			message.react('👍')
+		} else {
+			message.channel.send("Invalid Song.")
+		}
+	}
 
     /////////////////////////////////////////////
     // Moderation and Changes to Battle System //
@@ -8535,6 +9100,7 @@ client.on('messageCreate', message => {
 		
 			if (charName === arg[2]) {
 				btl[message.guild.id].parties[arg[1]].members.splice(i)
+				break
 			}
 		}
 			
@@ -8858,46 +9424,6 @@ client.on('messageCreate', message => {
         message.channel.send(`One Mores have been toggled ${(servFile[message.guild.id].onemores == true) ? "on" : "off"}`)
 	}
 
-	if (command === 'xprate') {
-        if (!message.member.permissions.serialize().ADMINISTRATOR) {
-            message.channel.send("You lack sufficient permissions, I'm so sorry!");
-            return
-        }
-
-        var servPath = dataPath+'/Server Settings/server.json'
-        var servRead = fs.readFileSync(servPath);
-        var servFile = JSON.parse(servRead);
-
-        if (!servFile[message.guild.id]) {
-            servFile[message.guild.id] = {
-				prefix: "rpg!",
-				limitbreaks: false,
-				showtimes: false,
-				onemores: false,
-				currency: "RPGBot Token",
-				xprate: 1,
-				pvpstuff: {
-					none: {},
-					metronome: {},
-					randskills: {},
-					randstats: {},
-					charfuck: {}
-				},
-				banned: []
-			}
-        }
-
-        const arg = message.content.slice(prefix.length).trim().split(/ +/);
-
-		if (isFinite(parseFloat(arg[1]))) {
-			servFile[message.guild.id].xprate = arg[1]
-			fs.writeFileSync(servPath, JSON.stringify(servFile, null, '    '));
-	
-			message.channel.send(`XP Rate has been changed to ${servFile[message.guild.id].xprate}x`)
-		} else
-			message.channel.send(`Please change the XP rate to an intenger or a float.`)
-	}
-
     if (command === 'showtimes') {
         if (!message.member.permissions.serialize().ADMINISTRATOR) {
             message.channel.send("You lack sufficient permissions, I'm so sorry!");
@@ -8969,7 +9495,7 @@ client.on('messageCreate', message => {
         }
 		
 		if (message.mentions.users.first()) {
-            message.channel.send("You're sickening. Don't ping others with this, that's just mean.");
+            message.channel.send("Don't ping others with this, that's just mean.");
             return
 		} else if (arg[1].toLowerCase() == 'dick') {
             message.channel.send("Not funny enough to let you do this, you clown.");
@@ -8984,7 +9510,7 @@ client.on('messageCreate', message => {
             message.channel.send("This is no harem.");
             return
         } else if (arg[1].toLowerCase() == 'sex' || arg[1].toLowerCase() == 'ass' || arg[1].toLowerCase() == 'doggy-style' || arg[1].toLowerCase() == 'doggystyle') {
-            message.channel.send("No you can't fuck with a robot, even if they had the capability to.");
+            message.channel.send("No you can't have sex with a robot, even if they had the capability to.");
             return
         } else {
 			var currencyText = arg[1].toLowerCase()
@@ -9005,6 +9531,46 @@ client.on('messageCreate', message => {
         fs.writeFileSync(servPath, JSON.stringify(servFile, null, '    '));
 
         message.channel.send(`The currency in this server is now set to ${arg[1]}`)
+	}
+	
+	if (command === 'xprate') {
+        if (!message.member.permissions.serialize().ADMINISTRATOR) {
+            message.channel.send("You lack sufficient permissions, I'm so sorry!");
+            return
+        }
+
+        var servPath = dataPath+'/Server Settings/server.json'
+        var servRead = fs.readFileSync(servPath);
+        var servFile = JSON.parse(servRead);
+
+        if (!servFile[message.guild.id]) {
+            servFile[message.guild.id] = {
+				prefix: "rpg!",
+				limitbreaks: false,
+				showtimes: false,
+				onemores: false,
+				currency: "RPGBot Token",
+				xprate: 1,
+				pvpstuff: {
+					none: {},
+					metronome: {},
+					randskills: {},
+					randstats: {},
+					charfuck: {}
+				},
+				banned: []
+			}
+        }
+
+        const arg = message.content.slice(prefix.length).trim().split(/ +/);
+
+		if (isFinite(parseFloat(arg[1]))) {
+			servFile[message.guild.id].xprate = parseFloat(arg[1])
+			fs.writeFileSync(servPath, JSON.stringify(servFile, null, '    '));
+	
+			message.channel.send(`XP Rate has been changed to ${servFile[message.guild.id].xprate}x`)
+		} else
+			message.channel.send(`Please change the XP rate to an intenger or a float.`)
 	}
 
     if (command === 'ban') {
@@ -9152,6 +9718,7 @@ client.on('messageCreate', message => {
 			.addFields()
 		
 		const servStuff = servFile[message.guild.id]
+
 		var mechanics = '**'
 		var mechanicDesc = ''
 
@@ -9193,11 +9760,14 @@ client.on('messageCreate', message => {
 			yyy: "Welcome to your special hell.",
 		}
 		
-		DiscordEmbed.fields.push({name: 'Mechanics', value: `${mechanics}\n\n*${mechanicDescriptions[mechanicDesc]}*`, inline: true})
+		DiscordEmbed.fields.push({name: 'Mechanics', value: `${mechanics}\n\n*${mechanicDescriptions[mechanicDesc]}*`, inline: false})
+		
+		// Prefix
+		DiscordEmbed.fields.push({name: 'Prefix', value: `${servStuff.prefix}`, inline: true})
 		
 		// Currency
-		DiscordEmbed.fields.push({name: 'Currency', value: `${servStuff.currency}, ${servStuff.currency}s*`, inline: true})
-
+		DiscordEmbed.fields.push({name: 'Currency', value: `${servStuff.currency}, ${servStuff.currency}s`, inline: true})
+		
 		// XP Rate
 		DiscordEmbed.fields.push({name: 'XP Rate', value: `${servStuff.xprate}x`, inline: true})
 
@@ -9214,10 +9784,20 @@ client.on('messageCreate', message => {
     }
 });
 
-client.on('messageReactionAdd', (reaction, user) => {
+client.on('messageReactionAdd', async (reaction, user) => {
+	if (reaction.partial) {
+		try {
+			await reaction.fetch();
+		} catch (error) {
+			console.error('Something went wrong when fetching the message:', error);
+			return;
+		}
+	}
+
     var relicPath = dataPath+'/RelicSearch/relicData.json'
     var relicRead = fs.readFileSync(relicPath);
     var relicData = JSON.parse(relicRead);
+
     var message = reaction.message;
 
     if (user.bot) { return false }
@@ -9356,4 +9936,4 @@ process.on('unhandledRejection', error => {
 	console.error('Unhandled promise rejection:', error);
 });
 
-client.login(process.env.BOT_TOKEN);
+client.login('help-me');
