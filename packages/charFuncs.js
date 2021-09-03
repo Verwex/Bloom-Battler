@@ -223,7 +223,7 @@ function writeChar(creator, name, health, magicpoints, attack, magic, perception
 
 // FUNCTIONS
 function resetMimic(userDefs) {
-	if (!userDefs.oldDefs) {return false}
+	if (!userDefs.oldDefs || userDefs.clone) {return false}
 	
 	var oldDefs = userDefs.oldDefs
 	for (const val in oldDefs) {

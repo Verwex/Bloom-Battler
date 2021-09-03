@@ -255,7 +255,7 @@
         "pvpmode": "none"
     },
     "877143757697454120": {
-        "battling": true,
+        "battling": false,
         "colosseum": [
             false,
             0,
@@ -267,301 +267,23 @@
                 "members": [
                     "Patella"
                 ],
-                "items": [],
-                "rings": 82
+                "items": {},
+                "rings": 144
             }
         },
         "allies": {
-            "members": [
-                {
-                    "name": "Patella",
-                    "truename": "Patella",
-                    "team": "allies",
-                    "id": 0,
-                    "melee": [
-                        "Strike Attack",
-                        "strike"
-                    ],
-                    "level": 30,
-                    "hp": 140,
-                    "mp": 80,
-                    "maxhp": 219,
-                    "maxmp": 175,
-                    "lb": 0,
-                    "xp": 2504,
-                    "maxxp": 5070,
-                    "status": "none",
-                    "statusturns": 0,
-                    "atk": 37,
-                    "mag": 20,
-                    "prc": 20,
-                    "end": 13,
-                    "chr": 12,
-                    "int": 19,
-                    "agl": 36,
-                    "luk": 35,
-                    "weapon": "none",
-                    "guard": false,
-                    "buffs": {
-                        "atk": 0,
-                        "mag": 0,
-                        "prc": 0,
-                        "end": 0,
-                        "agl": 0
-                    },
-                    "meleequote": [],
-                    "physquote": [],
-                    "magquote": [],
-                    "strongquote": [],
-                    "critquote": [],
-                    "missquote": [],
-                    "weakquote": [],
-                    "dodgequote": [
-                        "Ye pumpin' stink, ye ken that?"
-                    ],
-                    "resistquote": [],
-                    "blockquote": [],
-                    "repelquote": [],
-                    "drainquote": [],
-                    "hurtquote": [],
-                    "healquote": [],
-                    "helpedquote": [],
-                    "killquote": [],
-                    "deathquote": [],
-                    "lbquote": [],
-                    "lvlquote": [],
-                    "bio": {
-                        "info": "",
-                        "backstory": "",
-                        "voice": "",
-                        "theme": ""
-                    },
-                    "weak": [],
-                    "resist": [],
-                    "block": [],
-                    "repel": [],
-                    "drain": [],
-                    "skills": [
-                        "Undead-Like(Newborn)",
-                        "Agilao",
-                        "Harmonics"
-                    ],
-                    "trust": {},
-                    "owner": "441198920668938260"
-                },
-                {
-                    "name": "Patella",
-                    "truename": "Patella",
-                    "team": "allies",
-                    "id": 3,
-                    "melee": [
-                        "Strike Attack",
-                        "strike"
-                    ],
-                    "level": 30,
-                    "hp": 44,
-                    "mp": 72,
-                    "maxhp": 100,
-                    "maxmp": 80,
-                    "status": "none",
-                    "statusturns": 0,
-                    "atk": 37,
-                    "mag": 20,
-                    "prc": 20,
-                    "end": 13,
-                    "chr": 12,
-                    "int": 19,
-                    "agl": 36,
-                    "luk": 35,
-                    "weapon": "none",
-                    "guard": false,
-                    "buffs": {
-                        "atk": 0,
-                        "mag": 0,
-                        "prc": 0,
-                        "end": 0,
-                        "agl": 0
-                    },
-                    "meleequote": [],
-                    "physquote": [],
-                    "magquote": [],
-                    "strongquote": [],
-                    "critquote": [],
-                    "missquote": [],
-                    "weakquote": [],
-                    "dodgequote": [
-                        "Ye pumpin' stink, ye ken that?"
-                    ],
-                    "resistquote": [],
-                    "blockquote": [],
-                    "repelquote": [],
-                    "drainquote": [],
-                    "hurtquote": [],
-                    "healquote": [],
-                    "helpedquote": [],
-                    "killquote": [],
-                    "deathquote": [],
-                    "lbquote": [],
-                    "lvlquote": [],
-                    "bio": {
-                        "info": "",
-                        "backstory": "",
-                        "voice": "",
-                        "theme": ""
-                    },
-                    "weak": [],
-                    "resist": [],
-                    "block": [],
-                    "repel": [],
-                    "drain": [],
-                    "skills": [
-                        "Undead-Like(Newborn)",
-                        "Agilao",
-                        "Harmonics"
-                    ],
-                    "trust": {},
-                    "npc": true,
-                    "clone": true
-                },
-                {
-                    "maxhp": 73,
-                    "hp": 73,
-                    "maxmp": 58,
-                    "mp": 28,
-                    "npc": true,
-                    "name": "Geist_Grizzly_Bear",
-                    "id": 3,
-                    "atk": 8,
-                    "mag": 3,
-                    "end": 7,
-                    "chr": 16,
-                    "int": 14,
-                    "luk": 16,
-                    "prc": 8,
-                    "agl": 8,
-                    "skills": [
-                        "Makouga",
-                        "Trickery"
-                    ],
-                    "weak": [
-                        "pierce",
-                        "almighty"
-                    ],
-                    "resist": [
-                        "slash"
-                    ],
-                    "block": [],
-                    "repel": [
-                        "wind",
-                        "psychic",
-                        "nuclear",
-                        "bless",
-                        "status"
-                    ],
-                    "drain": [],
-                    "trueName": "Geist_Grizzly_Bear",
-                    "team": "allies",
-                    "weapon": "none",
-                    "buffs": {
-                        "atk": 0,
-                        "mag": 0,
-                        "end": 0,
-                        "agl": 0,
-                        "prc": 0
-                    },
-                    "status": "none",
-                    "melee": [
-                        "Strike Attack",
-                        "strike"
-                    ],
-                    "clone": true,
-                    "trust": {},
-                    "guard": false
-                }
-            ]
+            "members": []
         },
         "enemies": {
-            "members": [
-                {
-                    "name": "Grassimp",
-                    "truename": "Grassimp",
-                    "team": "enemies",
-                    "enemy": true,
-                    "id": 1,
-                    "maxhp": 200,
-                    "maxmp": 100,
-                    "hp": 0,
-                    "mp": 96,
-                    "lb": 0,
-                    "boss": false,
-                    "diety": false,
-                    "atk": 18,
-                    "mag": 18,
-                    "prc": 16,
-                    "end": 19,
-                    "chr": 11,
-                    "int": 12,
-                    "agl": 12,
-                    "luk": 17,
-                    "weapon": "none",
-                    "guard": false,
-                    "status": "none",
-                    "statusturns": 0,
-                    "melee": [
-                        "Strike Attack",
-                        "strike"
-                    ],
-                    "skills": [
-                        "Hanama",
-                        "Mahana",
-                        "Magna",
-                        "Lunge",
-                        "Media"
-                    ],
-                    "weak": [
-                        "fire"
-                    ],
-                    "resist": [],
-                    "block": [],
-                    "repel": [],
-                    "drain": [],
-                    "buffs": {
-                        "atk": 0,
-                        "mag": 0,
-                        "prc": 0,
-                        "end": 0,
-                        "agl": 0
-                    },
-                    "limitbreak": null,
-                    "meleequote": [],
-                    "physquote": [],
-                    "magquote": [],
-                    "strongquote": [],
-                    "critquote": [],
-                    "weakquote": [],
-                    "missquote": [],
-                    "dodgequote": [],
-                    "resistquote": [],
-                    "blockquote": [],
-                    "repelquote": [],
-                    "drainquote": [],
-                    "hurtquote": [],
-                    "healquote": [],
-                    "helpedquote": [],
-                    "killquote": [],
-                    "deathquote": [],
-                    "lbquote": [],
-                    "trust": {}
-                }
-            ],
+            "members": [],
             "items": [],
             "rings": 0
         },
-        "battleteam": "Patella",
+        "battleteam": "none",
         "battleteam2": "none",
-        "battlechannel": "877143757697454123",
+        "battlechannel": "none",
         "doturn": 0,
-        "turn": 3,
+        "turn": 0,
         "turnorder": [],
         "pvp": false,
         "pvpmode": "none",

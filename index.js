@@ -1727,57 +1727,61 @@ function winBattle(btl, server) {
 		
 		// Reset Mimic
 		charFuncs.resetMimic(battlerDefs)
-		charFuncs.resetMimic(charDefs)
+		if (!battlerDefs.clone)
+			charFuncs.resetMimic(charDefs)
 		
 		// Trust Levels
 		for (const k in btl[server].allies.members) {
 			const allyDefs = btl[server].allies.members[k]
-			charFuncs.trustUp(charDefs, allyDefs, 5, server)
+			if (!battlerDefs.clone)
+				charFuncs.trustUp(charDefs, allyDefs, 5, server)
 		}
 
 		// Award XP now
-		charDefs.xp += totalXP;
-		console.log(`BattleStatus: ${charDefs.name} got ${totalXP}XP. (${charDefs.xp}/${charDefs.maxxp}XP)`)
-		client.channels.fetch(btl[server].battlechannel)
-			.then(channel => channel.send(`${charDefs.name} got **${totalXP}EXP**!`))
-
-		var shouldLevelUp = false;
-		if (charDefs.xp >= charDefs.maxxp)
-			shouldLevelUp = true;
-
-		if (shouldLevelUp == true) {
-			var levelCount = 0
-			while (charDefs.xp >= charDefs.maxxp) {
-				charFuncs.lvlUp(charDefs)
-				levelCount++;
-			}
-
-			console.log(`BattleStatus: ${charDefs.name} levelled up ${levelCount} time(s)`)
-			
-			var lvlQuote = ""
-			if (charDefs.lvlquote && charDefs.lvlquote.length > 0) {
-				var possibleQuote = Math.round(Math.random() * (charDefs.lvlquote.length-1))
-				lvlQuote = `*${charDefs.name}: "${charDefs.lvlquote[possibleQuote]}"*\n\n`
-			}
-
-			const DiscordEmbed = new Discord.MessageEmbed()
-				.setColor('#b4eb34')
-				.setTitle(`${charDefs.name} levelled up!`)
-				.setDescription(`${lvlQuote}Level ${charDefs.level}\n${charDefs.maxhp}HP\n${charDefs.maxmp}MP\n\n${charDefs.atk}ATK\n${charDefs.mag}MAG\n${charDefs.prc}PRC\n${charDefs.end}END\n${charDefs.chr}CHR\n${charDefs.int}INT\n${charDefs.agl}AGL\n${charDefs.luk}LUK`)
-			
+		if (!battlerDefs.clone) {
+			charDefs.xp += totalXP;
+			console.log(`BattleStatus: ${charDefs.name} got ${totalXP}XP. (${charDefs.xp}/${charDefs.maxxp}XP)`)
 			client.channels.fetch(btl[server].battlechannel)
-				.then(channel => channel.send({embeds: [DiscordEmbed]}))
-		}
+				.then(channel => channel.send(`${charDefs.name} got **${totalXP}EXP**!`))
+
+			var shouldLevelUp = false;
+			if (charDefs.xp >= charDefs.maxxp)
+				shouldLevelUp = true;
+
+			if (shouldLevelUp == true) {
+				var levelCount = 0
+				while (charDefs.xp >= charDefs.maxxp) {
+					charFuncs.lvlUp(charDefs)
+					levelCount++;
+				}
+
+				console.log(`BattleStatus: ${charDefs.name} levelled up ${levelCount} time(s)`)
+				
+				var lvlQuote = ""
+				if (charDefs.lvlquote && charDefs.lvlquote.length > 0) {
+					var possibleQuote = Math.round(Math.random() * (charDefs.lvlquote.length-1))
+					lvlQuote = `*${charDefs.name}: "${charDefs.lvlquote[possibleQuote]}"*\n\n`
+				}
+
+				const DiscordEmbed = new Discord.MessageEmbed()
+					.setColor('#b4eb34')
+					.setTitle(`${charDefs.name} levelled up!`)
+					.setDescription(`${lvlQuote}Level ${charDefs.level}\n${charDefs.maxhp}HP\n${charDefs.maxmp}MP\n\n${charDefs.atk}ATK\n${charDefs.mag}MAG\n${charDefs.prc}PRC\n${charDefs.end}END\n${charDefs.chr}CHR\n${charDefs.int}INT\n${charDefs.agl}AGL\n${charDefs.luk}LUK`)
+				
+				client.channels.fetch(btl[server].battlechannel)
+					.then(channel => channel.send({embeds: [DiscordEmbed]}))
+			}
 		
-		// Full HP if this is a diety/big boss whatever
-		if (isBigBoss) {
-			charDefs.hp = charDefs.maxhp
-			charDefs.mp = charDefs.maxmp
+			// Full HP if this is a diety/big boss whatever
+			if (isBigBoss) {
+				charDefs.hp = charDefs.maxhp
+				charDefs.mp = charDefs.maxmp
+			}
+			
+			// Values to copy
+			charDefs.weapon = battlerDefs.weapon
+			charDefs.trust = battlerDefs.trust
 		}
-		
-		// Values to copy
-		charDefs.weapon = battlerDefs.weapon
-		charDefs.trust = battlerDefs.trust
     }
 
     // Award Rings
@@ -2471,6 +2475,7 @@ function enemyMove(enmID, btl, channel) {
 			newChar.maxmp = Math.round(oppDefs.maxmp / 3)
 			newChar.mp = newChar.maxmp
 			newChar.enemy = true
+			newChar.level = Math.floor(Math.random() * (20 - 1) + 1)
 
 			//Assign it a name
 			let statusOfLivingList = [
@@ -8296,6 +8301,7 @@ client.on('messageCreate', async message => {
 					newChar.maxmp = Math.round(allDefs.maxmp / 3)
 					newChar.mp = newChar.maxmp
 					newChar.npc = true
+					newChar.level = Math.floor(Math.random() * (20 - 1) + 1)
 
 					//Assign it a name
 					let statusOfLivingList = [
