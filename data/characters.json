@@ -2354,25 +2354,25 @@
     "Patella": {
         "name": "Patella",
         "owner": "441198920668938260",
-        "level": 31,
-        "hp": 225,
-        "mp": 180,
-        "maxhp": 225,
-        "maxmp": 180,
+        "level": 32,
+        "hp": 231,
+        "mp": 185,
+        "maxhp": 231,
+        "maxmp": 185,
         "basehp": 45,
         "basemp": 30,
         "melee": [
             "Strike Attack",
             "strike"
         ],
-        "atk": 38,
+        "atk": 39,
         "mag": 21,
         "prc": 21,
         "end": 14,
         "chr": 13,
         "int": 20,
-        "agl": 37,
-        "luk": 36,
+        "agl": 38,
+        "luk": 37,
         "baseatk": 8,
         "basemag": 6,
         "baseprc": 6,
@@ -2381,8 +2381,8 @@
         "baseint": 5,
         "baseagl": 7,
         "baseluk": 6,
-        "xp": 4946,
-        "maxxp": 5908,
+        "xp": 290,
+        "maxxp": 6886,
         "weak": [],
         "resist": [],
         "block": [],
@@ -2418,7 +2418,13 @@
             "theme": ""
         },
         "weapon": "none",
-        "trust": {}
+        "trust": {
+            "Rotter_Robot": {
+                "value": 10,
+                "nextLevel": 100,
+                "level": 1
+            }
+        }
     },
     "Lacrimal": {
         "name": "Lacrimal",

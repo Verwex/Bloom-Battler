@@ -1724,21 +1724,22 @@ function winBattle(btl, server) {
     for (const i in btl[server].allies.members) {
 		const battlerDefs = btl[server].allies.members[i]
 		const charDefs = charFile[btl[server].allies.members[i].name]
+
+		if (charDefs == undefined)
+			continue;
 		
 		// Reset Mimic
 		charFuncs.resetMimic(battlerDefs)
-		if (!battlerDefs.clone || (battlerDefs.clone && battlerDefs.name == charDefs.name))
-			charFuncs.resetMimic(charDefs)
+		charFuncs.resetMimic(charDefs)
 		
-		// Trust Levels
-		for (const k in btl[server].allies.members) {
-			const allyDefs = btl[server].allies.members[k]
-			if (!battlerDefs.clone)
-				charFuncs.trustUp(charDefs, allyDefs, 5, server)
-		}
-
-		// Award XP now
 		if (!battlerDefs.clone) {
+			// Trust Levels
+			for (const k in btl[server].allies.members) {
+				const allyDefs = btl[server].allies.members[k]
+				charFuncs.trustUp(charDefs, allyDefs, 5, server)
+			}
+
+			// Award XP now
 			charDefs.xp += totalXP;
 			console.log(`BattleStatus: ${charDefs.name} got ${totalXP}XP. (${charDefs.xp}/${charDefs.maxxp}XP)`)
 			client.channels.fetch(btl[server].battlechannel)
@@ -1771,7 +1772,7 @@ function winBattle(btl, server) {
 				client.channels.fetch(btl[server].battlechannel)
 					.then(channel => channel.send({embeds: [DiscordEmbed]}))
 			}
-		
+			
 			// Full HP if this is a diety/big boss whatever
 			if (isBigBoss) {
 				charDefs.hp = charDefs.maxhp
