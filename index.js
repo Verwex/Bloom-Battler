@@ -1727,7 +1727,7 @@ function winBattle(btl, server) {
 		
 		// Reset Mimic
 		charFuncs.resetMimic(battlerDefs)
-		if (!battlerDefs.clone)
+		if (!battlerDefs.clone || (battlerDefs.clone && battlerDefs.name == charDefs.name))
 			charFuncs.resetMimic(charDefs)
 		
 		// Trust Levels
