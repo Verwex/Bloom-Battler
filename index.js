@@ -3141,6 +3141,7 @@ client.on('messageCreate', async message => {
                     { name: `${prefix}guessmyword`, value: '(Args <Person>)\nThe pinged persom must guess your word! Good luck to both of you.', inline: true },
                     { name: `${prefix}quote`, value: "I'll recite one of the quotes I remember... I don't remember many.", inline: true },
 					{ name: `${prefix}ship`, value: '(Args <Person> <Person> <Person>...) Ships any number of people of your choice based on certain variables. Supports as many people as one wants, should you pick at least two people.', inline: true },
+					{ name: `${prefix}icecream`, value: "(Args <Amount Of Scoops> <Optional: Repeat Scoop Flavors>)\nI'll make an ice cream of any amount of scoop with randomized flavors. You can do up to 100 scoops.", inline: true },
                 )
             message.channel.send({embeds: [DiscordEmbed]})
         } else if (arg2 === 'relics') {
