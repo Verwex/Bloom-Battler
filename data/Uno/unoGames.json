@@ -1,3 +1,33 @@
 {
-    "819616171086577667": {}
+    "819616171086577667": {},
+    "728307995901034546": {
+        "awaiting": true,
+        "playing": false,
+        "players": [
+            {
+                "name": "🔷🔹 Pointy Boi 🔹🔷",
+                "id": "461050360832720904",
+                "cards": [],
+                "uno": false
+            },
+            {
+                "name": "Demonic Desire",
+                "id": "712602499823042620",
+                "cards": [],
+                "uno": false
+            },
+            {
+                "name": "Verwex",
+                "id": "441198920668938260",
+                "cards": [],
+                "uno": false
+            }
+        ],
+        "lastcard": [
+            "none",
+            0
+        ],
+        "danger": "none",
+        "order": "down"
+    }
 }

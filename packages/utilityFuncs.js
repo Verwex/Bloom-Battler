@@ -115,7 +115,8 @@ const enmHabitats = [
 
 const adminList = [
 	"516359709779820544",
-	"532291526634635285"
+	"532291526634635285",
+	"441198920668938260"
 ]
 
 function objClone(source) {

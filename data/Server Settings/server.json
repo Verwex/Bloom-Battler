@@ -5,6 +5,22 @@
         "showtimes": false,
         "onemores": false,
         "currency": "RPGBot Token",
+        "xprate": 0,
+        "pvpstuff": {
+            "none": {},
+            "metronome": {},
+            "randskills": {},
+            "randstats": {},
+            "charfuck": {}
+        },
+        "banned": []
+    },
+    "728307995901034546": {
+        "prefix": "test!",
+        "limitbreaks": false,
+        "showtimes": false,
+        "onemores": false,
+        "currency": "RPGBot Token",
         "xprate": 1,
         "pvpstuff": {
             "none": {},

@@ -24,7 +24,7 @@ const enemyFuncs = require('./Packages/enemyFuncs.js');
 const attackFuncs = require('./Packages/attackFuncs.js');
 const turnFuncs = require('./Packages/turnFuncs.js');
 
-// Bow Command Stuff
+// Bot Command Stuff
 const icecream = require('./Packages/Commands/icecream.js');
 
 // Other Required Shit
@@ -3874,14 +3874,11 @@ client.on('messageCreate', async message => {
 			return false
 		}
 
-		if (parseInt(arg[1]) == 0) {
-			message.channel.send(`You can't have a cone only.`)
-			return false
-		}
-
-		if (parseInt(arg[1]) > 100) {
+		if (parseFloat(arg[1]) > 100) {
 			message.channel.send(`That's way too much. Please use a number of scoops below or equal to 100.`)
 			return false
+		} else if (parseFloat(arg[1]) < 0) {
+			arg[1] = 0
 		}
 
 		let scoopNumber = Math.round(arg[1])
