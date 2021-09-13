@@ -24,6 +24,9 @@ const enemyFuncs = require('./Packages/enemyFuncs.js');
 const attackFuncs = require('./Packages/attackFuncs.js');
 const turnFuncs = require('./Packages/turnFuncs.js');
 
+// Bow Command Stuff
+const icecream = require('./Packages/Commands/icecream.js');
+
 // Other Required Shit
 require('dotenv').config();
 
@@ -36,6 +39,7 @@ const fs = require('fs');
 // Voice Shit
 const ffmpeg = require('ffmpeg-static');
 const ytdl = require('ytdl-core');
+const { isBooleanObject } = require('util/types');
 
 // Games
 var doGSM = false;
@@ -3860,6 +3864,38 @@ client.on('messageCreate', async message => {
 			.setDescription(`${resulttext}\n**${love}%** ${loveLevel}`)
 			.setFooter(`${footerText}`)
 		message.channel.send({embeds: [DiscordEmbed]})
+	}
+
+	if (command === 'icecream') {
+		const arg = message.content.slice(prefix.length).trim().split(/ +/);
+
+		if (!arg[1] || !isFinite(parseInt(arg[1]))) {
+			message.channel.send(`Please specify the amount of scoops you would like. Maximum is 100.`)
+			return false
+		}
+
+		if (parseInt(arg[1]) == 0) {
+			message.channel.send(`You can't have a cone only.`)
+			return false
+		}
+
+		if (parseInt(arg[1]) > 100) {
+			message.channel.send(`That's way too much. Please use a number of scoops below or equal to 100.`)
+			return false
+		}
+
+		let scoopNumber = Math.round(arg[1])
+		let repeatscoops = `true`
+
+		if (arg[2] !== `false` || !arg[2])
+			repeatscoops = `true`
+		else
+			repeatscoops = 'false'
+
+		if (scoopNumber > 10)
+			message.channel.send(`Please wait until your ice cream is done.`)
+
+		icecream.getIceCream(scoopNumber, repeatscoops, message)
 	}
 
     ///////////////////
