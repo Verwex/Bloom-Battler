@@ -31,6 +31,7 @@ const turnFuncs = require('./Packages/turnFuncs.js');
 
 // Now for specific commands
 const icecream = require('./Packages/Commands/icecream.js');
+const pizza = require('./Packages/Commands/pizza.js');
 
 //FS, for writing files.
 const fs = require('fs');
@@ -3466,6 +3467,7 @@ client.on('messageCreate', async message => {
 						{ name: `${prefix}quote`, value: "I'll recite one of the quotes I remember... I don't remember many.", inline: true },
 						{ name: `${prefix}ship`, value: '(Args <Person> <Person> <Person>...) Ships any number of people of your choice based on certain variables. Supports as many people as one wants, should you pick at least two people.', inline: true },
 						{ name: `${prefix}icecream`, value: "(Args <Amount Of Scoops> <Optional: Repeat Scoop Flavors>)\nI'll make an ice cream of any amount of scoop with randomized flavors. You can do up to 100 scoops.", inline: true },
+						{ name: `${prefix}pizza`, value: "(Args <Amount Of Toppings> <Optional: Amount of Condiments> <Optional: Include Cheese> <Optional: Include Sauce> <Optional: Repeat Toppings> <Optional: Repeat Condiments>)\nI'll make a pizza of any amount of toppings and condiments. You can do up to 100 toppings and 20 condiments", inline: true },
 					)
 				message.channel.send({embeds: [DiscordEmbed]})
 				break
@@ -4245,12 +4247,20 @@ client.on('messageCreate', async message => {
 		icecream.getIceCream(scoopNumber, repeatscoops, message)
 	}
 
+	/////////////////////
+	// Food Generators //
+	/////////////////////
+
 	if (command === 'icecream') {
 		const arg = message.content.slice(prefix.length).trim().split(/ +/);
 
 		if (!arg[1] || !isFinite(parseInt(arg[1]))) {
-			message.channel.send(`Please specify the amount of scoops you would like. Maximum is 100.`)
-			return false
+			const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}icecream`)
+				.setDescription(`(Args <Amount Of Scoops> <Optional: Repeat Scoop Flavors>)\nI'll make an ice cream of any amount of scoop with randomized flavors. You can do up to 100 scoops.`)
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
 		}
 
 		if (parseFloat(arg[1]) > 100) {
@@ -4272,6 +4282,68 @@ client.on('messageCreate', async message => {
 			message.channel.send(`Please wait until your ice cream is done.`)
 
 		icecream.getIceCream(scoopNumber, repeatscoops, message)
+	}
+
+	if (command == 'pizza') {
+		const arg = message.content.slice(prefix.length).trim().split(/ +/);
+
+		if (!arg[1] || !isFinite(parseInt(arg[1]))) {
+			const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}pizza`)
+				.setDescription(`(Args <Amount Of Toppings> <Optional: Amount of Condiments> <Optional: Include Cheese> <Optional: Include Sauce> <Optional: Repeat Toppings> <Optional: Repeat Condiments>)\nI'll make a pizza of any amount of toppings and condiments. You can do up to 100 toppings and 20 condiments.`)
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+		}
+
+		if (parseFloat(arg[1]) > 100) {
+			message.channel.send(`That's way too much. Please use a number of toppings below or equal to 100.`)
+			return false
+		} else if (parseFloat(arg[1]) < 0) {
+			arg[1] = 0
+		}
+
+		if (!arg[2])
+			arg[2] = 0
+
+		if (parseFloat(arg[2]) > 20) {
+			message.channel.send(`That's way too much. Please use a number of condiments below or equal to 20.`)
+			return false
+		} else if (parseFloat(arg[2]) < 0) {
+			arg[2] = 0
+		}
+
+		let toppingNumber = Math.round(arg[1])
+		let repeatToppings = `true`
+		let sauceNumber = Math.round(arg[2])
+		let repeatSauces = `true`
+		let allowCheese = 'true'
+		let allowSauce = 'true'
+
+		if (arg[3] !== `false` || !arg[3])
+			allowCheese = `true`
+		else
+			allowCheese = 'false'
+
+		if (arg[4] !== `false` || !arg[4])
+			allowSauce = `true`
+		else
+			allowSauce = 'false'
+
+		if (arg[5] !== `false` || !arg[5])
+			repeatToppings = `true`
+		else
+			repeatToppings = 'false'
+
+		if (arg[6] !== `false` || !arg[6])
+			repeatSauces = `true`
+		else
+			repeatSauces = 'false'
+
+		if (toppingNumber > 10)
+			message.channel.send(`Please wait until your pizza is done.`)
+
+		pizza.getPizza(toppingNumber, repeatToppings, sauceNumber, repeatSauces, allowCheese, allowSauce, message)
 	}
 
     ///////////////////

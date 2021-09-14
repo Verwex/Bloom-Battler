@@ -138,19 +138,19 @@ async function iceCream(scoops, repeatScoops, message) {
     }
 
     if (scoops < 1) {
-        iceCreamFlavorList = `\nNone.`
+        iceCreamFlavorList = `\nNone`
         iceCreamName = `Cone`
     }
 
-    if (iceCreamName.length > 255)
+    if (iceCreamName.length > 128)
         iceCreamName = "Title too long to process."
 
     embed = new Discord.MessageEmbed()
 			.setColor('#F0B2ED')
-			.setTitle(`${iceCreamName}`)
+			.setTitle(`${iceCreamName} ${iceCreamName == "Title too long to process." ? '' : 'Ice Cream'}`)
             .addFields(
                 { name: 'Scoops', value: `${scoops}`, inline: true },
-                { name: 'Flavors', value: `${iceCreamFlavorList}`, inline: true },
+                { name: 'Flavors', value: `${iceCreamFlavorList}`, inline: false },
             )
             .setImage(`attachment://icecream-result.png`)
 			.setFooter(`Ice Cream`);
