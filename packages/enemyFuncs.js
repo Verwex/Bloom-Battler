@@ -267,7 +267,8 @@ module.exports = {
 			deathquote: enm.deathquote ? enm.deathquote : [],
 			lbquote: enm.lbquote ? enm.lbquote : [],
 			
-			trust: {}
+			trust: {},
+			loot: enm.loot
 		}
 		
 		return enemyDefs

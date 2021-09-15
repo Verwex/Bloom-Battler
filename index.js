@@ -30,8 +30,17 @@ const attackFuncs = require('./Packages/attackFuncs.js');
 const turnFuncs = require('./Packages/turnFuncs.js');
 
 // Now for specific commands
-const icecream = require('./Packages/Commands/icecream.js');
-const pizza = require('./Packages/Commands/pizza.js');
+//Food Category
+const icecream = require('./packages/commands/food/icecream.js');
+const pizza = require('./packages/commands/food/pizza.js');
+//Loot Category
+const makeLoot = require('./packages/commands/loot/makeloot.js');
+const assignLoot = require('./packages/commands/loot/assignloot.js');
+const getLoot = require('./packages/commands/loot/getloot.js');
+const searchLoot = require('./packages/commands/loot/searchloots.js');
+const listLoot = require('./packages/commands/loot/listloots.js');
+const deassignLoot = require('./packages/commands/loot/deassignloot.js');
+const removeLoot = require('./packages/commands/loot/removeloot.js');
 
 //FS, for writing files.
 const fs = require('fs');
@@ -2272,11 +2281,55 @@ function winBattle(btl, server) {
         btl[server].parties[btl[server].battleteam].rings = (btl[server].parties[btl[server].battleteam].rings + totalRings)
     }
 
+	// Item Drops
+	let additionalText = ``
+	let itemList = ``
+	
+	for (const enemy in btl[server].enemies.members) {
+		var lootPath = dataPath+'/Loot/lootTables.json'
+		var lootRead = fs.readFileSync(lootPath);
+		var lootFile = JSON.parse(lootRead);
+		var btlPath = dataPath+'/battle.json'
+		var btlRead = fs.readFileSync(btlPath);
+		var btlFile = JSON.parse(btlRead);
+
+		const enmDefs = readEnm(btl[server].enemies.members[enemy].name)
+
+		if (enmDefs.loot !== '' || enmDefs.loot !== undefined || enmDefs.loot !== null) {
+			console.log('BattleStatus: Opening Loot')
+
+			let itemInput = lootFile[enmDefs.loot].items
+    		let chanceInput = lootFile[enmDefs.loot].itemChances
+
+			for (const loot in itemInput) {
+				if (Math.random() * 100 < chanceInput[loot]) {
+					console.log(`BattleStatus: Successfully gathered ${itemInput[loot]}`)
+					itemList += `\n- ${itemInput[loot]} from ${btl[server].enemies.members[enemy].name}`
+
+					if (btl[server].parties[btl[server].battleteam].items == []) {
+						btl[server].parties[btl[server].battleteam].items = {}
+					}
+
+					if (!btl[server].parties[btl[server].battleteam].items[itemInput[loot]]) {
+						btl[server].parties[btl[server].battleteam].items[itemInput[loot]] = 0
+					}
+					
+					btl[server].parties[btl[server].battleteam].items[itemInput[loot]] += 1
+				}
+			}
+
+			fs.writeFileSync(btlPath, JSON.stringify(btl, null, '    '));
+
+			if (itemList.length > 1)
+				additionalText = `\n\nThe party also got:${itemList}`
+		}
+	}
+
     console.log('BattleStatus: Defeated all enemies');
     const dEmbed = new Discord.MessageEmbed()
         .setColor('#d613cc')
         .setTitle(`Team ${btl[server].battleteam} won!`)
-		.setDescription(`You defeated all the enemies!\nThe party obtained ${totalRings} ${servFile[server].currency}s!`)
+		.setDescription(`You defeated all the enemies!\nThe party obtained ${totalRings} ${servFile[server].currency}s!${additionalText}`)
     client.channels.fetch(btl[server].battlechannel)
         .then(channel => channel.send({embeds: [dEmbed]}))
 
@@ -3542,6 +3595,22 @@ client.on('messageCreate', async message => {
 					)
 				message.channel.send({embeds: [DiscordEmbed]})
 				break
+
+			case 'loot':
+				DiscordEmbed = new Discord.MessageEmbed()
+					.setColor('#0099ff')
+					.setTitle('These are the commands that have to do with **Loot Tables** and enemy drops')
+					.addFields(
+						{ name: `${prefix}makeloot`, value: '(Args <Name> <Items, Drop Chances, ...>)\nCreates a loot table that can be assigned to enemies after a battle victory.', inline: true },
+						{ name: `${prefix}removeloot`, value: '(Args <Loot Table>)\nRemoves a loot table and unsets it for everything.', inline: true },
+						{ name: `${prefix}assignloot`, value: '(Args <Name> <Loot Table>)\nAssigns a loot table to a certain enemy type.', inline: true },
+						{ name: `${prefix}deassignloot`, value: '(Args <Enemy Name>)\nRemoves a loot table from a certain enemy type.', inline: true },
+						{ name: `${prefix}getloot`, value: '(Args <Loot Table / Enemy Name>)\nGets the loot table you want to look into.', inline: true },
+						{ name: `${prefix}searchloots`, value: '(Args <Search Parameter>)\nSearch for Loot Tables that include the word specified', inline: true },
+						{ name: `${prefix}listloots`, value: 'Will let you see a list of available loot tables', inline: true },
+					)
+				message.channel.send({embeds: [DiscordEmbed]})
+				break
        
 			default:
 				DiscordEmbed = new Discord.MessageEmbed()
@@ -3555,6 +3624,7 @@ client.on('messageCreate', async message => {
 						{ name: 'Relics', value: 'Begin the search for very cool relics! Cool, I promise!', inline: true },
 						{ name: 'Battle', value: 'Commands intended to assist with battle.', inline: true },
 						{ name: 'Music', value: 'Commands intended to play youtube videos & battle themes during battles.', inline: true },
+						{ name: 'Loot', value: 'Commands intended to assist with Loot Tables and enemy drops.', inline: true },
 						{ name: 'Moderation', value: 'Commands intended to help with server moderation.', inline: true },
 					)
 					.setFooter('zzzzzzzz');
@@ -5122,7 +5192,40 @@ client.on('messageCreate', async message => {
 		}
 		
 		party.items[arg[1]] += totalQuantity
+
 		fs.writeFileSync(btlPath, JSON.stringify(btl, null, '    '));
+	}
+
+	//////////
+	// Loot //
+	//////////
+
+	if (command === 'makeloot') {
+		makeLoot.initialize(message, prefix)
+	}
+
+	if (command === 'assignloot') {
+		assignLoot.initialize(message, prefix)
+	}
+
+	if (command === 'getloot') {
+		getLoot.initialize(message, prefix)
+	}
+
+	if (command === 'searchloots') {
+		searchLoot.initialize(message, prefix)
+	}
+
+	if (command === 'listloots') {
+		listLoot.initialize(message, prefix)
+	}
+
+	if (command === 'deassignloot') {
+		deassignLoot.initialize(message, prefix)
+	}
+
+	if (command === 'removeloot') {
+		removeLoot.initialize(message, prefix)
 	}
 
 	/////////////////////
@@ -7474,6 +7577,23 @@ client.on('messageCreate', async message => {
 			for (const i in enmDefs.drain) {charAffs += `${elementEmoji[enmDefs.drain[i]]} <:drain:879801979138895904>\n`}
 			if (charAffs === ``) {charAffs = "None."}
 
+			var enmLoot = ``
+			if (!enmDefs.loot || enmDefs.loot == '' || enmDefs.loot == undefined)
+				enmLoot = `No possible loot.`
+			
+			if (enmDefs.loot) {
+				var lootPath = dataPath+'/Loot/lootTables.json'
+				var lootRead = fs.readFileSync(lootPath);
+				var lootFile = JSON.parse(lootRead);
+
+				let lootVar=0;
+				
+				do {
+					enmLoot += `- ${lootFile[enmDefs.loot].items[lootVar]}\n`
+					lootVar++
+				} while (lootVar < lootFile[enmDefs.loot].items.length) //how tf did a for loop not work with it????????
+			}
+
             var DiscordEmbed = new Discord.MessageEmbed()
                 .setColor('#12de6a')
                 .setTitle(`${enmName}`)
@@ -7482,7 +7602,8 @@ client.on('messageCreate', async message => {
                     { name: `${enmName}'s Stats:`, value: `Level ${enmDefs.level}\nWorth ${enmDefs.awardxp}XP\n\n${enmDefs.hp} Max HP\n${enmDefs.mp} Max MP\n\n${enmDefs.atk}ATK\n${enmDefs.mag}MAG\n${enmDefs.prc}PRC\n${enmDefs.end}END\n${enmDefs.chr}CHR\n${enmDefs.int}INT\n${enmDefs.agl}AGL\n${enmDefs.luk}LUK`, inline: true },
                     { name: `${enmName}'s Skills:`, value: `${enmSkills}`, inline: true },
 					{ name: `${enmName}'s Affinities:`, value: `${charAffs}`, inline: true },
-                    { name: `${enmName}'s Limit Break Capability:`, value: `${enmLB}`, inline: true }
+                    { name: `${enmName}'s Limit Break Capability:`, value: `${enmLB}`, inline: true },
+					{ name: `${enmName}'s Possible Loot:`, value: `${enmLoot}`, inline: true }
                 )
 
 

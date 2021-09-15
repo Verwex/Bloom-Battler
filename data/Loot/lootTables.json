@@ -1,0 +1,13 @@
+{
+    "GrassimpDrops": {
+        "name": "GrassimpDrops",
+        "items": [
+            "SparkleBerry",
+            "ShineBerry"
+        ],
+        "itemChances": [
+            12,
+            15
+        ]
+    }
+}

@@ -1510,7 +1510,8 @@
         },
         "strikequote": [],
         "critquote": [],
-        "weakquote": []
+        "weakquote": [],
+        "trust": {}
     },
     "Sky": {
         "name": "Sky",

@@ -277,6 +277,16 @@
                 ],
                 "items": {},
                 "rings": 0
+            },
+            "Sutela": {
+                "members": [
+                    "Sutela"
+                ],
+                "items": {
+                    "SparkleBerry": 6,
+                    "ShineBerry": 5
+                },
+                "rings": 418
             }
         },
         "allies": {
@@ -295,6 +305,8 @@
         "turnorder": [],
         "pvp": false,
         "pvpmode": "none",
-        "canshowtime": false
+        "canshowtime": false,
+        "weather": "clear",
+        "terrain": "normal"
     }
 }
