@@ -29,21 +29,11 @@ const enemyFuncs = require('./Packages/enemyFuncs.js');
 const attackFuncs = require('./Packages/attackFuncs.js');
 const turnFuncs = require('./Packages/turnFuncs.js');
 
-// Now for specific commands
-//Food Category
-const icecream = require('./packages/commands/food/icecream.js');
-const pizza = require('./packages/commands/food/pizza.js');
-//Loot Category
-const makeLoot = require('./packages/commands/loot/makeloot.js');
-const assignLoot = require('./packages/commands/loot/assignloot.js');
-const getLoot = require('./packages/commands/loot/getloot.js');
-const searchLoot = require('./packages/commands/loot/searchloots.js');
-const listLoot = require('./packages/commands/loot/listloots.js');
-const deassignLoot = require('./packages/commands/loot/deassignloot.js');
-const removeLoot = require('./packages/commands/loot/removeloot.js');
-
 //FS, for writing files.
 const fs = require('fs');
+
+//Canvas, for making custom pictures.
+const Canvas = require('canvas');
 
 // Voice Shit
 const ffmpeg = require('ffmpeg-static');
@@ -314,6 +304,49 @@ const sendItemArray = async(channel, theArray) => {
 				current.map(async arrayDefs => ({
 					name: `${arrayDefs.name}`,
 					value: `${itemTypeEmoji[arrayDefs.type.toLowerCase()]}${arrayDefs.type.toUpperCase()}`
+				}))
+			)
+		})
+	}
+
+	const canFitOnOnePage = theArray.length <= 10
+	const embedMessage = await channel.send({
+		embeds: [await generateEmbed(0)],
+		components: canFitOnOnePage ? [] : [new Discord.MessageActionRow({components: [forwardButton]})]
+	})
+
+	if (canFitOnOnePage) return
+
+	const collector = embedMessage.createMessageComponentCollector({
+		filter: ({user}) => true // fuck you and your (the sequel)
+	})
+
+	let currentIndex = 0
+	collector.on('collect', async interaction => {
+		interaction.customId === backId ? (currentIndex -= 10) : (currentIndex += 10)
+		await interaction.update({
+			embeds: [await generateEmbed(currentIndex)],
+			components: [
+				new Discord.MessageActionRow({
+					components: [
+						...(currentIndex ? [backButton] : []),
+						...(currentIndex + 10 < theArray.length ? [forwardButton] : [])
+					]
+				})
+			]
+		})
+	})
+}
+
+const sendLootArray = async(channel, theArray) => {
+	const generateEmbed = async start => {
+		const current = theArray.slice(start, start + 10)
+		return new Discord.MessageEmbed({
+			title: `Showing results ${start + 1}-${start + current.length} out of ${theArray.length}`,
+			fields: await Promise.all(
+				current.map(async arrayDefs => ({
+					name: `${arrayDefs.name}`,
+					value: `${arrayDefs.items.length} Items`
 				}))
 			)
 		})
@@ -4280,6 +4313,9 @@ client.on('messageCreate', async message => {
 
 		// Send Embed
 
+		if (splicedName.length > 128)
+			splicedName = "Title too long to process."
+
 		const DiscordEmbed = new Discord.MessageEmbed()
             .setColor('#ff06aa')
             .setTitle(`${splicedName}`)
@@ -4287,133 +4323,680 @@ client.on('messageCreate', async message => {
 			.setFooter(`${footerText}`)
 		message.channel.send({embeds: [DiscordEmbed]})
 	}
-	
-	if (command === 'icecream') {
-		const arg = message.content.slice(prefix.length).trim().split(/ +/);
-
-		if (!arg[1] || !isFinite(parseInt(arg[1]))) {
-			message.channel.send(`Please specify the amount of scoops you would like. Maximum is 100.`)
-			return false
-		}
-
-		if (parseFloat(arg[1]) > 100) {
-			message.channel.send(`That's way too much. Please use a number of scoops below or equal to 100.`)
-			return false
-		} else if (parseFloat(arg[1]) < 0) {
-			arg[1] = 0
-		}
-
-		let scoopNumber = Math.round(arg[1])
-		let repeatscoops = `true`
-
-		if (arg[2] !== `false` || !arg[2])
-			repeatscoops = `true`
-		else
-			repeatscoops = 'false'
-
-		if (scoopNumber > 10)
-			message.channel.send(`Please wait until your ice cream is done.`)
-
-		icecream.getIceCream(scoopNumber, repeatscoops, message)
-	}
 
 	/////////////////////
 	// Food Generators //
 	/////////////////////
 
 	if (command === 'icecream') {
+		const iceCreamFlavors = [
+			'Chocolate','Vanilla','Acal Berry','Almond','Mojito','Gingerbread','Salted Caramel','Caramel','Marshmallow','Raspberry','Coffee',
+			'Mocha','Lamington','Saffron','Banana Foster','Buttercake','Rainbow','Garlic','Strawberry','Orange','Lemon','Lime','Apple','Sour Apple',
+			'Blueberry','Blackberry','Cherry','Bear Claw','Cinnamon','Toast','Cinnamon Toast','Kaffir Lime','Margarita','Italian Cherry','Butter','Spumoni',
+			'Asparagus','Birthday Cake','Mint','Mint Chocolate Chip','Banana',"``you``",'Pistachio','Leaf',`Mystery`,'Air','Sewage','Grape','Mango',
+			"``your mom lol``",'Neapolitan','Red Velvet','Blue Moon','Carrot Cake','Spaghetti','Superman','Black Sesame','Licorice','Peppermint',
+			'Jalapeno','Wine','Straciatella','Lucuma','Ube','Pineapple','Chocolate Fudge','Lemon Sorbet','Strawberry Shortcake','Chocolate Cherry Fudge',
+			'Bubblegum','Cotton Candy','Blood Orange','Sky','Spearmint','Smurf','Green Tea','Milk','Dark Chocolate','Milk Chocolate','Gold Medal Ribbon',
+			'Alphonso And Cream','Papaya Pineapple','Papaya','Cookies And Cream','Durian','Radioactive','Lavender','Orange Custard Chocolate Chip',
+			'Chocolate Raspberry','Panna Cotta','Cookie Monster','Dark Moon Chocolate','New Moon','Sunset','Sunrise','Iceberg Lettuce','Orange Sherbert',
+			'Cheesecake','Key Lime Pie','Gelato','Baby Blue','Outer Sky','Relieve','Pomegrante Chocolate Fudge','Orange Chocolate Fudge','Iceland Orange',
+			'Green Emerald','Cyan Emerald','Navy Emerald','Purple Emerald','Pink Emerald','Red Emerald','Yellow Emerald','White Emerald','Master Emerald',
+			'Phantom Ruby','Strawberry Chocolate','Ketchup','Butter Popcorn','Popcorn','Caramel Popcorn','Rose','Tulip','Chaos Goo','Water','Blueberry Jelly',
+			'Raspberry Jelly','Blackberry Jelly','Cherry Jelly','Strawberry Jelly','Pomegrante Jelly','Pomegrante','Orange Jelly','Lemon Jelly','Lime Jelly',
+			'Apple Jelly','Lunar Rainbow','Inverted','Cloudy Day','Clear Day','Night Sky','Starry Sky','Manor Light','Chocolate Mint Chip','Bullet Hole',
+			'Banana Gem','Underwater Fish','Chocolate Spearmint Chip','Spearmint Chocolate Chip','Deep Orage','Deep Cherry','Deep Raspberry','Deep Lavender',
+			'Deep Ume','Deep Blackberry','Deep Blueberry','Salt','Snow','Red Sun','Yellow Sun','Green Sun','Cyan Sun','Navy Sun','Purple Sun','White Sun',
+			'Chocolate Gem','Lavender Sorbet'
+			]
+			
 		const arg = message.content.slice(prefix.length).trim().split(/ +/);
 
-		if (!arg[1] || !isFinite(parseInt(arg[1]))) {
+		if (!arg[1]) {
 			const DiscordEmbed = new Discord.MessageEmbed()
-                .setColor('#0099ff')
-                .setTitle(`${prefix}icecream`)
-				.setDescription(`(Args <Amount Of Scoops> <Optional: Repeat Scoop Flavors>)\nI'll make an ice cream of any amount of scoop with randomized flavors. You can do up to 100 scoops.`)
-            message.channel.send({embeds: [DiscordEmbed]})
-            return false
-		}
-
-		if (parseFloat(arg[1]) > 100) {
-			message.channel.send(`That's way too much. Please use a number of scoops below or equal to 100.`)
+				.setColor('#0099ff')
+				.setTitle(`${prefix}icecream`)
+				.setDescription("(Args <Amount Of Scoops> <Optional: Repeat Scoop Flavors>)\nI'll make an ice cream of any amount of scoop with randomized flavors. You can do up to 100 scoops.\n\n Alternatively, you can also use:\n(Args <Scoop Flavors>)\n that if you want to specify flavors on an ice cream.")
+			message.channel.send({embeds: [DiscordEmbed]})
 			return false
-		} else if (parseFloat(arg[1]) < 0) {
-			arg[1] = 0
 		}
 
-		let scoopNumber = Math.round(arg[1])
-		let repeatscoops = `true`
+		let scoopNumber
+		let repeatscoops
 
-		if (arg[2] !== `false` || !arg[2])
+		if (isFinite(parseInt(arg[1]))) {
+
+			if (parseFloat(arg[1]) > 100) {
+				message.channel.send(`<:warning:878094052208296007>That's way too much. Please use a number of scoops below or equal to 100. Changing the value to 100.`)
+				arg[1] = 100
+			} else if (parseFloat(arg[1]) < 0) {
+				arg[1] = 0
+			}
+
+			scoopNumber = parseInt(arg[1])
 			repeatscoops = `true`
-		else
-			repeatscoops = 'false'
 
-		if (scoopNumber > 10)
-			message.channel.send(`Please wait until your ice cream is done.`)
+			if (arg[2] !== `false` || !arg[2])
+				repeatscoops = `true`
+			else
+				repeatscoops = 'false'
 
-		icecream.getIceCream(scoopNumber, repeatscoops, message)
+			if (scoopNumber > 10)
+				message.channel.send(`Please wait until your ice cream is done.`)
+		} else {
+
+			let input = message.content.slice(prefix.length).trim()
+			input = input.slice(command.length).trim()
+
+			const regex = new RegExp('"[^"]+"|[\\S]+', 'g');
+			let arguments = [];
+			input.match(regex).forEach(element => {
+				if (!element) return;
+				return arguments.push(element.replace(/"/g, ''));
+			});
+
+			if (arguments.length > 100) {
+				message.channel.send(`<:warning:878094052208296007>That's way too much. Please specify the scoop flavors, but make their amount below or equal to 100. Changing the amount to 100.`)
+				arguments.length = 100
+			}
+
+			if (arguments[0] == "None") {
+				arguments = []
+			}
+
+			let invalidFlavors = ''
+
+			for (const i in arguments) {
+				if (iceCreamFlavors.indexOf(arguments[i]) < 0) {
+					invalidFlavors += `\n- ${arguments[i]}`
+					arguments[i] = ''
+				}
+			}
+			const filterArray=(a,b)=>{return a.filter((e)=>{return e!=b})}
+			arguments = filterArray(arguments,'')
+
+			if (invalidFlavors.length > 0)
+				message.channel.send(`<:warning:878094052208296007>**Your invalid flavors are:**${invalidFlavors}`)
+
+			scoopNumber = arguments
+			repeatscoops = `true`
+
+			if (scoopNumber.length > 10)
+				message.channel.send(`Please wait until your ice cream is done.`)
+		}
+
+		getIceCream(scoopNumber, repeatscoops, message)
+
+		async function getIceCream(scoops, repeatScoops, message) {
+			let iceCreamResults = []
+			var iceCreamFlavorList = ''
+
+			if (!isFinite(scoops)) {
+				for (const i in scoops) {
+					scoops[i].slice(1,scoops[i].length - 1)
+
+					iceCreamResults.push(scoops[i])
+					iceCreamFlavorList += `\n- ${scoops[i]}`
+				}
+
+				scoops = scoops.length
+			} else {
+				var iceCreamInput = [...iceCreamFlavors]
+				iceCreamResults = []
+				iceCreamFlavorList = ''
+			
+				for (var i = 1; i <= scoops; i++) {
+			
+					if (iceCreamInput.length < 1) {
+						iceCreamInput = [...iceCreamFlavors]
+						console.log(`Oops. Ran out of ice cream flavors. Repeating the list.`)
+					}
+			
+					var flavorNum = Math.floor(Math.random() * iceCreamInput.length)
+			
+					iceCreamResults.push(iceCreamInput[flavorNum])
+					iceCreamFlavorList += `\n- ${iceCreamInput[flavorNum]}`
+			
+					if (repeatScoops == 'false')
+						iceCreamInput.splice(flavorNum, 1)
+				}
+			}
+		
+			console.log(`Flavors: ${iceCreamResults}`)
+		
+			var filtered = new Set(iceCreamResults);
+			var iceCreamFiltered = [...filtered]
+			var iceCreamName = iceCreamFiltered.join(' ');
+		
+			///////////
+			// IMAGE //
+			///////////
+		
+			const canvas = Canvas.createCanvas(201, 240 + (62 * iceCreamResults.length));
+			const context = canvas.getContext('2d');
+		
+			// Since the image takes time to load, you should await it
+			const cone = await Canvas.loadImage('./images/foodgenerators/icecream/cone.png')
+		
+			// This uses the canvas dimensions to stretch the image onto the entire canvas
+			var coneY = canvas.height - 240
+			context.drawImage(cone, 20, coneY, 161, 231);
+		
+			var lastScoopY
+			for (var i = 1; i <= scoops; i++) {
+				const scoop = await Canvas.loadImage(`./images/foodgenerators/icecream/scoopflavors/${iceCreamResults[iceCreamResults.length - i]}.png`)
+		
+				lastScoopY = coneY - 57 - 62 * (i-1)
+				context.drawImage(scoop, 20, lastScoopY, 161, 155);
+			}
+		
+			// Use the helpful Attachment class structure to process the file for you
+			const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'icecream-result.png');
+		
+			//////////////////
+			// Last Touches //
+			//////////////////
+		
+			if (iceCreamResults.length > 8) {
+				embed = new Discord.MessageEmbed()
+					.setColor('#F0B2ED')
+					.setTitle(`Current Ice Cream Flavors:`)
+					.setDescription(`${iceCreamFlavorList}`)
+					.setFooter(`Ice Cream`);
+		
+				message.author.send({embeds: [embed]})
+				iceCreamFlavorList = `*Too many scoops in this field.\nYou should get a DM with the flavor list.*`
+			}
+		
+			if (scoops < 1) {
+				scoops = 0
+				iceCreamFlavorList = `\nNone`
+				iceCreamName = `Cone Only`
+			}
+		
+			if (iceCreamName.length > 128)
+				iceCreamName = "Title too long to process."
+
+			console.log(scoops)
+		
+			embed = new Discord.MessageEmbed()
+					.setColor('#F0B2ED')
+					.setTitle(`${iceCreamName} ${iceCreamName == "Title too long to process." ? '' : 'Ice Cream'}`)
+					.addFields(
+						{ name: 'Scoops', value: `${scoops}`, inline: true },
+						{ name: 'Flavors', value: `${iceCreamFlavorList}`, inline: false },
+					)
+					.setImage(`attachment://icecream-result.png`)
+					.setFooter(`Ice Cream`);
+		
+			return message.channel.send({embeds: [embed], files: [attachment]})
+		}
 	}
 
 	if (command == 'pizza') {
+		const sauces = [
+			'Traditional','Pesto','Olive Oil and Garlic','White','Mayo','BBQ','Ranch Dressing','Hamburger','Salsa','Buffalo','Sweet Chili',
+			'Teriyaki','Fig Jam','Greek Yoghurt','Bolognese','Mystery'
+		]
+			
+		const cheeses = [
+			'Mozarella','Provolone','Cheddar','Parmesan','Gouda','Goat','Gruyere','Ricotta','Four Cheese','Mimolette','Russian','Red Leicester',
+			'Colby-Jack'
+		]
+			
+		const toppingTypes = [
+			"``you``","``your mom lol``",'Toast','Rosemary','Biscuits','Corn','Squid','Chocolate Curls','Sewage','Salt','Pepper','Scallions','Feta',
+			'Almonds','French Fries','Garlic','Basil','Oregano','Broccoli','Chili Peppers','Salmon','Clams','Chili Powder','Anchovies','Fried Eggs',
+			'Hard Boiled Eggs','Overboiled Eggs','Black Caviar','Red Caviar','Green Onion','Onion','Red Onion','Purple Onion','Peas','Pepperoni',
+			'Green Pepperoni','Tuna','Olives','Black Olives','Capers','Salami','Tomatoes','Cherry Tomatoes','Kimchi','Mochi','Rice','Sesame Seeds',
+			'Black Sesame Seeds','Natto','Nori','Arugula','Artichoke','Ham','Heavy Cream','Pineapple Cream','Sour Cream','Pepper Cream','Truffle Cream',
+			'Beef Carpaccio','Eggplant','Parsley','Mussels','Tiger Prawns','Shrimp','Frutti di Mare','Champignons','Bacon','Prosciutto','Oyster',
+			'Salsiccia','Trevisano Radicchio','Spinach','Truffle','Bell Pepper','German Sausage','Veal Schnitzel','Anchovy Fillets','Pecorino Romano',
+			'Tiny Eggs','Kit Kat','Hokkaido Slices','Seaweed','Eel','Leek','Marshmallow','Potato','Wonton Wrappers','Chicken','Chicken Breast Cutlets',
+			'Cauliflower','Ground Beef','Lettuce','Pickles','Habanero Pepper','Pineapple','Meatballs','Black Beans','Beans','Dill','Lime','Lemon',
+			'Lemon Juice','Lime Juice','Mango'
+		]
+			
+		const condimentTypes = [
+			'Ketchup','Thousand Island Sauce','Fig Jam','BBQ Sauce','Green Ketchup','Purple Ketchup','Sriracha','Mayonnaise','Garlic Sauce',
+			'Greek Yoghurt'
+		]
+
 		const arg = message.content.slice(prefix.length).trim().split(/ +/);
 
-		if (!arg[1] || !isFinite(parseInt(arg[1]))) {
+		if (!arg[1]) {
 			const DiscordEmbed = new Discord.MessageEmbed()
                 .setColor('#0099ff')
                 .setTitle(`${prefix}pizza`)
-				.setDescription(`(Args <Amount Of Toppings> <Optional: Amount of Condiments> <Optional: Include Cheese> <Optional: Include Sauce> <Optional: Repeat Toppings> <Optional: Repeat Condiments>)\nI'll make a pizza of any amount of toppings and condiments. You can do up to 100 toppings and 20 condiments.`)
+				.setDescription(`(Args <Amount Of Toppings> <Optional: Amount of Condiments> <Optional: Include Cheese> <Optional: Include Sauce> <Optional: Repeat Toppings> <Optional: Repeat Condiments>)\nI'll make a pizza of any amount of toppings and condiments. You can do up to 100 toppings and 20 condiments.\n\n Alternatively, you can also use:\n(Args <Sauce> <Cheese> <Toppings> <Optional: Condiment Amount>)\n that if you want to specify the sauce, cheese and toppings on a pizza.`)
             message.channel.send({embeds: [DiscordEmbed]})
             return false
 		}
 
-		if (parseFloat(arg[1]) > 100) {
-			message.channel.send(`That's way too much. Please use a number of toppings below or equal to 100.`)
-			return false
-		} else if (parseFloat(arg[1]) < 0) {
-			arg[1] = 0
-		}
+		let toppingNumber
+		let repeatToppings
+		let sauceNumber
+		let repeatSauces
+		let allowCheese
+		let allowSauce
 
-		if (!arg[2])
-			arg[2] = 0
+		if (isFinite(parseInt(arg[1]))) {
+			if (parseFloat(arg[1]) > 100) {
+				message.channel.send(`<:warning:878094052208296007>That's way too much. Please use a number of toppings below or equal to 100. Changing the value to 100`)
+				return false
+			} else if (parseFloat(arg[1]) < 0) {
+				arg[1] = 0
+			}
 
-		if (parseFloat(arg[2]) > 20) {
-			message.channel.send(`That's way too much. Please use a number of condiments below or equal to 20.`)
-			return false
-		} else if (parseFloat(arg[2]) < 0) {
-			arg[2] = 0
-		}
+			if (!arg[2])
+				arg[2] = 0
 
-		let toppingNumber = Math.round(arg[1])
-		let repeatToppings = `true`
-		let sauceNumber = Math.round(arg[2])
-		let repeatSauces = `true`
-		let allowCheese = 'true'
-		let allowSauce = 'true'
+			if (parseFloat(arg[2]) > 20) {
+				message.channel.send(`<:warning:878094052208296007>That's way too much. Please use a number of condiments below or equal to 20. Changing the value to 20.`)
+				arg[2] = 20
+			} else if (parseFloat(arg[2]) < 0) {
+				arg[2] = 0
+			}
 
-		if (arg[3] !== `false` || !arg[3])
-			allowCheese = `true`
-		else
-			allowCheese = 'false'
-
-		if (arg[4] !== `false` || !arg[4])
-			allowSauce = `true`
-		else
-			allowSauce = 'false'
-
-		if (arg[5] !== `false` || !arg[5])
+			toppingNumber = Math.round(parseInt(arg[1]))
 			repeatToppings = `true`
-		else
-			repeatToppings = 'false'
-
-		if (arg[6] !== `false` || !arg[6])
+			sauceNumber = Math.round(parseInt(arg[2]))
 			repeatSauces = `true`
-		else
-			repeatSauces = 'false'
+			allowCheese = 'true'
+			allowSauce = 'true'
 
-		if (toppingNumber > 10)
-			message.channel.send(`Please wait until your pizza is done.`)
+			if (arg[3] !== `false` || !arg[3])
+				allowCheese = `true`
+			else
+				allowCheese = 'false'
 
-		pizza.getPizza(toppingNumber, repeatToppings, sauceNumber, repeatSauces, allowCheese, allowSauce, message)
+			if (arg[4] !== `false` || !arg[4])
+				allowSauce = `true`
+			else
+				allowSauce = 'false'
+
+			if (arg[5] !== `false` || !arg[5])
+				repeatToppings = `true`
+			else
+				repeatToppings = 'false'
+
+			if (arg[6] !== `false` || !arg[6])
+				repeatSauces = `true`
+			else
+				repeatSauces = 'false'
+
+			if (toppingNumber > 10)
+				message.channel.send(`Please wait until your pizza is done.`)
+
+			getPizzaByNumber(toppingNumber, repeatToppings, sauceNumber, repeatSauces, allowCheese, allowSauce, message)
+		} else {
+			let input = message.content.slice(prefix.length).trim()
+			input = input.slice(command.length).trim()
+
+			const regex = new RegExp('"[^"]+"|[\\S]+', 'g');
+			let arguments = [];
+			input.match(regex).forEach(element => {
+				if (!element) return;
+				return arguments.push(element.replace(/"/g, ''));
+			});
+
+			//assigning variables
+			let saucePick = arguments[0]
+			let cheesePick = arguments[1]
+			let toppingPick
+			let condimentPick
+
+			arguments = arguments.slice(2)
+
+			if (isFinite(parseInt(arguments[arguments.length-1]))) {
+				condimentPick = arguments[arguments.length-1]
+				arguments = arguments.slice(0,arguments.length-1)
+			} else {
+				condimentPick = 0
+			}
+
+			toppingPick = [...arguments]
+
+			if (sauces.indexOf(saucePick) < 0 && saucePick !== 'None') {
+				message.channel.send(`<:warning:878094052208296007>${saucePick} is not a valid sauce. Defaulting to 'None'.`)
+				saucePick = 'None'
+			}
+
+			if (cheeses.indexOf(cheesePick) < 0 && cheesePick !== 'None') {
+				message.channel.send(`<:warning:878094052208296007>${cheesePick} is not a valid cheese. Defaulting to 'None'.`)
+				cheesePick = 'None'
+			}
+
+			if (toppingPick[0] == 'None')
+			toppingPick = []
+
+			if (toppingPick.length > 100) {
+				message.channel.send(`<:warning:878094052208296007>That's way too much. Please specify the topping, but make their amount below or equal to 100. Changing the amount to 100.`)
+				toppingPick.length = 100
+			}
+
+			let invalidToppings = ''
+
+			for (const i in toppingPick) {
+				if (toppingTypes.indexOf(toppingPick[i]) < 0) {
+					invalidToppings += `\n- ${toppingPick[i]}`
+					toppingPick[i] = ''
+				}
+			}
+			const filterArray=(a,b)=>{return a.filter((e)=>{return e!=b})}
+			toppingPick = filterArray(toppingPick,'')
+
+			if (invalidToppings.length > 0)
+				message.channel.send(`<:warning:878094052208296007>**Your invalid toppings are:**${invalidToppings}`)
+
+			if (parseFloat(condimentPick) > 20) {
+				message.channel.send(`<:warning:878094052208296007>That's way too much. Please use a number of condiments below or equal to 20. Changing the value to 20.`)
+				condimentPick = 20
+			}
+
+			if (toppingPick.length > 10)
+				message.channel.send(`Please wait until your ice cream is done.`)
+
+			getPizzaByLetter(saucePick,cheesePick,toppingPick,condimentPick)
+		}
+
+		async function getPizzaByNumber(toppings, repeatToppings, condiments, repeatCondiments, allowCheese, allowSauce, message) {
+
+			if (allowSauce == 'true')
+				var sauce = sauces[Math.floor(Math.random() * sauces.length)]
+			else
+				var sauce = "No Sauce"
+		
+			if (allowCheese == 'true')
+				var cheese = cheeses[Math.floor(Math.random() * cheeses.length)]
+			else
+				var cheese = "No Cheese"
+		
+			//Toppings
+			var toppingInput = [...toppingTypes]
+			let toppingResults = []
+			var toppingList = ''
+		
+			for (var i = 1; i <= toppings; i++) {
+		
+				if (toppingInput.length < 1) {
+					toppingInput = [...toppingTypes]
+					console.log(`Oops. Ran out of pizza toppings. Repeating the list.`)
+				}
+		
+				var toppingNum = Math.floor(Math.random() * toppingInput.length)
+		
+				toppingResults.push(toppingInput[toppingNum])
+				toppingList += `\n- ${toppingInput[toppingNum]}`
+		
+				if (repeatToppings == 'false')
+					toppingInput.splice(toppingNum, 1)
+			}
+		
+			console.log(`Toppings: ${toppingResults}`)
+		
+			var filteredA = new Set(toppingResults);
+			var toppingsFilteres = [...filteredA]
+			var toppingName = toppingsFilteres.join(' ');
+		
+			//Condiments
+			var condimentInput = [...condimentTypes]
+			let condimentResults = []
+			var condimentList = ''
+		
+			for (var i = 1; i <= condiments; i++) {
+		
+				if (condimentInput.length < 1) {
+					condimentInput = [...condimentTypes]
+					console.log(`Oops. Ran out of pizza condiments. Repeating the list.`)
+				}
+		
+				var condimentNum = Math.floor(Math.random() * condimentInput.length)
+		
+				condimentResults.push(condimentInput[condimentNum])
+				condimentList += `\n- ${condimentInput[condimentNum]}`
+		
+				if (repeatCondiments == 'false')
+					condimentInput.splice(condimentNum, 1)
+			}
+		
+			console.log(`Condiments: ${condimentResults}`)
+		
+			///////////
+			// IMAGE //
+			///////////
+		
+			const canvas = Canvas.createCanvas(180, 180);
+			const context = canvas.getContext('2d');
+		
+			function drawRotated(degrees, image){
+				context.save();
+			
+				context.translate(canvas.width/2,canvas.height/2);
+			
+				context.rotate(degrees*Math.PI/180);
+			
+				context.drawImage(image,-image.width/2,-image.width/2);
+			
+				context.restore();
+			}
+		
+			//crust
+			const crustDraw = await Canvas.loadImage('./images/foodgenerators/pizza/crust.png')
+			drawRotated(0, crustDraw)
+			//sauce
+			if (allowSauce == 'true') {
+				const sauceDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/sauces/${sauce}.png`)
+				drawRotated(Math.random() * 360, sauceDraw)
+			}
+			//cheese
+			if (allowCheese == 'true') {
+				const cheeseDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/cheeses/${cheese}.png`)
+				drawRotated(Math.random() * 360, cheeseDraw)
+			}
+			//toppings
+			for (var i = 1; i <= toppings; i++) {
+				const toppingDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/toppings/${toppingResults[toppingResults.length - i]}.png`)
+				drawRotated(Math.random() * 360, toppingDraw)
+			}
+			//condiments
+			for (var i = 1; i <= condiments; i++) {
+				const condimentDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/condiments/${condimentResults[condimentResults.length - i]}.png`)
+				drawRotated(Math.random() * 360, condimentDraw)
+			}
+		
+			const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'pizza-result.png');
+		
+			//////////////////
+			// Last Touches //
+			//////////////////
+		
+			if (toppingResults.length > 8) {
+				embed = new Discord.MessageEmbed()
+					.setColor('#F0B2ED')
+					.setTitle(`Current Pizza Toppings:`)
+					.setDescription(`${toppingList}`)
+					.setFooter(`Pizza`);
+		
+				message.author.send({embeds: [embed]})
+				toppingList = `*Too many toppings in this field.\nYou should get a DM with the topping list.*`
+			}
+		
+			if (condimentResults.length > 8) {
+				embed = new Discord.MessageEmbed()
+					.setColor('#F0B2ED')
+					.setTitle(`Current Pizza Condiments:`)
+					.setDescription(`${condimentList}`)
+					.setFooter(`Pizza`);
+		
+				message.author.send({embeds: [embed]})
+				condimentList = `*Too many condiments in this field.\nYou should get a DM with the condiment list.*`
+			}
+		
+			if (toppings < 1) {
+				toppingList = `\nNone`
+				toppingName = `${cheese}`
+			}
+		
+			if (condiments < 1)
+				condimentList = `\nNone`
+		
+			if (toppingName.length > 128)
+				toppingName = "Title too long to process."
+		
+			embed = new Discord.MessageEmbed()
+					.setColor('#FF6100')
+					.setTitle(`${toppingName} ${toppingName == "Title too long to process." ? '' : 'Pizza'}`)
+					.addFields(
+						{ name: 'Sauce', value: `${sauce}`, inline: true },
+						{ name: 'Cheese', value: `${cheese}`, inline: true },
+						{ name: 'Topping Number', value: `${toppings}`, inline: false },
+						{ name: 'Toppings', value: `${toppingList}`, inline: true },
+						{ name: 'Condiment Number', value: `${condiments}`, inline: false },
+						{ name: 'Condiments', value: `${condimentList}`, inline: true },
+					)
+					.setImage(`attachment://pizza-result.png`)
+					.setFooter(`Pizza`);
+		
+			return message.channel.send({embeds: [embed], files: [attachment]})
+		}
+
+		async function getPizzaByLetter(sauce, cheese, toppings, condiments) {
+			
+			if (sauce == 'None')
+				sauce = 'No Sauce'
+
+			if (cheese == 'None')
+				cheese = 'No Cheese'
+
+			let toppingResults = []
+			var toppingList = ''
+			
+			for (const i in toppings) {
+				toppings[i].slice(1,toppings[i].length - 1)
+
+				toppingResults.push(toppings[i])
+				toppingList += `\n- ${toppings[i]}`
+			}
+			toppings = toppings.length
+
+			console.log(`Toppings: ${toppingResults}`)
+		
+			var filteredA = new Set(toppingResults);
+			var toppingsFilteres = [...filteredA]
+			var toppingName = toppingsFilteres.join(' ');
+		
+			//Condiments
+			var condimentInput = [...condimentTypes]
+			let condimentResults = []
+			var condimentList = ''
+		
+			for (var i = 1; i <= condiments; i++) {
+				var condimentNum = Math.floor(Math.random() * condimentInput.length)
+		
+				condimentResults.push(condimentInput[condimentNum])
+				condimentList += `\n- ${condimentInput[condimentNum]}`
+			}
+		
+			console.log(`Condiments: ${condimentResults}`)
+
+			///////////
+			// IMAGE //
+			///////////
+		
+			const canvas = Canvas.createCanvas(180, 180);
+			const context = canvas.getContext('2d');
+		
+			function drawRotated(degrees, image){
+				context.save();
+			
+				context.translate(canvas.width/2,canvas.height/2);
+			
+				context.rotate(degrees*Math.PI/180);
+			
+				context.drawImage(image,-image.width/2,-image.width/2);
+			
+				context.restore();
+			}
+		
+			//crust
+			const crustDraw = await Canvas.loadImage('./images/foodgenerators/pizza/crust.png')
+			drawRotated(0, crustDraw)
+			//sauce
+			if (sauce !== 'No Sauce') {
+				const sauceDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/sauces/${sauce}.png`)
+				drawRotated(Math.random() * 360, sauceDraw)
+			}
+			//cheese
+			if (cheese !== 'No Cheese') {
+				const cheeseDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/cheeses/${cheese}.png`)
+				drawRotated(Math.random() * 360, cheeseDraw)
+			}
+			//toppings
+			for (var i = 1; i <= toppings; i++) {
+				const toppingDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/toppings/${toppingResults[toppingResults.length - i]}.png`)
+				drawRotated(Math.random() * 360, toppingDraw)
+			}
+			//condiments
+			for (var i = 1; i <= condiments; i++) {
+				const condimentDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/condiments/${condimentResults[condimentResults.length - i]}.png`)
+				drawRotated(Math.random() * 360, condimentDraw)
+			}
+		
+			const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'pizza-result.png');
+
+			//////////////////
+			// Last Touches //
+			//////////////////
+		
+			if (toppingResults.length > 8) {
+				embed = new Discord.MessageEmbed()
+					.setColor('#F0B2ED')
+					.setTitle(`Current Pizza Toppings:`)
+					.setDescription(`${toppingList}`)
+					.setFooter(`Pizza`);
+		
+				message.author.send({embeds: [embed]})
+				toppingList = `*Too many toppings in this field.\nYou should get a DM with the topping list.*`
+			}
+		
+			if (condimentResults.length > 8) {
+				embed = new Discord.MessageEmbed()
+					.setColor('#F0B2ED')
+					.setTitle(`Current Pizza Condiments:`)
+					.setDescription(`${condimentList}`)
+					.setFooter(`Pizza`);
+		
+				message.author.send({embeds: [embed]})
+				condimentList = `*Too many condiments in this field.\nYou should get a DM with the condiment list.*`
+			}
+		
+			if (toppings < 1) {
+				toppingList = `\nNone`
+				toppingName = `${cheese}`
+			}
+		
+			if (condiments < 1)
+				condimentList = `\nNone`
+		
+			if (toppingName.length > 128)
+				toppingName = "Title too long to process."
+		
+			embed = new Discord.MessageEmbed()
+					.setColor('#FF6100')
+					.setTitle(`${toppingName} ${toppingName == "Title too long to process." ? '' : 'Pizza'}`)
+					.addFields(
+						{ name: 'Sauce', value: `${sauce}`, inline: true },
+						{ name: 'Cheese', value: `${cheese}`, inline: true },
+						{ name: 'Topping Number', value: `${toppings}`, inline: false },
+						{ name: 'Toppings', value: `${toppingList}`, inline: true },
+						{ name: 'Condiment Number', value: `${condiments}`, inline: false },
+						{ name: 'Condiments', value: `${condimentList}`, inline: true },
+					)
+					.setImage(`attachment://pizza-result.png`)
+					.setFooter(`Pizza`);
+		
+			return message.channel.send({embeds: [embed], files: [attachment]})
+		}
 	}
 
     ///////////////////
@@ -5201,31 +5784,360 @@ client.on('messageCreate', async message => {
 	//////////
 
 	if (command === 'makeloot') {
-		makeLoot.initialize(message, prefix)
+		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
+			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
+			return false
+		}
+		
+		if (!message.member.permissions.serialize().ADMINISTRATOR) {
+			message.channel.send("You lack sufficient permissions, I'm so sorry!");
+			return false
+		}
+	
+		const arg = message.content.slice(prefix.length).trim().split(/ +/);
+	
+		if (!arg[1]) {
+			const DiscordEmbed = new Discord.MessageEmbed()
+					.setColor('#0099ff')
+					.setTitle(`${prefix}makeLoot`)
+					.setDescription("(Args <Name> <Items, Drop Chances, ...>)\nCreates a loot table that can be assigned to enemies after a battle victory.\n\nItems and Drop chances can be written like:\n__<item>, <drop chance>, <item>, <drop chance>__\n or like:\n__<items>, <drop chances>__\n as long as there is at least one item.")
+				message.channel.send({embeds: [DiscordEmbed]})
+				return false
+		}
+	
+		if (!arg[2]) {
+			message.channel.send("Please specify an item, or a chance of an item dropping.");
+			return false
+		}
+	
+		let itemInput = []
+		let chanceInput = []
+		let incorrectItems = ""
+	
+		var itemPath = dataPath+'/items.json'
+		var itemRead = fs.readFileSync(itemPath);
+		var itemFile = JSON.parse(itemRead);
+	
+		for (const i in arg) {
+			if (i > 1) {
+				if (!isFinite(parseFloat(arg[i]))) {
+					if (!itemFile[arg[i]])
+						incorrectItems += `\n- ${[arg[i]]}`
+					else
+						itemInput.push(arg[i])
+				} else {
+					chanceInput.push(Math.round(parseFloat(arg[i])))
+				}
+			}
+		}
+	
+		if (incorrectItems.length > 0)
+			message.channel.send(`<:warning:878094052208296007>**Your invalid items are:**${incorrectItems}`);
+	
+		//item and drop length comparisons
+	
+		if (itemInput.length < 1) {
+			message.channel.send("I'm sorry, but the loot table doesn't contain an existing item.");
+			return false
+		}
+	
+		if (chanceInput.length > itemInput.length) {
+			chanceInput.length = itemInput.length
+			message.channel.send("<:warning:878094052208296007>Due to there being more drop chances than items themselves, I'll shorten them for you.");
+		}
+	
+		if (chanceInput.length < itemInput.length) {
+			message.channel.send("<:warning:878094052208296007>Due to there being more items than drops chances themselves, I'll assign the leftover ones a default of 10%.");
+	
+			var chancesLeftOver = itemInput.length - chanceInput.length
+	
+			for (i = 1; i <= chancesLeftOver; i++)
+				chanceInput.push(10)
+		}
+	
+		console.log(`Items: ${itemInput}\n Chances: ${chanceInput}`)
+	
+		//Writing into File
+	
+		var lootPath = dataPath+'/Loot/lootTables.json'
+		var lootRead = fs.readFileSync(lootPath);
+		var lootFile = JSON.parse(lootRead);
+	
+		lootFile[arg[1]] = {
+			name: arg[1],
+			items: itemInput,
+			itemChances: chanceInput 
+		}
+	
+		fs.writeFileSync(lootPath, JSON.stringify(lootFile, null, '    '));
+	
+		//Outputting an embed
+	
+		console.log(`Items length: ${itemInput.length}\n Chances length: ${chanceInput.length}`)
+	
+		let finalText = ``
+	
+		let a=0;
+		do {
+			finalText += `\n- ${itemInput[a]}: ${chanceInput[a]}% chance`
+			a++
+		} while (a < itemInput.length) //how tf did a for loop not work with it????????
+	
+		const DiscordEmbed = new Discord.MessageEmbed()
+			.setColor('#A35B33')
+			.setTitle(`A loot table has been made!`)
+			.setDescription(`**Name**:\n${arg[1]}\n\n**Loot**:${finalText}`)
+			.setFooter('Loot Table')
+		message.channel.send({embeds: [DiscordEmbed]})
 	}
 
 	if (command === 'assignloot') {
-		assignLoot.initialize(message, prefix)
+		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
+			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
+			return false
+		}
+		
+		if (!message.member.permissions.serialize().ADMINISTRATOR) {
+			message.channel.send("You lack sufficient permissions, I'm so sorry!");
+			return false
+		}
+	
+		const arg = message.content.slice(prefix.length).trim().split(/ +/);
+	
+		if (!arg[1]) {
+			const DiscordEmbed = new Discord.MessageEmbed()
+					.setColor('#0099ff')
+					.setTitle(`${prefix}assignloot`)
+					.setDescription("(Args <Name> <Loot Table>)\nAssigns a loot table to a certain enemy type.")
+				message.channel.send({embeds: [DiscordEmbed]})
+				return false
+		}
+	
+		if (!arg[2]) {
+			message.channel.send("You didn't specify a loot table yet.")
+			return false
+		}
+	
+		var lootPath = dataPath+'/Loot/lootTables.json'
+		var lootRead = fs.readFileSync(lootPath);
+		var lootFile = JSON.parse(lootRead);
+		var enmPath = dataPath+'/enemies.json'
+		var enmRead = fs.readFileSync(enmPath);
+		var enmFile = JSON.parse(enmRead);
+	
+		if (!enmFile[arg[1]]) {
+			message.channel.send(`${arg[1]} is not an enemy.`)
+			return false
+		}
+	
+		if (!lootFile[arg[2]]) {
+			message.channel.send(`${arg[2]} is not a loot table.`)
+			return false
+		}
+	
+		enmFile[arg[1]].loot = arg[2]
+		fs.writeFileSync(enmPath, JSON.stringify(enmFile, null, '    '));
+	
+		message.channel.send(`**${arg[1]}** will now drop items from the **${arg[2]}** loot table at random.`);
 	}
 
 	if (command === 'getloot') {
-		getLoot.initialize(message, prefix)
+		const arg = message.content.slice(prefix.length).trim().split(/ +/);
+
+		if (!arg[1]) {
+			const DiscordEmbed = new Discord.MessageEmbed()
+					.setColor('#0099ff')
+					.setTitle(`${prefix}getloot`)
+					.setDescription("(Args <Loot Table / Enemy Name>)\nGets the loot table you want to look into.")
+				message.channel.send({embeds: [DiscordEmbed]})
+				return false
+		}
+
+		var lootPath = dataPath+'/Loot/lootTables.json'
+		var lootRead = fs.readFileSync(lootPath);
+		var lootFile = JSON.parse(lootRead);
+		var enmPath = dataPath+'/enemies.json'
+		var enmRead = fs.readFileSync(enmPath);
+		var enmFile = JSON.parse(enmRead);
+
+		let itemInput
+		let chanceInput
+		let lootName
+
+		if (lootFile[arg[1]]) {
+			lootName = arg[1]
+
+			itemInput = lootFile[arg[1]].items
+			chanceInput = lootFile[arg[1]].itemChances
+		} else if (enmFile[arg[1]]) {
+			if (enmFile[arg[1]].loot == '' || !enmFile[arg[1]].loot) {
+				message.channel.send(`${arg[1]} does not have a set loot table.`)
+				return false
+			}
+
+			lootName = enmFile[arg[1]].loot
+
+			itemInput = lootFile[lootName].items
+			chanceInput = lootFile[lootName].itemChances
+		} else {
+			message.channel.send(`${arg[1]} is not a loot table, or an enemy type.`)
+			return false
+		}
+
+		let finalText = ``
+		let a=0;
+		do {
+			finalText += `\n- ${itemInput[a]}: ${chanceInput[a]}% chance`
+			a++
+		} while (a < itemInput.length) //how tf did a for loop not work with it????????
+
+		let ownedBy = ''
+
+		for (const i in enmFile) {
+			if (enmFile[i].loot == lootName) {
+				if (ownedBy != "") {ownedBy += ", "}
+				ownedBy += `${i}`
+			}
+		}
+
+		const DiscordEmbed = new Discord.MessageEmbed()
+			.setColor('#A35B33')
+			.setTitle(`Loot Table: ${lootName}`)
+			.setDescription(`**Loot**:${finalText}\n\n**Owned By**:\n${ownedBy}`)
+			.setFooter('Loot Table')
+		message.channel.send({embeds: [DiscordEmbed]})
 	}
 
 	if (command === 'searchloots') {
-		searchLoot.initialize(message, prefix)
+		const arg = message.content.slice(prefix.length).trim().split(/ +/);
+
+		if (!arg[1] || arg[1] === ' ' || arg[1] === 'null') {
+			const DiscordEmbed = new Discord.MessageEmbed()
+				.setColor('#0099ff')
+				.setTitle(`${prefix}searchloots`)
+				.setDescription("(Args <Search Parameter>)\nSearch for Loot Tables that include the word specified.")
+			message.channel.send({embeds: [DiscordEmbed]})
+			return false
+		}
+
+		var lootPath = dataPath+'/Loot/lootTables.json'
+		var lootRead = fs.readFileSync(lootPath);
+		var lootFile = JSON.parse(lootRead);
+
+		var skillTxt = []
+		for (const skillName in lootFile) {
+			if (skillName.includes(arg[1])) {
+				skillTxt.push(lootFile[skillName])
+			}
+		}
+
+		sendLootArray(message.channel, skillTxt)
 	}
 
 	if (command === 'listloots') {
-		listLoot.initialize(message, prefix)
+		var lootPath = dataPath+'/Loot/lootTables.json'
+		var lootRead = fs.readFileSync(lootPath);
+		var lootFile = JSON.parse(lootRead);
+
+		var skillTxt = []
+		for (const i in lootFile) {
+				skillTxt.push(lootFile[i])
+		}
+
+		sendLootArray(message.channel, skillTxt)
 	}
 
 	if (command === 'deassignloot') {
-		deassignLoot.initialize(message, prefix)
+		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
+			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
+			return false
+		}
+		
+		if (!message.member.permissions.serialize().ADMINISTRATOR) {
+			message.channel.send("You lack sufficient permissions, I'm so sorry!");
+			return false
+		}
+	
+		const arg = message.content.slice(prefix.length).trim().split(/ +/);
+	
+		if (!arg[1]) {
+			const DiscordEmbed = new Discord.MessageEmbed()
+					.setColor('#0099ff')
+					.setTitle(`${prefix}deassignloot`)
+					.setDescription("(Args <Enemy Name>)\nRemoves a loot table from a certain enemy type.")
+				message.channel.send({embeds: [DiscordEmbed]})
+				return false
+		}
+	
+		var enmPath = dataPath+'/enemies.json'
+		var enmRead = fs.readFileSync(enmPath);
+		var enmFile = JSON.parse(enmRead);
+	
+		if (!enmFile[arg[1]]) {
+			message.channel.send(`${arg[1]} is not an enemy.`)
+			return false
+		}
+	
+		if (!enmFile[arg[1]].loot || enmFile[arg[1]].loot == '' || enmFile[arg[1]].loot == undefined) {
+			message.channel.send(`${arg[1]} doesn't have a set loot table.`)
+			return false
+		}
+	
+		enmFile[arg[1]].loot = ''
+		fs.writeFileSync(enmPath, JSON.stringify(enmFile, null, '    '));
+	
+		message.channel.send(`**${arg[1]}** will no longer drop items at random.`);
 	}
 
 	if (command === 'removeloot') {
-		removeLoot.initialize(message, prefix)
+		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
+			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
+			return false
+		}
+		
+		if (!message.member.permissions.serialize().ADMINISTRATOR) {
+			message.channel.send("You lack sufficient permissions, I'm so sorry!");
+			return false
+		}
+	
+		const arg = message.content.slice(prefix.length).trim().split(/ +/);
+	
+		if (!arg[1]) {
+			const DiscordEmbed = new Discord.MessageEmbed()
+					.setColor('#0099ff')
+					.setTitle(`${prefix}assignloot`)
+					.setDescription("(Args <Loot Table>)\nRemoves a loot table and unsets it for everything.")
+				message.channel.send({embeds: [DiscordEmbed]})
+				return false
+		}
+	
+		var lootPath = dataPath+'/Loot/lootTables.json'
+		var lootRead = fs.readFileSync(lootPath);
+		var lootFile = JSON.parse(lootRead);
+		var enmPath = dataPath+'/enemies.json'
+		var enmRead = fs.readFileSync(enmPath);
+		var enmFile = JSON.parse(enmRead);
+	
+		if (!lootFile[arg[1]]) {
+			message.channel.send(`${arg[1]} is not a loot table.`)
+			return false
+		}
+	
+		let enmList = ``
+	
+		for (const i in enmFile) {
+			if (enmFile[i].loot == arg[1]) {
+				enmFile[i].loot = ''
+	
+				enmList += `\n- ${i}`
+			}
+		}
+		fs.writeFileSync(enmPath, JSON.stringify(enmFile, null, '    '));
+	
+		delete lootFile[arg[1]]
+		fs.writeFileSync(lootPath, JSON.stringify(lootFile, null, '    '));
+	
+		message.channel.send(`**${arg[1]}** has been removed, and with it, the enemies that no longer have the loot are:${enmList}`);
 	}
 
 	/////////////////////
