@@ -1,13 +1,22 @@
 {
-    "GrassimpDrops": {
-        "name": "GrassimpDrops",
+    "Grassimp": {
+        "name": "Grassimp",
         "items": [
             "SparkleBerry",
             "ShineBerry"
         ],
         "itemChances": [
-            12,
-            15
+            50,
+            20
+        ]
+    },
+    "Metalic": {
+        "name": "Metalic",
+        "items": [
+            "SliceOfPizza"
+        ],
+        "itemChances": [
+            100
         ]
     }
 }

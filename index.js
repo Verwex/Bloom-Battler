@@ -381,6 +381,50 @@ const sendLootArray = async(channel, theArray) => {
 	})
 }
 
+const sendBasicArray = async(channel, theArray) => {
+	const generateEmbed = async start => {
+		const current = theArray.slice(start, start + 10)
+		return new Discord.MessageEmbed({
+			title: `Showing results ${start + 1}-${start + current.length} out of ${theArray.length}`,
+			fields: await Promise.all(
+				current.map(async arrayDefs => ({
+					
+					name: `- ${arrayDefs.name}`,
+					value: `_ _`
+				}))
+			)
+		})
+	}
+
+	const canFitOnOnePage = theArray.length <= 10
+	const embedMessage = await channel.send({
+		embeds: [await generateEmbed(0)],
+		components: canFitOnOnePage ? [] : [new Discord.MessageActionRow({components: [forwardButton]})]
+	})
+
+	if (canFitOnOnePage) return
+
+	const collector = embedMessage.createMessageComponentCollector({
+		filter: ({user}) => true // fuck you and your (the sequel)
+	})
+
+	let currentIndex = 0
+	collector.on('collect', async interaction => {
+		interaction.customId === backId ? (currentIndex -= 10) : (currentIndex += 10)
+		await interaction.update({
+			embeds: [await generateEmbed(currentIndex)],
+			components: [
+				new Discord.MessageActionRow({
+					components: [
+						...(currentIndex ? [backButton] : []),
+						...(currentIndex + 10 < theArray.length ? [forwardButton] : [])
+					]
+				})
+			]
+		})
+	})
+}
+
 // Finally, Voice Channel shit
 var voiceChannelShit = {}
 
@@ -3634,13 +3678,41 @@ client.on('messageCreate', async message => {
 					.setColor('#0099ff')
 					.setTitle('These are the commands that have to do with **Loot Tables** and enemy drops')
 					.addFields(
-						{ name: `${prefix}makeloot`, value: '(Args <Name> <Items, Drop Chances, ...>)\nCreates a loot table that can be assigned to enemies after a battle victory.', inline: true },
+						{ name: `${prefix}makeloot`, value: '(Args <Name> <Items, Drop Chances, ...>)\nCreates a loot table that can be assigned to enemies after a battle victory, and chests.', inline: true },
 						{ name: `${prefix}removeloot`, value: '(Args <Loot Table>)\nRemoves a loot table and unsets it for everything.', inline: true },
 						{ name: `${prefix}assignloot`, value: '(Args <Name> <Loot Table>)\nAssigns a loot table to a certain enemy type.', inline: true },
 						{ name: `${prefix}deassignloot`, value: '(Args <Enemy Name>)\nRemoves a loot table from a certain enemy type.', inline: true },
 						{ name: `${prefix}getloot`, value: '(Args <Loot Table / Enemy Name>)\nGets the loot table you want to look into.', inline: true },
 						{ name: `${prefix}searchloots`, value: '(Args <Search Parameter>)\nSearch for Loot Tables that include the word specified', inline: true },
 						{ name: `${prefix}listloots`, value: 'Will let you see a list of available loot tables', inline: true },
+					)
+				message.channel.send({embeds: [DiscordEmbed]})
+				break
+
+			case 'chests':
+				DiscordEmbed = new Discord.MessageEmbed()
+					.setColor('#0099ff')
+					.setTitle('These are the commands that have to do with **Chests** because people have to store stuff somewhere')
+					.addFields(
+						{ name: `${prefix}makechest`, value: '(Args <Name> <Channel> <Spoiler> <Optional: Loot Table, Items...>)\nCreates a chest that characters can open, gather items from and put them in.', inline: true },
+						{ name: `${prefix}removechest`, value: '(Args <Name>)\nWill remove a chest and delete every item inside of it.', inline: true },
+						{ name: `${prefix}getchest`, value: "(Args <Name>)\nWill display some information about a specific chest.", inline: true },
+						{ name: `${prefix}searchchests`, value: "(Args <Search Parameter>)\nWill search for chests based on the word specified, in a server you type into.", inline: true },
+						{ name: `${prefix}listchests`, value: "Will show you a list of chests, in a server you type into.", inline: true },
+						{ name: `${prefix}chestlocation`, value: "(Args <Name> <Channel>)\nWill change a chest's location.", inline: true },
+						{ name: `${prefix}renamechest`, value: "(Args <Name> <New Name>)\nWill change a chest's name to what you want it to be.", inline: true },
+						{ name: `${prefix}spoilerchest`, value: '(Args <Name>)\nWill change if a chest is spoilered or not.', inline: true },
+						{ name: `${prefix}encounterchest`, value: '(Args <Name>)\nWill make a chest opened for the first time.', inline: true },
+						{ name: `${prefix}chestloot`, value: "(Args <Name> <New Name>)\nWill change a chest's loot table and items within.", inline: true },
+						{ name: `${prefix}removechestloot`, value: "(Args <Name>)\nWill remove a chest's loot table, and items related to it within.", inline: true },
+						{ name: `${prefix}chestitems`, value: "(Args <Name> <Optional: Items>)\nWill set a chest's base items to put into a chest.", inline: true },
+						{ name: `${prefix}removechestitems`, value: "(Args <Name>)\nWill remove a chest's base items.", inline: true },
+						{ name: `${prefix}lockchest`, value: "(Args <Name> <Item>)\nWill lock a chest with an item.", inline: true },
+						{ name: `${prefix}removelock`, value: "(Args <Name>)\nWill remove a chest's lock.", inline: true },
+						{ name: `${prefix}openchest`, value: "(Args <Chest Name> <Party>)\nOpens a created chest with the specified party.", inline: true },
+						{ name: `${prefix}closechest`, value: "(Args <Chest Name>)\nCloses a created chest if it is open.", inline: true },
+						{ name: `${prefix}takeitem`, value: "(Args <Chest Name> <Item> <Optional: Quantity>)\nTake items from a chest, should it be open.", inline: true },
+						{ name: `${prefix}putitem`, value: "(Args <Chest Name> <Item> <Optional: Quantity>)\nTake items from a party, and put them inside of a chest, should it be open.", inline: true },
 					)
 				message.channel.send({embeds: [DiscordEmbed]})
 				break
@@ -3658,6 +3730,7 @@ client.on('messageCreate', async message => {
 						{ name: 'Battle', value: 'Commands intended to assist with battle.', inline: true },
 						{ name: 'Music', value: 'Commands intended to play youtube videos & battle themes during battles.', inline: true },
 						{ name: 'Loot', value: 'Commands intended to assist with Loot Tables and enemy drops.', inline: true },
+						{ name: 'Chests', value: 'Because one has to store their items somewhere.', inline: true },
 						{ name: 'Moderation', value: 'Commands intended to help with server moderation.', inline: true },
 					)
 					.setFooter('zzzzzzzz');
@@ -5800,7 +5873,7 @@ client.on('messageCreate', async message => {
 			const DiscordEmbed = new Discord.MessageEmbed()
 					.setColor('#0099ff')
 					.setTitle(`${prefix}makeLoot`)
-					.setDescription("(Args <Name> <Items, Drop Chances, ...>)\nCreates a loot table that can be assigned to enemies after a battle victory.\n\nItems and Drop chances can be written like:\n__<item>, <drop chance>, <item>, <drop chance>__\n or like:\n__<items>, <drop chances>__\n as long as there is at least one item.")
+					.setDescription("(Args <Name> <Items, Drop Chances, ...>)\nCreates a loot table that can be assigned to enemies after a battle victory, and chests.\n\nItems and Drop chances can be written like:\n__<item>, <drop chance>, <item>, <drop chance>__\n or like:\n__<items>, <drop chances>__\n as long as there is at least one item.")
 				message.channel.send({embeds: [DiscordEmbed]})
 				return false
 		}
@@ -6117,6 +6190,9 @@ client.on('messageCreate', async message => {
 		var enmPath = dataPath+'/enemies.json'
 		var enmRead = fs.readFileSync(enmPath);
 		var enmFile = JSON.parse(enmRead);
+		var chestPath = dataPath+'/chests.json'
+		var chestRead = fs.readFileSync(chestPath);
+		var chestFile = JSON.parse(chestRead);
 	
 		if (!lootFile[arg[1]]) {
 			message.channel.send(`${arg[1]} is not a loot table.`)
@@ -6133,11 +6209,1506 @@ client.on('messageCreate', async message => {
 			}
 		}
 		fs.writeFileSync(enmPath, JSON.stringify(enmFile, null, '    '));
+
+		for(const serverID in chestFile) {
+			for(const channelID in chestFile[serverID]) {
+				for (const i in chestFile[serverID][channelID]) {
+					if (chestFile[serverID][channelID][i].inputLoot == arg[1]) {
+						chestFile[serverID][channelID][i].inputLoot = ''
+
+						for (const item in chestFile[serverID][channelID][i].itemsFromLoot) {
+
+							console.log(item)
+							if (chestFile[serverID][channelID][i].items[item] > 0) {
+								chestFile[serverID][channelID][i].items[item] -= chestFile[serverID][channelID][i].itemsFromLoot[item]
+							}
+							
+							if (chestFile[serverID][channelID][i].items[item] <= 0) {
+								delete chestFile[serverID][channelID][i].items[item]
+							}
+						}
+
+						chestFile[serverID][channelID][i].itemsFromLoot = {}
+					}
+				}
+			}
+		}
+
+		fs.writeFileSync(chestPath, JSON.stringify(chestFile, null, '    '));
 	
 		delete lootFile[arg[1]]
 		fs.writeFileSync(lootPath, JSON.stringify(lootFile, null, '    '));
 	
-		message.channel.send(`**${arg[1]}** has been removed, and with it, the enemies that no longer have the loot are:${enmList}`);
+		message.channel.send(`**${arg[1]}** has been removed, and with it, the enemies that no longer have the loot are:${enmList}\n\nChests are probably affected as well.`);
+	}
+
+	////////////
+	// Chests //
+	////////////
+
+	if (command == 'makechest') {
+		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
+			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
+			return false
+		}
+		
+        if (!message.member.permissions.serialize().ADMINISTRATOR) {
+            message.channel.send("You lack sufficient permissions, I'm so sorry!");
+            return
+        }
+
+        const arg = message.content.slice(prefix.length).trim().split(/ +/);
+        if (!arg[1]) {
+            const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}makechest`)
+				.setDescription('(Args <Name> <Channel> <Spoiler> <Optional: Loot Table, Items...>)\nCreates a chest that characters can open, gather items from and put them in.')
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+        }
+
+		if (!arg[2] || !client.channels.cache.get(arg[2])) {
+			message.channel.send("Please specify a valid channel.")
+			return false
+		}
+
+		if (!arg[3]) {
+			message.channel.send("Please specify if this chest should be left as a spoiler or not.")
+			return false
+		}
+
+		var chestPath = dataPath+'/chests.json'
+		var chestRead = fs.readFileSync(chestPath);
+		var chestFile = JSON.parse(chestRead);
+        var itemPath = dataPath+'/items.json'
+        var itemRead = fs.readFileSync(itemPath);
+        var itemFile = JSON.parse(itemRead);
+		var lootPath = dataPath+'/Loot/lootTables.json'
+		var lootRead = fs.readFileSync(lootPath);
+		var lootFile = JSON.parse(lootRead);
+
+		const chestName = arg[1]
+		const chestChannel = client.channels.cache.get(arg[2])
+		const underSpoiler = arg[3]
+		let chosenLoot = ''
+		let chosenItems = []
+
+		if (!chestChannel.isText() && !chestChannel.isThread()) {
+			message.channel.send(`${chestChannel.name} is not a text channel. Please change the location.`)
+			return false
+		}
+
+		for (const i in arg) {
+			if (i > 3) {
+				if (!lootFile[arg[i]]) {
+					if (!itemFile[arg[i]]) {
+						message.channel.send(`<:warning:878094052208296007>${arg[i]} is not a valid item, neither is it a valid loot table`)
+					} else {
+						chosenItems.push(itemFile[arg[i]].name)
+					}
+				} else {
+					chosenLoot = lootFile[arg[i]].name
+				}
+			}
+		}
+
+		if (!chestFile[message.guild.id]) {
+			chestFile[message.guild.id] = {}
+		}
+
+		if (!chestFile[message.guild.id][chestChannel.id]) {
+			chestFile[message.guild.id][chestChannel.id] = {}
+		}
+
+		chestFile[message.guild.id][chestChannel.id][chestName] = {
+			name: chestName,
+			inputLoot: chosenLoot,
+			inputItems: chosenItems,
+			itemsFromLoot: {},
+			items: {},
+			party: "",
+			locked: false,
+			lockOpener: "",
+			spoiler: (underSpoiler == 'true'?true:false),
+			encountered: false
+		}
+
+		////////putting items inside
+		//Loot
+
+		let currentItems = {}
+
+		if (chosenLoot !== '') {
+			let itemInput = lootFile[chosenLoot].items
+			let chanceInput = lootFile[chosenLoot].itemChances
+
+			for (const loot in itemInput) {
+				if (Math.random() * 100 < chanceInput[loot]) {
+					console.log(`Successfully put ${itemInput[loot]} inside of a chest`)
+
+					if (!chestFile[message.guild.id][chestChannel.id][chestName].items[itemInput[loot]]) {
+						chestFile[message.guild.id][chestChannel.id][chestName].items[itemInput[loot]] = 0
+					}
+						
+					chestFile[message.guild.id][chestChannel.id][chestName].items[itemInput[loot]] += 1
+
+					if (!chestFile[message.guild.id][chestChannel.id][chestName].itemsFromLoot[itemInput[loot]]) {
+						chestFile[message.guild.id][chestChannel.id][chestName].itemsFromLoot[itemInput[loot]] = 0
+					}
+						
+					chestFile[message.guild.id][chestChannel.id][chestName].itemsFromLoot[itemInput[loot]] += 1
+
+					if (!currentItems[itemInput[loot]]) {
+						currentItems[itemInput[loot]] = 0
+					}
+
+					currentItems[itemInput[loot]] += 1
+				}
+			}
+		}	
+		//real items
+		let pickedItems = 'None'
+
+		if (chosenItems !== [])
+			pickedItems = ''
+
+		for (const i in chosenItems) {
+			pickedItems += `\n- ${chosenItems[i]}`
+
+			if (!chestFile[message.guild.id][chestChannel.id][chestName].items[chosenItems[i]]) {
+				chestFile[message.guild.id][chestChannel.id][chestName].items[chosenItems[i]] = 0
+			}
+
+			chestFile[message.guild.id][chestChannel.id][chestName].items[chosenItems[i]] += 1
+
+			if (!currentItems[chosenItems[i]]) {
+				currentItems[chosenItems[i]] = 0
+			}
+
+			currentItems[chosenItems[i]] += 1
+		}
+
+		fs.writeFileSync(chestPath, JSON.stringify(chestFile, null, '    '));
+
+		//embed
+
+		console.log(currentItems)
+
+		let spoilerText = 'No'
+		let lootText = 'None'
+		let itemText = ''
+
+		for (const i in currentItems)
+			itemText += `\n- ${i}: ${currentItems[i]}`
+
+		if (underSpoiler == 'true')
+			spoilerText = 'Yes'
+
+		if (chosenLoot !== '')
+			lootText = chosenLoot
+
+		if (pickedItems == '')
+			pickedItems = `None`
+
+		if (itemText == '')
+			itemText = `None`
+
+		if (underSpoiler == 'true') {
+			message.delete()
+			var chestEmbed = new Discord.MessageEmbed()
+			.setColor('#c2907e')
+			.setTitle(`Contents of ${chestName}!`)
+			.setFields(
+				{name: `Loot Table`, value: lootText, inline: false},
+				{name: `Base Items`, value: pickedItems, inline: false},
+				{name: `Current Items`, value: itemText, inline: false}
+			)
+			message.author.send({embeds: [chestEmbed]})
+
+			lootText = '*Spoilered. You should get a DM with the chest contents.*'
+			pickedItems = '*Spoilered. You should get a DM with the chest contents.*'
+			itemText = '*Spoilered. You should get a DM with the chest contents.*'
+		}
+
+		var chestEmbed = new Discord.MessageEmbed()
+			.setColor('#c2907e')
+			.setTitle(`A new chest has been created!`)
+			.setFields(
+				{name: `Name`, value: chestName, inline: true},
+				{name: `Channel`, value: chestChannel.name, inline: true},
+				{name: `Spoiler`, value: spoilerText, inline: true},
+				{name: `Loot Table`, value: lootText, inline: false},
+				{name: `Chosen Items`, value: pickedItems, inline: false},
+				{name: `Current Items`, value: itemText, inline: false}
+			)
+		message.channel.send({embeds: [chestEmbed]})
+	}
+
+	if (command == 'spoilerchest') {
+		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
+			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
+			return false
+		}
+		
+        if (!message.member.permissions.serialize().ADMINISTRATOR) {
+            message.channel.send("You lack sufficient permissions, I'm so sorry!");
+            return
+        }
+
+        const arg = message.content.slice(prefix.length).trim().split(/ +/);
+        if (!arg[1]) {
+            const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}spoilerchest`)
+				.setDescription('(Args <Name>)\nWill change if a chest is spoilered or not.')
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+        }
+
+		const success = utilityFuncs.getChest(arg[1],message)
+		if (success == false) {
+			message.channel.send(`${arg[1]} is not a valid chest.`)
+			return false
+		}
+
+		var chestPath = dataPath+'/chests.json'
+		var chestRead = fs.readFileSync(chestPath);
+		var chestFile = JSON.parse(chestRead);
+
+		for (const channelID in chestFile[message.guild.id]) {
+			for (const chest in chestFile[message.guild.id][channelID]) {
+				if (chestFile[message.guild.id][channelID][arg[1]]) {
+					chestFile[message.guild.id][channelID][arg[1]].spoiler = !chestFile[message.guild.id][channelID][arg[1]].spoiler
+
+					if (chestFile[message.guild.id][channelID][arg[1]].spoiler !== true)
+						message.channel.send(`${arg[1]} is **no longer spoilered**. Everyone is free to see the chest without opening it for the first time.`)
+					else
+						message.channel.send(`${arg[1]} is **now spoilered**. Only ones with permissions are free to see the chest without opening it for the first time.`)
+				}
+			}
+		}
+		fs.writeFileSync(chestPath, JSON.stringify(chestFile, null, '    '));
+	}
+
+	if (command == 'encounterchest') {
+		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
+			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
+			return false
+		}
+		
+        if (!message.member.permissions.serialize().ADMINISTRATOR) {
+            message.channel.send("You lack sufficient permissions, I'm so sorry!");
+            return
+        }
+
+        const arg = message.content.slice(prefix.length).trim().split(/ +/);
+        if (!arg[1]) {
+            const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}encounterchest`)
+				.setDescription('(Args <Name>)\nWill make a chest opened for the first time.')
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+        }
+
+		const success = utilityFuncs.getChest(arg[1],message)
+		if (success == false) {
+			message.channel.send(`${arg[1]} is not a valid chest.`)
+			return false
+		}
+
+		var chestPath = dataPath+'/chests.json'
+		var chestRead = fs.readFileSync(chestPath);
+		var chestFile = JSON.parse(chestRead);
+
+		for (const channelID in chestFile[message.guild.id]) {
+			for (const chest in chestFile[message.guild.id][channelID]) {
+				if (chestFile[message.guild.id][channelID][arg[1]]) {
+					chestFile[message.guild.id][channelID][arg[1]].encountered = true
+
+					message.react('👍')
+				}
+			}
+		}
+		fs.writeFileSync(chestPath, JSON.stringify(chestFile, null, '    '));
+	}
+
+	if (command == 'removechest') {
+		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
+			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
+			return false
+		}
+		
+        if (!message.member.permissions.serialize().ADMINISTRATOR) {
+            message.channel.send("You lack sufficient permissions, I'm so sorry!");
+            return
+        }
+
+        const arg = message.content.slice(prefix.length).trim().split(/ +/);
+        if (!arg[1]) {
+            const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}removechest`)
+				.setDescription('(Args <Name>)\nWill remove a chest and delete every item inside of it.')
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+        }
+
+		const success = utilityFuncs.getChest(arg[1],message)
+		if (success == false) {
+			message.channel.send(`${arg[1]} is not a valid chest.`)
+			return false
+		}
+
+		var chestPath = dataPath+'/chests.json'
+		var chestRead = fs.readFileSync(chestPath);
+		var chestFile = JSON.parse(chestRead);
+
+		for (const channelID in chestFile[message.guild.id]) {
+			for (const chest in chestFile[message.guild.id][channelID]) {
+				if (chestFile[message.guild.id][channelID][arg[1]]) {
+					delete chestFile[message.guild.id][channelID][arg[1]]
+
+					message.react('👍')
+				}
+			}
+		}
+		fs.writeFileSync(chestPath, JSON.stringify(chestFile, null, '    '));
+	}
+
+	if (command == 'chestlocation') {
+		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
+			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
+			return false
+		}
+		
+        if (!message.member.permissions.serialize().ADMINISTRATOR) {
+            message.channel.send("You lack sufficient permissions, I'm so sorry!");
+            return
+        }
+
+        const arg = message.content.slice(prefix.length).trim().split(/ +/);
+        if (!arg[1]) {
+            const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}chestlocation`)
+				.setDescription("(Args <Name> <Channel>)\nWill change a chest's location.")
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+        }
+
+		if (!arg[2] || !client.channels.cache.get(arg[2])) {
+			message.channel.send("Please specify a valid channel.")
+			return false
+		}
+
+		const chestChannel = client.channels.cache.get(arg[2])
+		const success = utilityFuncs.getChest(arg[1],message)
+
+		if (success == false) {
+			message.channel.send(`${arg[1]} is not a valid chest.`)
+			return false
+		}
+
+		if (!chestChannel.isText() && !chestChannel.isThread()) {
+			message.channel.send(`${chestChannel.name} is not a text channel. Please change the location.`)
+			return false
+		}
+
+		var chestPath = dataPath+'/chests.json'
+		var chestRead = fs.readFileSync(chestPath);
+		var chestFile = JSON.parse(chestRead);
+
+		if (!chestFile[message.guild.id][chestChannel.id])
+			chestFile[message.guild.id][chestChannel.id] = {}
+
+		for (const channelID in chestFile[message.guild.id]) {
+			for (const chest in chestFile[message.guild.id][channelID]) {
+				if (chestFile[message.guild.id][channelID][arg[1]]) {
+					if (channelID == chestChannel.id) {
+						message.channel.send(`The new location shouldn't be the same location. Please choose a different location.`)
+						return false
+					}
+
+					chestFile[message.guild.id][chestChannel.id][arg[1]] = chestFile[message.guild.id][channelID][arg[1]]
+					delete chestFile[message.guild.id][channelID][arg[1]]
+
+					message.channel.send(`${chest} has successfully switched location to ${chestChannel.name}.`)
+					fs.writeFileSync(chestPath, JSON.stringify(chestFile, null, '    '));
+					return true
+				}
+			}
+		}
+	}
+
+	if (command == 'renamechest') {
+		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
+			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
+			return false
+		}
+		
+        if (!message.member.permissions.serialize().ADMINISTRATOR) {
+            message.channel.send("You lack sufficient permissions, I'm so sorry!");
+            return
+        }
+
+        const arg = message.content.slice(prefix.length).trim().split(/ +/);
+        if (!arg[1]) {
+            const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}renamechest`)
+				.setDescription("(Args <Name> <New Name>)\nWill change a chest's name to what you want it to be.")
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+        }
+
+		if (!arg[2]) {
+			message.channel.send("Please specify a new name for this chest.")
+			return false
+		}
+
+		const success = utilityFuncs.getChest(arg[1],message)
+
+		if (success == false) {
+			message.channel.send(`${arg[1]} is not a valid chest.`)
+			return false
+		}
+
+		if (arg[2] == arg[1]) {
+			message.channel.send(`You can't rename a chest to the same thing. Please change the new name.`)
+			return false
+		}
+
+		var chestPath = dataPath+'/chests.json'
+		var chestRead = fs.readFileSync(chestPath);
+		var chestFile = JSON.parse(chestRead);
+
+		for (const channelID in chestFile[message.guild.id]) {
+			for (const chest in chestFile[message.guild.id][channelID]) {
+				if (chestFile[message.guild.id][channelID][arg[1]]) {
+					chestFile[message.guild.id][channelID][arg[2]] = chestFile[message.guild.id][channelID][arg[1]]
+					delete chestFile[message.guild.id][channelID][arg[1]]
+
+					message.channel.send(`${arg[1]} has been successfully renamed to ${arg[2]}`)
+					fs.writeFileSync(chestPath, JSON.stringify(chestFile, null, '    '));
+					return true
+				}
+			}
+		}
+	}
+
+	if (command == 'chestloot') {
+		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
+			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
+			return false
+		}
+		
+        if (!message.member.permissions.serialize().ADMINISTRATOR) {
+            message.channel.send("You lack sufficient permissions, I'm so sorry!");
+            return
+        }
+
+        const arg = message.content.slice(prefix.length).trim().split(/ +/);
+        if (!arg[1]) {
+            const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}chestloot`)
+				.setDescription("(Args <Name> <New Name>)\nWill change a chest's loot table and items within.")
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+        }
+
+		if (!arg[2]) {
+			message.channel.send("Please specify a valid loot table.")
+			return false
+		}
+
+		const success = utilityFuncs.getChest(arg[1],message)
+
+		if (success == false) {
+			message.channel.send(`${arg[1]} is not a valid chest.`)
+			return false
+		}
+
+		var lootPath = dataPath+'/Loot/lootTables.json'
+		var lootRead = fs.readFileSync(lootPath);
+		var lootFile = JSON.parse(lootRead);
+		var chestPath = dataPath+'/chests.json'
+		var chestRead = fs.readFileSync(chestPath);
+		var chestFile = JSON.parse(chestRead);
+	
+		if (!lootFile[arg[2]]) {
+			message.channel.send(`${arg[2]} is not a loot table.`)
+			return false
+		}
+
+		for (const channelID in chestFile[message.guild.id]) {
+			for (const chest in chestFile[message.guild.id][channelID]) {
+				if (chestFile[message.guild.id][channelID][arg[1]]) {
+					for (const item in chestFile[message.guild.id][channelID][arg[1]].itemsFromLoot) {
+
+						console.log(item)
+						if (chestFile[message.guild.id][channelID][arg[1]].items[item] > 0) {
+							chestFile[message.guild.id][channelID][arg[1]].items[item] -= chestFile[message.guild.id][channelID][arg[1]].itemsFromLoot[item]
+						}
+						
+						if (chestFile[message.guild.id][channelID][arg[1]].items[item] <= 0) {
+							delete chestFile[message.guild.id][channelID][arg[1]].items[item]
+						}
+					}
+
+					chestFile[message.guild.id][channelID][arg[1]].itemsFromLoot = {}
+					
+					chestFile[message.guild.id][channelID][arg[1]].inputLoot = lootFile[arg[2]].name
+
+					let itemInput = lootFile[arg[2]].items
+					let chanceInput = lootFile[arg[2]].itemChances
+
+					for (const loot in itemInput) {
+						if (Math.random() * 100 < chanceInput[loot]) {
+							console.log(`Successfully put ${itemInput[loot]} inside of a chest`)
+
+							if (!chestFile[message.guild.id][channelID][arg[1]].items[itemInput[loot]]) {
+								chestFile[message.guild.id][channelID][arg[1]].items[itemInput[loot]] = 0
+							}
+								
+							chestFile[message.guild.id][channelID][arg[1]].items[itemInput[loot]] += 1
+
+							if (!chestFile[message.guild.id][channelID][arg[1]].itemsFromLoot[itemInput[loot]]) {
+								chestFile[message.guild.id][channelID][arg[1]].itemsFromLoot[itemInput[loot]] = 0
+							}
+								
+							chestFile[message.guild.id][channelID][arg[1]].itemsFromLoot[itemInput[loot]] += 1
+						}
+					}
+
+					let newItems = ''
+					for (const i in chestFile[message.guild.id][channelID][arg[1]].items) {
+						newItems += `\n- ${i}: ${chestFile[message.guild.id][channelID][arg[1]].items[i]}`
+					}
+
+					if (newItems.length < 1)
+						newItems = '\nNone'
+
+					var chestEmbed = new Discord.MessageEmbed()
+						.setColor('#c2907e')
+						.setTitle(`The loot table has changed for ${arg[1]}!`)
+						.setDescription(`Items:${newItems}`)
+
+					if (chestFile[message.guild.id][channelID][arg[1]].spoiler == false)
+						message.channel.send({embeds: [chestEmbed]})
+					else {
+						message.delete()
+						message.author.send({embeds: [chestEmbed]})
+					}
+
+					fs.writeFileSync(chestPath, JSON.stringify(chestFile, null, '    '));
+					return true
+				}
+			}
+		}
+	}
+
+	if (command == 'removechestloot') {
+		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
+			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
+			return false
+		}
+		
+        if (!message.member.permissions.serialize().ADMINISTRATOR) {
+            message.channel.send("You lack sufficient permissions, I'm so sorry!");
+            return
+        }
+
+        const arg = message.content.slice(prefix.length).trim().split(/ +/);
+        if (!arg[1]) {
+            const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}removechestloot`)
+				.setDescription("(Args <Name>)\nWill remove a chest's loot table, and items related to it within.")
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+        }
+
+		const success = utilityFuncs.getChest(arg[1],message)
+
+		if (success == false) {
+			message.channel.send(`${arg[1]} is not a valid chest.`)
+			return false
+		}
+
+		var chestPath = dataPath+'/chests.json'
+		var chestRead = fs.readFileSync(chestPath);
+		var chestFile = JSON.parse(chestRead);
+
+		for (const channelID in chestFile[message.guild.id]) {
+			for (const chest in chestFile[message.guild.id][channelID]) {
+				if (chestFile[message.guild.id][channelID][arg[1]]) {
+					if (chestFile[message.guild.id][channelID][arg[1]].inputLoot == "") {
+						message.channel.send(`${arg[1]} does not have a chest loot specified.`)
+						return false
+					}
+
+					for (const item in chestFile[message.guild.id][channelID][arg[1]].itemsFromLoot) {
+
+						console.log(item)
+						if (chestFile[message.guild.id][channelID][arg[1]].items[item] > 0) {
+							chestFile[message.guild.id][channelID][arg[1]].items[item] -= chestFile[message.guild.id][channelID][arg[1]].itemsFromLoot[item]
+						}
+						
+						if (chestFile[message.guild.id][channelID][arg[1]].items[item] <= 0) {
+							delete chestFile[message.guild.id][channelID][arg[1]].items[item]
+						}
+					}
+
+					chestFile[message.guild.id][channelID][arg[1]].itemsFromLoot = {}
+					chestFile[message.guild.id][channelID][arg[1]].inputLoot = ""
+
+					let newItems = ''
+					for (const i in chestFile[message.guild.id][channelID][arg[1]].items) {
+						newItems += `\n- ${i}: ${chestFile[message.guild.id][channelID][arg[1]].items[i]}`
+					}
+
+					if (newItems.length < 1)
+						newItems = '\nNone'
+
+					var chestEmbed = new Discord.MessageEmbed()
+						.setColor('#c2907e')
+						.setTitle(`The loot table has been removed for ${arg[1]}!`)
+						.setDescription(`Items:${newItems}`)
+
+					if (chestFile[message.guild.id][channelID][arg[1]].spoiler == false)
+						message.channel.send({embeds: [chestEmbed]})
+					else {
+						message.delete()
+						message.author.send({embeds: [chestEmbed]})
+					}
+
+					fs.writeFileSync(chestPath, JSON.stringify(chestFile, null, '    '));
+					return true
+				}
+			}
+		}
+	}
+
+	if (command == 'chestitems') {
+		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
+			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
+			return false
+		}
+		
+        if (!message.member.permissions.serialize().ADMINISTRATOR) {
+            message.channel.send("You lack sufficient permissions, I'm so sorry!");
+            return
+        }
+
+        const arg = message.content.slice(prefix.length).trim().split(/ +/);
+        if (!arg[1]) {
+            const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}chestitems`)
+				.setDescription("(Args <Name> <Optional: Items>)\nWill set a chest's base items to put into a chest.")
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+        }
+
+		const success = utilityFuncs.getChest(arg[1],message)
+
+		if (success == false) {
+			message.channel.send(`${arg[1]} is not a valid chest.`)
+			return false
+		}
+
+		var chestPath = dataPath+'/chests.json'
+		var chestRead = fs.readFileSync(chestPath);
+		var chestFile = JSON.parse(chestRead);
+		var itemPath = dataPath+'/items.json'
+        var itemRead = fs.readFileSync(itemPath);
+        var itemFile = JSON.parse(itemRead);
+
+		let incorrectItems = ""
+		let chosenItems = []
+
+		for (const i in arg) {
+			if (i > 1) {
+				if (!itemFile[arg[i]]) {
+					incorrectItems += `\n- ${[arg[i]]}`
+				} else {
+					chosenItems.push(itemFile[arg[i]].name)
+				}
+			}
+		}
+
+		if (incorrectItems.length > 0)
+			message.channel.send(`<:warning:878094052208296007>**Your invalid items are:**${incorrectItems}`);
+
+			for (const channelID in chestFile[message.guild.id]) {
+				for (const chest in chestFile[message.guild.id][channelID]) {
+					if (chestFile[message.guild.id][channelID][arg[1]]) {
+	
+						for (const i in chestFile[message.guild.id][channelID][arg[1]].inputItems) {
+							var item = chestFile[message.guild.id][channelID][arg[1]].inputItems[i]
+
+							if (chestFile[message.guild.id][channelID][arg[1]].items[item] > 0)
+								chestFile[message.guild.id][channelID][arg[1]].items[item]--
+							
+							if (chestFile[message.guild.id][channelID][arg[1]].items[item] <= 0)
+								delete chestFile[message.guild.id][channelID][arg[1]].items[item]
+						}
+	
+						chestFile[message.guild.id][channelID][arg[1]].inputItems = chosenItems
+
+						for (const i in chosenItems) {
+							if (!chestFile[message.guild.id][channelID][arg[1]].items[chosenItems[i]]) {
+								chestFile[message.guild.id][channelID][arg[1]].items[chosenItems[i]] = 0
+							}
+									
+							chestFile[message.guild.id][channelID][arg[1]].items[chosenItems[i]] += 1
+						}
+
+						let newItems = ''
+						for (const i in chestFile[message.guild.id][channelID][arg[1]].items) {
+							newItems += `\n- ${i}: ${chestFile[message.guild.id][channelID][arg[1]].items[i]}`
+						}
+
+						if (newItems.length < 1)
+						newItems = '\nNone'
+	
+						var chestEmbed = new Discord.MessageEmbed()
+							.setColor('#c2907e')
+							.setTitle(`The base items have been changed for ${arg[1]}!`)
+							.setDescription(`Items:${newItems}`)
+	
+						if (chestFile[message.guild.id][channelID][arg[1]].spoiler == false)
+							message.channel.send({embeds: [chestEmbed]})
+						else {
+							message.delete()
+							message.author.send({embeds: [chestEmbed]})
+						}
+	
+						fs.writeFileSync(chestPath, JSON.stringify(chestFile, null, '    '));
+						return true
+					}
+				}
+			}
+	}
+
+	if (command == 'removechestitems') {
+		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
+			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
+			return false
+		}
+		
+        if (!message.member.permissions.serialize().ADMINISTRATOR) {
+            message.channel.send("You lack sufficient permissions, I'm so sorry!");
+            return
+        }
+
+        const arg = message.content.slice(prefix.length).trim().split(/ +/);
+        if (!arg[1]) {
+            const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}removechestitems`)
+				.setDescription("(Args <Name>)\nWill remove a chest's base items.")
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+        }
+
+		const success = utilityFuncs.getChest(arg[1],message)
+
+		if (success == false) {
+			message.channel.send(`${arg[1]} is not a valid chest.`)
+			return false
+		}
+
+		var chestPath = dataPath+'/chests.json'
+		var chestRead = fs.readFileSync(chestPath);
+		var chestFile = JSON.parse(chestRead);
+
+		for (const channelID in chestFile[message.guild.id]) {
+			for (const chest in chestFile[message.guild.id][channelID]) {
+				if (chestFile[message.guild.id][channelID][arg[1]]) {
+
+					if (chestFile[message.guild.id][channelID][arg[1]].inputItems == []) {
+						message.channel.send(`${arg[1]} already doesn't have base items to begin with.`)
+						return false
+					}
+
+					for (const i in chestFile[message.guild.id][channelID][arg[1]].inputItems) {
+						var item = chestFile[message.guild.id][channelID][arg[1]].inputItems[i]
+
+						if (chestFile[message.guild.id][channelID][arg[1]].items[item] > 0)
+							chestFile[message.guild.id][channelID][arg[1]].items[item]--
+						
+						if (chestFile[message.guild.id][channelID][arg[1]].items[item] <= 0)
+							delete chestFile[message.guild.id][channelID][arg[1]].items[item]
+					}
+
+					chestFile[message.guild.id][channelID][arg[1]].inputItems = []
+
+					let newItems = ''
+					for (const i in chestFile[message.guild.id][channelID][arg[1]].items) {
+						newItems += `\n- ${i}: ${chestFile[message.guild.id][channelID][arg[1]].items[i]}`
+					}
+
+					if (newItems.length < 1)
+					newItems = '\nNone'
+
+					var chestEmbed = new Discord.MessageEmbed()
+						.setColor('#c2907e')
+						.setTitle(`The base items have been removed for ${arg[1]}!`)
+						.setDescription(`Items:${newItems}`)
+
+					if (chestFile[message.guild.id][channelID][arg[1]].spoiler == false)
+						message.channel.send({embeds: [chestEmbed]})
+					else {
+						message.delete()
+						message.author.send({embeds: [chestEmbed]})
+					}
+
+					fs.writeFileSync(chestPath, JSON.stringify(chestFile, null, '    '));
+					return true
+				}
+			}
+		}
+	}
+
+	if (command == 'lockchest') {
+		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
+			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
+			return false
+		}
+		
+        if (!message.member.permissions.serialize().ADMINISTRATOR) {
+            message.channel.send("You lack sufficient permissions, I'm so sorry!");
+            return
+        }
+
+        const arg = message.content.slice(prefix.length).trim().split(/ +/);
+        if (!arg[1]) {
+            const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}lockchest`)
+				.setDescription("(Args <Name> <Item>)\nWill lock a chest with an item.")
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+        }
+
+		if (!arg[2]) {
+			message.channel.send(`Please specify an item to lock your chest with.`)
+			return false
+		}
+
+		const success = utilityFuncs.getChest(arg[1],message)
+
+		if (success == false) {
+			message.channel.send(`${arg[1]} is not a valid chest.`)
+			return false
+		}
+
+		var chestPath = dataPath+'/chests.json'
+		var chestRead = fs.readFileSync(chestPath);
+		var chestFile = JSON.parse(chestRead);
+		var itemPath = dataPath+'/items.json'
+        var itemRead = fs.readFileSync(itemPath);
+        var itemFile = JSON.parse(itemRead);
+
+		if (!itemFile[arg[2]]) {
+			message.channel.send(`${arg[2]} is not a valid item.`)
+			return false
+		}
+
+		for (const channelID in chestFile[message.guild.id]) {
+			for (const chest in chestFile[message.guild.id][channelID]) {
+				if (chestFile[message.guild.id][channelID][arg[1]]) {
+
+					chestFile[message.guild.id][channelID][arg[1]].locked = true
+					chestFile[message.guild.id][channelID][arg[1]].lockOpener = arg[2]
+
+					fs.writeFileSync(chestPath, JSON.stringify(chestFile, null, '    '));
+
+					if (chestFile[message.guild.id][channelID][arg[1]].spoiler = true)
+						message.delete()
+
+					message.channel.send(`${arg[1]} has been locked${chestFile[message.guild.id][channelID][arg[1]].spoiler !== true ? ` with a ${arg[2]}` : `.`}`)
+
+					return true
+				}
+			}
+		}
+	}
+
+	if (command == 'removelock') {
+		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
+			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
+			return false
+		}
+		
+        if (!message.member.permissions.serialize().ADMINISTRATOR) {
+            message.channel.send("You lack sufficient permissions, I'm so sorry!");
+            return
+        }
+
+        const arg = message.content.slice(prefix.length).trim().split(/ +/);
+        if (!arg[1]) {
+            const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}removelock`)
+				.setDescription("(Args <Name>)\nWill remove a chest's lock.")
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+        }
+
+		const success = utilityFuncs.getChest(arg[1],message)
+
+		if (success == false) {
+			message.channel.send(`${arg[1]} is not a valid chest.`)
+			return false
+		}
+
+		var chestPath = dataPath+'/chests.json'
+		var chestRead = fs.readFileSync(chestPath);
+		var chestFile = JSON.parse(chestRead);
+
+		for (const channelID in chestFile[message.guild.id]) {
+			for (const chest in chestFile[message.guild.id][channelID]) {
+				if (chestFile[message.guild.id][channelID][arg[1]]) {
+					if (chestFile[message.guild.id][channelID][arg[1]].lockOpener == "") {
+						message.channel.send(`${arg[1]} doesn't have a lock.`)
+						return false
+					}
+
+					chestFile[message.guild.id][channelID][arg[1]].locked = false
+					chestFile[message.guild.id][channelID][arg[1]].lockOpener = ""
+
+					fs.writeFileSync(chestPath, JSON.stringify(chestFile, null, '    '));
+
+					if (chestFile[message.guild.id][channelID][arg[1]].spoiler = true)
+						message.delete()
+
+					message.channel.send(`${arg[1]} is no longer locked.`)
+
+					return true
+				}
+			}
+		}
+	}
+
+	if (command == 'getchest') {
+		const arg = message.content.slice(prefix.length).trim().split(/ +/);
+        if (!arg[1]) {
+            const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}getchest`)
+				.setDescription("(Args <Name>)\nWill display some information about a specific chest.")
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+        }
+
+		const success = utilityFuncs.getChest(arg[1],message)
+
+		if (success == false) {
+			message.channel.send(`${arg[1]} is not a valid chest.`)
+			return false
+		}
+
+		var chestPath = dataPath+'/chests.json'
+		var chestRead = fs.readFileSync(chestPath);
+		var chestFile = JSON.parse(chestRead);
+
+		var canSkip = false
+		if (message.member.permissions.serialize().ADMINISTRATOR || utilityFuncs.RPGBotAdmin(message.author.id))
+			canSkip = true
+
+		for (const channelID in chestFile[message.guild.id]) {
+			for (const chest in chestFile[message.guild.id][channelID]) {
+				if (chestFile[message.guild.id][channelID][arg[1]]) {
+					if (chestFile[message.guild.id][channelID][arg[1]].spoiler == true && chestFile[message.guild.id][channelID][arg[1]].encountered == false && canSkip == false) {
+						var DiscordEmbed = new Discord.MessageEmbed()
+						.setColor('#c2907e')
+						.setTitle(`${arg[1]}`)
+						.setDescription("You can't look in there yet. Please open it first before you can access the information.")
+	
+					return message.channel.send({embeds: [DiscordEmbed]})
+					}
+
+					var chestChannel = client.channels.cache.get(channelID)
+					let spoilerText = (chestFile[message.guild.id][channelID][arg[1]].spoiler == true ? `Yes` : `No`)
+					let lootText = chestFile[message.guild.id][channelID][arg[1]].inputLoot
+					if (lootText == "")
+						lootText = 'None'
+					let pickedItems = ''
+					for (const i in chestFile[message.guild.id][channelID][arg[1]].inputItems) {
+						pickedItems += `\n- ${chestFile[message.guild.id][channelID][arg[1]].inputItems[i]}`
+					}
+					if (pickedItems == '')
+					pickedItems = `None`
+
+					let itemText = ''
+					for (const i in chestFile[message.guild.id][channelID][arg[1]].items) {
+						itemText += `\n- ${i}: ${chestFile[message.guild.id][channelID][arg[1]].items[i]}`
+					}
+					if (itemText == '')
+						itemText = `None`
+					
+					let lockText = (chestFile[message.guild.id][channelID][arg[1]].locked == true ? `Yes` : `No`)
+					let keyText = (chestFile[message.guild.id][channelID][arg[1]].lockOpener !== "" ? chestFile[message.guild.id][channelID][arg[1]].lockOpener : `None`)
+
+					var chestEmbed = new Discord.MessageEmbed()
+					.setColor('#c2907e')
+					.setTitle(`${arg[1]}`)
+					.setFields(
+						{name: `Channel`, value: chestChannel.name, inline: true},
+						{name: `Spoiler`, value: spoilerText, inline: true},
+						{name: `Locked`, value: lockText, inline: false},
+						{name: `Lock Key`, value: keyText, inline: false},
+						{name: `Loot Table`, value: lootText, inline: false},
+						{name: `Base Items`, value: pickedItems, inline: false},
+						{name: `Current Items`, value: itemText, inline: false}
+					)
+					if (chestFile[message.guild.id][channelID][arg[1]].spoiler == true && chestFile[message.guild.id][channelID][arg[1]].encountered == false && (message.member.permissions.serialize().ADMINISTRATOR || utilityFuncs.RPGBotAdmin(message.author.id))) {
+						message.react(`👍`)
+						message.author.send({embeds: [chestEmbed]})
+					} else
+						message.channel.send({embeds: [chestEmbed]})
+				}
+			}
+		}
+	}
+
+	if (command == 'searchchests') {
+		const arg = message.content.slice(prefix.length).trim().split(/ +/);
+        if (!arg[1]) {
+            const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}searchchests`)
+				.setDescription("(Args <Search Parameter>)\nWill search for chests based on the word specified, in a server you type into.")
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+        }
+
+		var chestPath = dataPath+'/chests.json'
+		var chestRead = fs.readFileSync(chestPath);
+		var chestFile = JSON.parse(chestRead);
+
+		var skillTxt = []
+		for (const channelID in chestFile[message.guild.id]) {
+			for (const chest in chestFile[message.guild.id][channelID]) {
+				if (chest.includes(arg[1])) {
+					skillTxt.push(chestFile[message.guild.id][channelID][chest])
+				}
+			}
+		}
+
+		sendBasicArray(message.channel, skillTxt)
+	}
+
+	if (command == 'listchests') {
+		var chestPath = dataPath+'/chests.json'
+		var chestRead = fs.readFileSync(chestPath);
+		var chestFile = JSON.parse(chestRead);
+		
+		var skillTxt = []
+		for (const channelID in chestFile[message.guild.id]) {
+			for (const chest in chestFile[message.guild.id][channelID]) {
+				skillTxt.push(chestFile[message.guild.id][channelID][chest])
+			}
+		}
+		
+		sendBasicArray(message.channel, skillTxt)
+	}
+
+	if (command == 'openchest') {
+		message.delete()
+
+		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
+			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
+			return false
+		}
+		
+        if (!message.member.permissions.serialize().ADMINISTRATOR) {
+            message.channel.send("You lack sufficient permissions, I'm so sorry!");
+            return
+        }
+
+        const arg = message.content.slice(prefix.length).trim().split(/ +/);
+        if (!arg[1]) {
+            const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}openchest`)
+				.setDescription('(Args <Chest Name> <Party>)\nOpens a created chest with the specified party.')
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+        }
+
+		if (!arg[2]) {
+            message.channel.send("Please specify a correct party.");
+            return
+        }
+
+		var chestPath = dataPath+'/chests.json'
+		var chestRead = fs.readFileSync(chestPath);
+		var chestFile = JSON.parse(chestRead);
+		var btlPath = dataPath+'/battle.json'
+		var btlRead = fs.readFileSync(btlPath);
+		var btl = JSON.parse(btlRead);
+
+		if (!chestFile[message.guild.id][message.channel.id][arg[1]]) {
+			message.channel.send(`${arg[1]} does not exist in this channel. Please try somewhere else.`);
+            return
+		}
+
+		if (!btl[message.guild.id].parties[arg[2]]) {
+			message.channel.send("Invalid Party!")
+			return false
+		}
+
+		var chestInput = chestFile[message.guild.id][message.channel.id][arg[1]]
+		var partyInput = btl[message.guild.id].parties[arg[2]]
+
+		let canOpen = false
+
+		if (chestInput.locked == false) {
+			canOpen = true
+		} else if (chestInput.locked == true) {
+			for (const i in partyInput.items) {
+				if (chestInput.lockOpener == i) {
+					canOpen = true
+				}
+			}
+		}
+
+		if (canOpen == false) {
+			message.channel.send("You can't open this chest because you don't have the right item to open it with.")
+			return false
+		}
+
+		chestInput.party = arg[2]
+		chestInput.encountered = true
+		fs.writeFileSync(chestPath, JSON.stringify(chestFile, null, '    '));
+
+		let itemText = ''
+		for (const i in chestInput.items) {
+			itemText += `\n- ${i}: ${chestInput.items[i]}`
+		}
+		if (itemText == '')
+			itemText = `None`
+
+		var chestEmbed = new Discord.MessageEmbed()
+			.setColor('#c2907e')
+			.setTitle(`${arg[2]} has successfully opened ${arg[1]}`)
+			.setFields(
+				{name: `Items`, value: itemText, inline: false}
+			)
+		message.channel.send({embeds: [chestEmbed]})
+	}
+
+	if (command == 'closechest') {
+		message.delete()
+
+		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
+			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
+			return false
+		}
+		
+        if (!message.member.permissions.serialize().ADMINISTRATOR) {
+            message.channel.send("You lack sufficient permissions, I'm so sorry!");
+            return
+        }
+
+		const arg = message.content.slice(prefix.length).trim().split(/ +/);
+        if (!arg[1]) {
+            const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}openchest`)
+				.setDescription('(Args <Chest Name>)\nCloses a created chest if it is open.')
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+        }
+
+		var chestPath = dataPath+'/chests.json'
+		var chestRead = fs.readFileSync(chestPath);
+		var chestFile = JSON.parse(chestRead);
+		var btlPath = dataPath+'/battle.json'
+		var btlRead = fs.readFileSync(btlPath);
+		var btl = JSON.parse(btlRead);
+
+		if (!chestFile[message.guild.id][message.channel.id][arg[1]]) {
+			message.channel.send(`${arg[1]} does not exist in this channel. Please try somewhere else.`);
+            return
+		}
+
+		var chestInput = chestFile[message.guild.id][message.channel.id][arg[1]]
+
+		if (chestInput.party == "") {
+			message.channel.send(`${arg[1]} is not open yet. Please open it first.`);
+            return
+		}
+
+		message.channel.send(`${chestInput.party} has closed ${arg[1]}.`)
+		chestInput.party = ""
+		fs.writeFileSync(chestPath, JSON.stringify(chestFile, null, '    '));
+	}
+
+	if (command == 'takeitem') {
+		message.delete()
+
+		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
+			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
+			return false
+		}
+
+		const arg = message.content.slice(prefix.length).trim().split(/ +/);
+        if (!arg[1]) {
+            const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}takeitem`)
+				.setDescription(`(Args <Chest Name> <Item> <Optional: Quantity>)\nTake items from a chest, should it be open.\n\nYou can also do:\n${prefix}takeitem all to take all the items from the chest.`)
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+        }
+
+		if (!arg[2]) {
+			message.channel.send("Please specify what item you want to take, or if you want to take all of them.")
+			return false
+		}
+
+		var chestPath = dataPath+'/chests.json'
+		var chestRead = fs.readFileSync(chestPath);
+		var chestFile = JSON.parse(chestRead);
+		var itemPath = dataPath+'/items.json'
+		var itemRead = fs.readFileSync(itemPath);
+		var itemFile = JSON.parse(itemRead);
+		var btlPath = dataPath+'/battle.json'
+		var btlRead = fs.readFileSync(btlPath);
+		var btl = JSON.parse(btlRead);
+
+		if (!chestFile[message.guild.id][message.channel.id][arg[1]]) {
+			message.channel.send(`${arg[1]} does not exist in this channel. Please try somewhere else.`);
+            return
+		}
+
+		var chestInput = chestFile[message.guild.id][message.channel.id][arg[1]]
+
+		if (chestInput.party == "") {
+			message.channel.send(`${arg[1]} is not open yet. Please open it first.`);
+            return
+		}
+
+		var partyInput = btl[message.guild.id].parties[chestInput.party]
+
+		if (arg[2] == 'All') {
+			for (const item in itemFile) {
+				for (const chestItem in chestInput.items) {
+					if (chestItem == itemFile[item].name) {
+						if (!partyInput.items[item]) {
+							partyInput.items[item] = 0
+						}
+
+						partyInput.items[item] += chestInput.items[chestItem]
+					}
+				}
+			}
+			fs.writeFileSync(btlPath, JSON.stringify(btl, null, '    '));
+
+			chestInput.items = {}
+
+			fs.writeFileSync(chestPath, JSON.stringify(chestFile, null, '    '));
+		} else {
+			let quantity = 1
+
+			if (!arg[3])
+			quantity = 1
+
+			quantity = parseInt(arg[3])
+
+			if (!isFinite(parseInt(arg[3])))
+			quantity = 1
+
+			if (parseInt(arg[3]) < 1)
+			quantity = 1
+
+			if (!itemFile[arg[2]]) {
+				message.channel.send(`${arg[2]} is not a valid item.`);
+            	return
+			}
+
+			let canTake = false
+
+			for (i in chestInput.items) {
+				if (itemFile[arg[2]].name == i)
+				canTake = true
+			}
+
+			if (canTake == false) {
+				message.channel.send(`${arg[2]} is not in this chest yet.`);
+            	return
+			}
+
+			if (quantity > chestInput.items[itemFile[arg[2]].name])
+			quantity = chestInput.items[itemFile[arg[2]].name]
+
+			chestInput.items[itemFile[arg[2]].name] -= quantity
+
+			if (chestInput.items[itemFile[arg[2]].name] < 1)
+			delete chestInput.items[itemFile[arg[2]].name]
+
+			fs.writeFileSync(chestPath, JSON.stringify(chestFile, null, '    '));
+
+			if (!partyInput.items[arg[2]]) {
+				partyInput.items[arg[2]] = 0
+			}
+
+			partyInput.items[arg[2]] += quantity
+
+			fs.writeFileSync(btlPath, JSON.stringify(btl, null, '    '));
+		}
+
+		let itemText = ''
+		for (const i in chestInput.items) {
+			itemText += `\n- ${i}: ${chestInput.items[i]}`
+		}
+		if (itemText == '')
+			itemText = `None`
+
+		var chestEmbed = new Discord.MessageEmbed()
+			.setColor('#c2907e')
+			.setTitle(`${chestInput.party} has successfully taken items from ${chestInput.name}`)
+			.setFields(
+				{name: `Items`, value: itemText, inline: false}
+			)
+		message.channel.send({embeds: [chestEmbed]})
+	}
+
+	if (command == 'putitem') {
+		message.delete()
+
+		if (utilityFuncs.isBanned(message.author.id, message.guild.id) && !utilityFuncs.RPGBotAdmin(message.author.id)) {
+			message.channel.send("I've been told you were banned from using the RPG sections of the bot, sorry!")
+			return false
+		}
+
+		const arg = message.content.slice(prefix.length).trim().split(/ +/);
+        if (!arg[1]) {
+            const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}putitem`)
+				.setDescription(`(Args <Chest Name> <Item> <Optional: Quantity>)\nTake items from a party, and put them inside of a chest, should it be open.\n\nYou can also do:\n${prefix}putitem all to put all the items from the party into a chest.`)
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+        }
+
+		if (!arg[2]) {
+			message.channel.send("Please specify what item you want to take, or if you want to take all of them.")
+			return false
+		}
+
+		var chestPath = dataPath+'/chests.json'
+		var chestRead = fs.readFileSync(chestPath);
+		var chestFile = JSON.parse(chestRead);
+		var itemPath = dataPath+'/items.json'
+		var itemRead = fs.readFileSync(itemPath);
+		var itemFile = JSON.parse(itemRead);
+		var btlPath = dataPath+'/battle.json'
+		var btlRead = fs.readFileSync(btlPath);
+		var btl = JSON.parse(btlRead);
+
+		if (!chestFile[message.guild.id][message.channel.id][arg[1]]) {
+			message.channel.send(`${arg[1]} does not exist in this channel. Please try somewhere else.`);
+            return
+		}
+
+		var chestInput = chestFile[message.guild.id][message.channel.id][arg[1]]
+
+		if (chestInput.party == "") {
+			message.channel.send(`${arg[1]} is not open yet. Please open it first.`);
+            return
+		}
+
+		var partyInput = btl[message.guild.id].parties[chestInput.party]
+
+		if (arg[2] == 'All') {
+			for (const item in itemFile) {
+				for (const partyItem in partyInput.items) {
+					if (item == partyItem) {
+						if (!chestInput.items[itemFile[item].name]) {
+							chestInput.items[itemFile[item].name] = 0
+						}
+
+						chestInput.items[itemFile[item].name] += partyInput.items[partyItem]
+					}
+				}
+			}
+
+			fs.writeFileSync(chestPath, JSON.stringify(chestFile, null, '    '));
+
+			partyInput.items = {}
+
+			fs.writeFileSync(btlPath, JSON.stringify(btl, null, '    '));
+		} else {
+			let quantity = 1
+
+			if (!arg[3])
+			quantity = 1
+
+			quantity = parseInt(arg[3])
+
+			if (!isFinite(parseInt(arg[3])))
+			quantity = 1
+
+			if (parseInt(arg[3]) < 1)
+			quantity = 1
+
+			if (!itemFile[arg[2]]) {
+				message.channel.send(`${arg[2]} is not a valid item.`);
+            	return
+			}
+
+			let canPut = false
+
+			for (i in partyInput.items) {
+				if (arg[2] == i)
+				canPut = true
+			}
+
+			if (canPut == false) {
+				message.channel.send(`${arg[2]} is not an item in ${chestInput.party}'s inventory.`);
+            	return
+			}
+
+			if (quantity > partyInput.items[arg[2]])
+			quantity = partyInput.items[arg[2]]
+
+			partyInput.items[arg[2]] -= quantity
+
+			if (partyInput.items[arg[2]] < 1)
+			delete partyInput.items[arg[2]]
+
+			fs.writeFileSync(btlPath, JSON.stringify(btl, null, '    '));
+
+			if (!chestInput.items[itemFile[arg[2]].name]) {
+				chestInput.items[itemFile[arg[2]].name] = 0
+			}
+
+			chestInput.items[itemFile[arg[2]].name] += quantity
+
+			fs.writeFileSync(chestPath, JSON.stringify(chestFile, null, '    '));
+		}
+
+		let itemText = ''
+		for (const i in chestInput.items) {
+			itemText += `\n- ${i}: ${chestInput.items[i]}`
+		}
+		if (itemText == '')
+			itemText = `None`
+
+		var chestEmbed = new Discord.MessageEmbed()
+			.setColor('#c2907e')
+			.setTitle(`${chestInput.party} has successfully put items from ${chestInput.name}`)
+			.setFields(
+				{name: `Items`, value: itemText, inline: false}
+			)
+		message.channel.send({embeds: [chestEmbed]})
 	}
 
 	/////////////////////

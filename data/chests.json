@@ -1,0 +1,24 @@
+{
+    "877143757697454120": {
+        "877143757697454123": {
+            "Sutela's": {
+                "name": "Sutela's",
+                "inputLoot": "",
+                "inputItems": [
+                    "Slice of Pizza",
+                    "Slice of Pizza"
+                ],
+                "itemsFromLoot": {},
+                "items": {
+                    "Slice of Pizza": 2
+                },
+                "party": "Sutela",
+                "locked": true,
+                "lockOpener": "ShineBerry",
+                "spoiler": true,
+                "encountered": true
+            }
+        },
+        "888872413469753414": {}
+    }
+}
