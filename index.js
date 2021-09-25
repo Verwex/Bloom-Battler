@@ -454,6 +454,7 @@ const sendFoodArray = async(channel, theArray, nameArray, ownerArray) => {
 					name: `- ${arrayDefs.name}`,
 					value: `Owner: ${arrayDefs.owner !== 'official' ? arrayDefs.owner : `${client.user.username} *(Official)*`}\nImage: ${arrayDefs.image !== 'image' ? arrayDefs.image : 'Image separate from a link'}`
 				}))
+			)
 		})
 	}
 
