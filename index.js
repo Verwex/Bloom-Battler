@@ -341,6 +341,7 @@ const sendItemArray = async(channel, theArray) => {
 const sendLootArray = async(channel, theArray) => {
 	const generateEmbed = async start => {
 		const current = theArray.slice(start, start + 10)
+
 		return new Discord.MessageEmbed({
 			title: `Showing results ${start + 1}-${start + current.length} out of ${theArray.length}`,
 			fields: await Promise.all(
@@ -393,6 +394,66 @@ const sendBasicArray = async(channel, theArray) => {
 					value: `_ _`
 				}))
 			)
+		})
+	}
+
+	const canFitOnOnePage = theArray.length <= 10
+	const embedMessage = await channel.send({
+		embeds: [await generateEmbed(0)],
+		components: canFitOnOnePage ? [] : [new Discord.MessageActionRow({components: [forwardButton]})]
+	})
+
+	if (canFitOnOnePage) return
+
+	const collector = embedMessage.createMessageComponentCollector({
+		filter: ({user}) => true // fuck you and your (the sequel)
+	})
+
+	let currentIndex = 0
+	collector.on('collect', async interaction => {
+		interaction.customId === backId ? (currentIndex -= 10) : (currentIndex += 10)
+		await interaction.update({
+			embeds: [await generateEmbed(currentIndex)],
+			components: [
+				new Discord.MessageActionRow({
+					components: [
+						...(currentIndex ? [backButton] : []),
+						...(currentIndex + 10 < theArray.length ? [forwardButton] : [])
+					]
+				})
+			]
+		})
+	})
+}
+
+const sendFoodArray = async(channel, theArray, nameArray, ownerArray) => {
+	const generateEmbed = async start => {
+		let current = theArray.slice(start, start + 10)
+		const current2 = nameArray.slice(start, start + 10)
+		const current3 = ownerArray.slice(start, start + 10)
+
+		for (const i in current) {
+			current[i].name = current2[i]
+
+			if (current3[i] !== 'official') {
+				if (isFinite(parseInt(current3[i]))) {
+					var userID = client.users.cache.find(user => user.id === current3[i].toString())
+					userID = userID.username
+				} else
+				userID = current3[i]
+			} else
+			var userID = 'official'
+
+			current[i].owner = userID
+		}
+
+		return new Discord.MessageEmbed({
+			title: `Showing results ${start + 1}-${start + current.length} out of ${theArray.length}`,
+			fields: await Promise.all(
+				current.map(async arrayDefs => ({
+					name: `- ${arrayDefs.name}`,
+					value: `Owner: ${arrayDefs.owner !== 'official' ? arrayDefs.owner : `${client.user.username} *(Official)*`}\nImage: ${arrayDefs.image !== 'image' ? arrayDefs.image : 'Image separate from a link'}`
+				}))
 		})
 	}
 
@@ -3596,8 +3657,6 @@ client.on('messageCreate', async message => {
 						{ name: `${prefix}guessmyword`, value: '(Args <Person>)\nThe pinged persom must guess your word! Good luck to both of you.', inline: true },
 						{ name: `${prefix}quote`, value: "I'll recite one of the quotes I remember... I don't remember many.", inline: true },
 						{ name: `${prefix}ship`, value: '(Args <Person> <Person> <Person>...) Ships any number of people of your choice based on certain variables. Supports as many people as one wants, should you pick at least two people.', inline: true },
-						{ name: `${prefix}icecream`, value: "(Args <Amount Of Scoops> <Optional: Repeat Scoop Flavors>)\nI'll make an ice cream of any amount of scoop with randomized flavors. You can do up to 100 scoops.", inline: true },
-						{ name: `${prefix}pizza`, value: "(Args <Amount Of Toppings> <Optional: Amount of Condiments> <Optional: Include Cheese> <Optional: Include Sauce> <Optional: Repeat Toppings> <Optional: Repeat Condiments>)\nI'll make a pizza of any amount of toppings and condiments. You can do up to 100 toppings and 20 condiments", inline: true },
 					)
 				message.channel.send({embeds: [DiscordEmbed]})
 				break
@@ -3694,7 +3753,7 @@ client.on('messageCreate', async message => {
 					.setColor('#0099ff')
 					.setTitle('These are the commands that have to do with **Chests** because people have to store stuff somewhere')
 					.addFields(
-						{ name: `${prefix}makechest`, value: '(Args <Name> <Channel> <Spoiler> <Optional: Loot Table, Items...>)\nCreates a chest that characters can open, gather items from and put them in.', inline: true },
+						{ name: `${prefix}makechest`, value: '(Args <Name> <Channel> <Spoiler> <Optional: Loot Table, Items...>)\nCreates a chest that characters can open, gather items from and put them in.', inline: false },
 						{ name: `${prefix}removechest`, value: '(Args <Name>)\nWill remove a chest and delete every item inside of it.', inline: true },
 						{ name: `${prefix}getchest`, value: "(Args <Name>)\nWill display some information about a specific chest.", inline: true },
 						{ name: `${prefix}searchchests`, value: "(Args <Search Parameter>)\nWill search for chests based on the word specified, in a server you type into.", inline: true },
@@ -3706,13 +3765,32 @@ client.on('messageCreate', async message => {
 						{ name: `${prefix}chestloot`, value: "(Args <Name> <New Name>)\nWill change a chest's loot table and items within.", inline: true },
 						{ name: `${prefix}removechestloot`, value: "(Args <Name>)\nWill remove a chest's loot table, and items related to it within.", inline: true },
 						{ name: `${prefix}chestitems`, value: "(Args <Name> <Optional: Items>)\nWill set a chest's base items to put into a chest.", inline: true },
-						{ name: `${prefix}removechestitems`, value: "(Args <Name>)\nWill remove a chest's base items.", inline: true },
+						{ name: `${prefix}removechestitems`, value: "(Args <Name>)\nWill remove a chest's base items.", inline: false },
 						{ name: `${prefix}lockchest`, value: "(Args <Name> <Item>)\nWill lock a chest with an item.", inline: true },
 						{ name: `${prefix}removelock`, value: "(Args <Name>)\nWill remove a chest's lock.", inline: true },
-						{ name: `${prefix}openchest`, value: "(Args <Chest Name> <Party>)\nOpens a created chest with the specified party.", inline: true },
+						{ name: `${prefix}openchest`, value: "(Args <Chest Name> <Party>)\nOpens a created chest with the specified party.", inline: false },
 						{ name: `${prefix}closechest`, value: "(Args <Chest Name>)\nCloses a created chest if it is open.", inline: true },
 						{ name: `${prefix}takeitem`, value: "(Args <Chest Name> <Item> <Optional: Quantity>)\nTake items from a chest, should it be open.", inline: true },
 						{ name: `${prefix}putitem`, value: "(Args <Chest Name> <Item> <Optional: Quantity>)\nTake items from a party, and put them inside of a chest, should it be open.", inline: true },
+					)
+				message.channel.send({embeds: [DiscordEmbed]})
+				break
+
+			case 'food':
+				DiscordEmbed = new Discord.MessageEmbed()
+					.setColor('#0099ff')
+					.setTitle('You can make yourself some food however you like, or even make your own food with the official ones.')
+					.addFields(
+						{ name: `${prefix}makefood`, value: "(Args <Name> <Category> <Image Link / Attachment>)\nI will make your very own food available to the ice cream generator.", inline: false },
+						{ name: `${prefix}foodtemplate`, value: "Get yourself a textbook example of what to make for a certain food category.", inline: true },
+						{ name: `${prefix}removefood`, value: "(Args <Category> <Name>)\nIf you don't want your food to be there, I can make it gone.", inline: true },
+						{ name: `${prefix}renamefood`, value: "(Args <Category> <Name> <New Name>)\nI will change the name of your food from one to another.", inline: true },
+						{ name: `${prefix}foodimage`, value: "(Args <Category> <Name> <Image Link / Attachment>)\nI will change the look of your chosen food.", inline: true },
+						{ name: `${prefix}foodprivacy`, value: "I can make your stuff with your food private if you want to.", inline: false },
+						{ name: `${prefix}listfood`, value: `(Args <Category> <'official'/'users'/__<User ID / User Mention>__/'me'/'all'>)\nWill make a list of food in a certain category.`, inline: true },
+						{ name: `${prefix}searchfood`, value: `(Args <Category> <Search Parameter(s)>)\nWill search within a certain food category given the search parameter.`, inline: true },
+						{ name: `${prefix}icecream`, value: "(Args <Amount Of Scoops> <Optional: Repeat Scoop Flavors>)\nI'll make an ice cream of any amount of scoop with randomized flavors. You can do up to 100 scoops.", inline: false },
+						{ name: `${prefix}pizza`, value: "(Args <Amount Of Toppings> <Optional: Amount of Condiments> <Optional: Include Cheese> <Optional: Include Sauce> <Optional: Repeat Toppings> <Optional: Repeat Condiments>)\nI'll make a pizza of any amount of toppings and condiments. You can do up to 100 toppings and 20 condiments", inline: true },
 					)
 				message.channel.send({embeds: [DiscordEmbed]})
 				break
@@ -3732,6 +3810,7 @@ client.on('messageCreate', async message => {
 						{ name: 'Loot', value: 'Commands intended to assist with Loot Tables and enemy drops.', inline: true },
 						{ name: 'Chests', value: 'Because one has to store their items somewhere.', inline: true },
 						{ name: 'Moderation', value: 'Commands intended to help with server moderation.', inline: true },
+						{ name: 'Food', value: 'Everyone has to eat food (and drink) to survive afterall.', inline: true },
 					)
 					.setFooter('zzzzzzzz');
 				message.channel.send({embeds: [DiscordEmbed]})
@@ -4402,25 +4481,8 @@ client.on('messageCreate', async message => {
 	/////////////////////
 
 	if (command === 'icecream') {
-		const iceCreamFlavors = [
-			'Chocolate','Vanilla','Acal Berry','Almond','Mojito','Gingerbread','Salted Caramel','Caramel','Marshmallow','Raspberry','Coffee',
-			'Mocha','Lamington','Saffron','Banana Foster','Buttercake','Rainbow','Garlic','Strawberry','Orange','Lemon','Lime','Apple','Sour Apple',
-			'Blueberry','Blackberry','Cherry','Bear Claw','Cinnamon','Toast','Cinnamon Toast','Kaffir Lime','Margarita','Italian Cherry','Butter','Spumoni',
-			'Asparagus','Birthday Cake','Mint','Mint Chocolate Chip','Banana',"``you``",'Pistachio','Leaf',`Mystery`,'Air','Sewage','Grape','Mango',
-			"``your mom lol``",'Neapolitan','Red Velvet','Blue Moon','Carrot Cake','Spaghetti','Superman','Black Sesame','Licorice','Peppermint',
-			'Jalapeno','Wine','Straciatella','Lucuma','Ube','Pineapple','Chocolate Fudge','Lemon Sorbet','Strawberry Shortcake','Chocolate Cherry Fudge',
-			'Bubblegum','Cotton Candy','Blood Orange','Sky','Spearmint','Smurf','Green Tea','Milk','Dark Chocolate','Milk Chocolate','Gold Medal Ribbon',
-			'Alphonso And Cream','Papaya Pineapple','Papaya','Cookies And Cream','Durian','Radioactive','Lavender','Orange Custard Chocolate Chip',
-			'Chocolate Raspberry','Panna Cotta','Cookie Monster','Dark Moon Chocolate','New Moon','Sunset','Sunrise','Iceberg Lettuce','Orange Sherbert',
-			'Cheesecake','Key Lime Pie','Gelato','Baby Blue','Outer Sky','Relieve','Pomegrante Chocolate Fudge','Orange Chocolate Fudge','Iceland Orange',
-			'Green Emerald','Cyan Emerald','Navy Emerald','Purple Emerald','Pink Emerald','Red Emerald','Yellow Emerald','White Emerald','Master Emerald',
-			'Phantom Ruby','Strawberry Chocolate','Ketchup','Butter Popcorn','Popcorn','Caramel Popcorn','Rose','Tulip','Chaos Goo','Water','Blueberry Jelly',
-			'Raspberry Jelly','Blackberry Jelly','Cherry Jelly','Strawberry Jelly','Pomegrante Jelly','Pomegrante','Orange Jelly','Lemon Jelly','Lime Jelly',
-			'Apple Jelly','Lunar Rainbow','Inverted','Cloudy Day','Clear Day','Night Sky','Starry Sky','Manor Light','Chocolate Mint Chip','Bullet Hole',
-			'Banana Gem','Underwater Fish','Chocolate Spearmint Chip','Spearmint Chocolate Chip','Deep Orage','Deep Cherry','Deep Raspberry','Deep Lavender',
-			'Deep Ume','Deep Blackberry','Deep Blueberry','Salt','Snow','Red Sun','Yellow Sun','Green Sun','Cyan Sun','Navy Sun','Purple Sun','White Sun',
-			'Chocolate Gem','Lavender Sorbet'
-			]
+		let iceCreamFlavors = []
+		let iceCreamIDs = []
 			
 		const arg = message.content.slice(prefix.length).trim().split(/ +/);
 
@@ -4433,8 +4495,31 @@ client.on('messageCreate', async message => {
 			return false
 		}
 
+		var foodPath = dataPath+'/foodConfig.json'
+		var foodRead = fs.readFileSync(foodPath);
+		var foodFile = JSON.parse(foodRead);
+
 		let scoopNumber
 		let repeatscoops
+
+		let users = await message.guild.members.fetch().catch(console.error);
+		let list = users.map(m => m.id)
+
+		//Official Ice Creams
+		for (const flavor in foodFile['official']['iceCream']['flavors']) {
+			iceCreamFlavors.push(flavor)
+			iceCreamIDs.push('official')
+		}
+		//User-Based
+		for (const i in list) {
+			if (foodFile[list[i]] && foodFile[list[i]]['iceCream'] && foodFile[list[i]]['iceCream']['flavors']) {
+				var user = list[i]
+				for (const flavor in foodFile[list[i]]['iceCream']['flavors']) {
+					iceCreamFlavors.push(flavor)
+					iceCreamIDs.push(user)
+				}
+			}
+		}
 
 		if (isFinite(parseInt(arg[1]))) {
 
@@ -4497,10 +4582,11 @@ client.on('messageCreate', async message => {
 				message.channel.send(`Please wait until your ice cream is done.`)
 		}
 
-		getIceCream(scoopNumber, repeatscoops, message)
+		getIceCream(scoopNumber, repeatscoops, message, iceCreamIDs)
 
 		async function getIceCream(scoops, repeatScoops, message) {
 			let iceCreamResults = []
+			let iceCreamIDList = []
 			var iceCreamFlavorList = ''
 
 			if (!isFinite(scoops)) {
@@ -4508,12 +4594,48 @@ client.on('messageCreate', async message => {
 					scoops[i].slice(1,scoops[i].length - 1)
 
 					iceCreamResults.push(scoops[i])
-					iceCreamFlavorList += `\n- ${scoops[i]}`
+
+					var failureLevel = 0
+					var userRandTable = []
+
+					//if this flavor exists in your personal list
+					if (Math.round(Math.random() * 100) <= 40) { //which will look into 40% of the time
+						if (foodFile[message.author.id] && foodFile[message.author.id]['iceCream']['flavors'][scoops[i]])
+						iceCreamIDList.push(message.author.id)
+						else
+						failureLevel = 1
+					} else
+					failureLevel = 1
+					
+					//if not, then it will search through the user list first
+					if (failureLevel == 1) {
+						for (const userID in foodFile) {
+							for (const a in list) {
+								if (list[a] == userID && foodFile[userID]['iceCream'] && foodFile[userID]['iceCream']['flavors']) {
+									for (const flavor in foodFile[userID]['iceCream']['flavors']) {
+										if (flavor == scoops[i])
+										userRandTable.push(userID)
+									}
+								}
+							}
+						}
+
+						console.log(userRandTable)
+
+						//and pick a random ID
+						if (userRandTable.length > 0)
+						iceCreamIDList.push(userRandTable[Math.floor(Math.random() * userRandTable.length)])
+						else	//and if that fails, we will resort to the official flavors
+						iceCreamIDList.push('official')
+					}
+
+					iceCreamFlavorList += `\n- ${scoops[i]} *(${iceCreamIDList[i] !== 'official' ? client.users.cache.get(iceCreamIDList[i]) : 'Official'})*`
 				}
 
 				scoops = scoops.length
 			} else {
 				var iceCreamInput = [...iceCreamFlavors]
+				var IDInput = [...iceCreamIDs]
 				iceCreamResults = []
 				iceCreamFlavorList = ''
 			
@@ -4521,20 +4643,24 @@ client.on('messageCreate', async message => {
 			
 					if (iceCreamInput.length < 1) {
 						iceCreamInput = [...iceCreamFlavors]
+						IDInput = [...iceCreamIDs]
 						console.log(`Oops. Ran out of ice cream flavors. Repeating the list.`)
 					}
 			
 					var flavorNum = Math.floor(Math.random() * iceCreamInput.length)
 			
 					iceCreamResults.push(iceCreamInput[flavorNum])
-					iceCreamFlavorList += `\n- ${iceCreamInput[flavorNum]}`
+					iceCreamIDList.push(IDInput[flavorNum])
+					iceCreamFlavorList += `\n- ${iceCreamInput[flavorNum]} *(${IDInput[flavorNum] !== 'official' ? client.users.cache.get(IDInput[flavorNum]) : 'Official'})*`
 			
-					if (repeatScoops == 'false')
+					if (repeatScoops == 'false') {
 						iceCreamInput.splice(flavorNum, 1)
+						IDInput.splice(flavorNum, 1)
+					}
 				}
 			}
 		
-			console.log(`Flavors: ${iceCreamResults}`)
+			console.log(`Flavors: ${iceCreamResults}\nIDs: ${iceCreamIDList}`)
 		
 			var filtered = new Set(iceCreamResults);
 			var iceCreamFiltered = [...filtered]
@@ -4556,7 +4682,21 @@ client.on('messageCreate', async message => {
 		
 			var lastScoopY
 			for (var i = 1; i <= scoops; i++) {
-				const scoop = await Canvas.loadImage(`./images/foodgenerators/icecream/scoopflavors/${iceCreamResults[iceCreamResults.length - i]}.png`)
+				var scoop
+
+				if (iceCreamIDList[iceCreamIDList.length - i] == 'official')
+					try {
+						scoop = await Canvas.loadImage(`./images/foodgenerators/icecream/scoopflavors/${iceCreamResults[iceCreamResults.length - i]}.png`)
+					} catch (error) {
+						scoop = await Canvas.loadImage(`./images/foodgenerators/icecream/error_scoop.png`)
+					}
+				else {
+					try {
+						scoop = await Canvas.loadImage(foodFile[iceCreamIDList[iceCreamIDList.length - i]]['iceCream']['flavors'][iceCreamResults[iceCreamResults.length - i]].image)
+					} catch (error) {
+						scoop = await Canvas.loadImage(`./images/foodgenerators/icecream/error_scoop.png`)
+					}
+				}
 		
 				lastScoopY = coneY - 57 - 62 * (i-1)
 				context.drawImage(scoop, 20, lastScoopY, 161, 155);
@@ -4605,34 +4745,1001 @@ client.on('messageCreate', async message => {
 		}
 	}
 
+	if (command == 'foodprivacy') {
+		var foodPath = dataPath+'/foodConfig.json'
+		var foodRead = fs.readFileSync(foodPath);
+		var foodFile = JSON.parse(foodRead);
+
+		if (!foodFile[message.author.id]) {
+			foodFile[message.author.id] = {}
+
+			fs.writeFileSync(foodPath, JSON.stringify(foodFile, null, '    '));
+		}
+
+		if (!foodFile[message.author.id]['privacy']) {
+			foodFile[message.author.id]['privacy'] = {
+				globalBlock: false
+			}
+
+			fs.writeFileSync(foodPath, JSON.stringify(foodFile, null, '    '));
+		}
+
+		if (!foodFile[message.author.id]['privacy'][message.guild.id]) {
+			foodFile[message.author.id]['privacy'][message.guild.id] = {
+				blockedServer: false,
+				blockedCategories: [],
+				blockedChannels: []
+			}
+
+			fs.writeFileSync(foodPath, JSON.stringify(foodFile, null, '    '));
+		}
+
+		const arg = message.content.slice(prefix.length).trim().split(/ +/);
+		
+		if ((arg[1] !== 'global' && arg[1] !== 'server' && arg[1] !== 'category' && arg[1] !== 'channel') || !arg[1] ) {
+
+			const isGlobalBlock = foodFile[message.author.id]['privacy'].globalBlock == true ? 'Yes' : 'No'
+			const isServerBlock = foodFile[message.author.id]['privacy'][message.guild.id].blockedServer == true ? 'Yes' : 'No'
+
+			let categoryBlock = ``
+
+			for (i in foodFile[message.author.id]['privacy'][message.guild.id].blockedCategories) {
+				var categoryID = foodFile[message.author.id]['privacy'][message.guild.id].blockedCategories[i]
+				var category = message.guild.channels.cache.get(categoryID)
+				categoryBlock += `\n- ${category.name} *(${category.isText() ? 'Thread Parent' : 'Category'})*`
+			}
+
+			if (categoryBlock == ``)
+			categoryBlock = `None`
+
+			let channelBlock = ``
+
+			for (i in foodFile[message.author.id]['privacy'][message.guild.id].blockedChannels) {
+				var channelID = foodFile[message.author.id]['privacy'][message.guild.id].blockedChannels[i]
+				var channel = message.guild.channels.cache.get(channelID)
+				channelBlock += `\n- ${channel.name} *(${channel.isThread() ? 'Thread' : 'Channel'})*`
+			}
+
+			if (channelBlock == ``)
+			channelBlock = `None`
+
+			embed = new Discord.MessageEmbed()
+			.setColor('#0099ff')
+			.setTitle(`Food Privacy for ${message.author.username}`)
+			.setDescription(`If you want to set privacy, try:\n**${prefix}${command} global** - for setting the global privacy\n**${prefix}${command} server** - for setting the current server's privacy\n**${prefix}${command} category** - for setting the privacy of a category you're in\n**${prefix}${command} channel** - for setting the privacy of a channel you're in\n\n_ _`)
+			.addFields(
+				{ name: 'Globally private', value: `${isGlobalBlock}`, inline: true },
+				{ name: `Private everywhere in ${message.guild.name}`, value: `${isServerBlock}`, inline: true },
+				{ name: `Private ${message.guild.name} categories/thread parents`, value: `${categoryBlock}`, inline: false },
+				{ name: `Private ${message.guild.name} channels/threads`, value: `${channelBlock}`, inline: false },
+			)
+
+			return message.channel.send({embeds: [embed]})
+		}
+
+		if (arg[1] == 'global') {
+			foodFile[message.author.id]['privacy'].globalBlock = !foodFile[message.author.id]['privacy'].globalBlock
+			fs.writeFileSync(foodPath, JSON.stringify(foodFile, null, '    '));
+
+			message.channel.send(`Your food lists are ${foodFile[message.author.id]['privacy'].globalBlock == true ? 'now private globally.' : 'no longer globally private.'}`)
+		}
+
+		if (arg[1] == 'server') {
+			foodFile[message.author.id]['privacy'][message.guild.id].blockedServer = !foodFile[message.author.id]['privacy'][message.guild.id].blockedServer
+			fs.writeFileSync(foodPath, JSON.stringify(foodFile, null, '    '));
+
+			message.channel.send(`Your food lists are ${foodFile[message.author.id]['privacy'][message.guild.id].blockedServer ? 'now private for this server.' : 'no longer private for this server.'}`)
+		}
+
+		if (arg[1] == 'category') {
+			
+			var categoryID = message.channel.parentId
+
+			if (categoryID == null)
+			return message.channel.send(`There isn't a category this channel is appended to.`)
+
+			var addOrReduce = "add"
+			
+			for (i in foodFile[message.author.id]['privacy'][message.guild.id].blockedCategories) {
+				if (foodFile[message.author.id]['privacy'][message.guild.id].blockedCategories[i] == categoryID)
+				addOrReduce = "reduce"
+			}
+
+			if (addOrReduce == 'add') {
+				foodFile[message.author.id]['privacy'][message.guild.id].blockedCategories.push(categoryID)
+				message.channel.send(`Your food lists are now private for the **${message.channel.parent.name}** ${message.channel.parent.isText() ? 'thread parent' : 'category'}.`)
+			} else {
+				foodFile[message.author.id]['privacy'][message.guild.id].blockedCategories.splice(foodFile[message.author.id]['privacy'][message.guild.id].blockedCategories.indexOf(categoryID), 1)
+				message.channel.send(`Your food lists are no longer private for the **${message.channel.parent.name}** ${message.channel.parent.isText() ? 'thread parent' : 'category'}.`)
+			}
+
+			fs.writeFileSync(foodPath, JSON.stringify(foodFile, null, '    '));
+		}
+
+		if (arg[1] == 'channel') {
+			
+			var channelID = message.channel.id
+
+			var addOrReduce = "add"
+			
+			for (i in foodFile[message.author.id]['privacy'][message.guild.id].blockedChannels) {
+				if (foodFile[message.author.id]['privacy'][message.guild.id].blockedChannels[i] == channelID)
+				addOrReduce = "reduce"
+			}
+
+			if (addOrReduce == 'add') {
+				foodFile[message.author.id]['privacy'][message.guild.id].blockedChannels.push(channelID)
+				message.channel.send(`Your food lists are now private for the **${message.channel.name}** ${message.channel.isThread() ? 'thread' : 'channel'}.`)
+			} else {
+				foodFile[message.author.id]['privacy'][message.guild.id].blockedChannels.splice(foodFile[message.author.id]['privacy'][message.guild.id].blockedChannels.indexOf(channelID), 1)
+				message.channel.send(`Your food lists are no longer private for the **${message.channel.name}** ${message.channel.isThread() ? 'thread' : 'channel'}.`)
+			}
+
+			fs.writeFileSync(foodPath, JSON.stringify(foodFile, null, '    '));
+		}
+	}
+
+	if (command == 'listfood') {
+		const arg = message.content.slice(prefix.length).trim().split(/ +/);
+
+		if (!arg[1] || (arg[1] && !arg[2])) {
+			const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}listfood`)
+				.setDescription(`(Args <Category> <'official'/'users'/__<User ID / User Mention>__/'me'/'all'>)\nWill make a list of food in a certain categorys.`)
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+		}
+
+		var foodPath = dataPath+'/foodConfig.json'
+		var foodRead = fs.readFileSync(foodPath);
+		var foodFile = JSON.parse(foodRead);
+
+		var skillTxt = []
+		var nameTxt = []
+		var ownerTxt = []
+
+		if ((arg[1] && arg[1].toLowerCase() !== 'ic_flavor' && arg[1].toLowerCase() !== 'pi_sauce' && arg[1].toLowerCase() !== 'pi_cheese' && arg[1].toLowerCase() !== 'pi_topping'
+		&& arg[1].toLowerCase() !== 'pi_condiment') || !arg[1]) {
+		const DiscordEmbed = new Discord.MessageEmbed()
+            .setColor('#0099ff')
+            .setTitle(`Invalid`)
+			.setDescription(`This is not a valid food category. Please use:`)
+			.addFields(
+				{ name: `ic_flavor`, value: `This is for ice cream flavors.`, inline: true },
+				{ name: `pi_sauce`, value: `This is for pizza sauces.`, inline: true },
+				{ name: `pi_cheese`, value: `This is for pizza cheeses.`, inline: true },
+				{ name: `pi_topping`, value: `This is for pizza toppings.`, inline: true },
+				{ name: `pi_condiment`, value: `This is for pizza condiments.`, inline: true },
+			)
+        message.channel.send({embeds: [DiscordEmbed]})
+        return false
+		}
+
+		var category = arg[1].toLowerCase()
+
+		var catText = ''
+
+		var begmean = ''
+		var midmean = ''
+
+		if (category.startsWith(`ic_`)) {
+			begmean = 'iceCream'
+
+			if (category.includes(`flavor`)) {
+				midmean = 'flavors'
+				catText = 'ice cream flavors'
+			}
+		}else if (category.startsWith(`pi_`)) {
+			begmean = 'pizza'
+
+			if (category.includes(`sauce`)) {
+				midmean = 'sauces'
+				catText = 'pizza sauces'
+			} else if (category.includes(`cheese`)) {
+				midmean = 'cheeses'
+				catText = 'pizza cheeses'
+			} else if (category.includes(`topping`)) {
+				midmean = 'toppings'
+				catText = 'pizza toppings'
+			} else if (category.includes(`condiment`)) {
+				midmean = 'condiments'
+				catText = 'pizza condiments'
+			}
+		}
+
+		//this is for official ice cream
+		if (arg[2] == 'official' || arg[2] == 'all') {
+			for (const i in foodFile['official'][begmean][midmean]) {
+				skillTxt.push(foodFile['official'][begmean][midmean][i])
+				nameTxt.push(i)
+				ownerTxt.push('official')
+			}
+		}
+		//and now, for user-based ice cream
+		let users = await message.guild.members.fetch().catch(console.error);
+		let list = users.map(m => m.id)
+		//firstly, the all and users options
+		if (arg[2] == 'all' || arg[2] == 'users') {
+			for (const userID in foodFile) {
+				for (const i in list) {
+					if (list[i] == userID) {
+
+						var skip = false
+
+						//global block
+						if (foodFile[userID]['privacy'].globalBlock == true)
+						skip = true
+
+						//server block
+						if (foodFile[userID]['privacy'][message.guild.id].blockedServer == true)
+						skip = true
+
+						//category block
+						for (const categories in foodFile[userID]['privacy'][message.guild.id].blockedCategories) {
+							if (message.channel.parentId == foodFile[userID]['privacy'][message.guild.id].blockedCategories[categories])
+							skip = true
+						}
+
+						//channel block
+						for (const channels in foodFile[userID]['privacy'][message.guild.id].blockedChannels) {
+							if (message.channel.id == foodFile[userID]['privacy'][message.guild.id].blockedChannels[channels])
+							skip = true
+						}
+
+						if (skip == false) {
+							for (const i in foodFile[userID][begmean][midmean]) {
+								skillTxt.push(foodFile[userID][begmean][midmean][i])
+								nameTxt.push(i)
+								ownerTxt.push(userID)
+							}
+						}
+					}
+				}
+			}
+			if (skillTxt.length < 2)
+			return message.channel.send(`There aren't any user-based ${catText} available to the public yet.`)
+		}
+
+		if (arg[2] == 'me') {
+			var userID = message.author.id
+			var userName = message.author.username
+
+			if (!foodFile[userID] || !foodFile[userID][begmean] || !foodFile[userID][begmean][midmean] || foodFile[userID][begmean][midmean] == {})
+			return message.channel.send(`You don't have any ${catText} set.`)
+
+			for (const i in foodFile[userID][begmean][midmean]) {
+				skillTxt.push(foodFile[userID][begmean][midmean][i])
+				nameTxt.push(i)
+				ownerTxt.push(userID)
+			}
+		}
+
+		if (arg[2] !== 'all' && arg[2] !== 'users' && arg[2] !== 'official' && arg[2] !== 'me' && arg[2]) {
+			if (message.mentions.users.first())
+			arg[3] = message.mentions.users.first()
+			else {
+			arg[3] = client.users.cache.find(user => user.id === arg[2].toString())
+
+			if (arg[3] == undefined)
+			return message.channel.send(`Please provide a valid member ID, or mention someone.`)
+			}
+
+			var userID = arg[3].id
+			var userName = arg[3].username
+
+			if (!foodFile[userID] || !foodFile[userID][begmean] || !foodFile[userID][begmean][midmean] || foodFile[userID][begmean][midmean] == {})
+			return message.channel.send(`${userName} doesn't have any ${catText} set.`)
+
+			var skip = false
+
+			if (userID !== message.author.id) {
+				//global block
+				if (foodFile[userID]['privacy'].globalBlock == true)
+				skip = true
+
+				//server block
+				if (foodFile[userID]['privacy'][message.guild.id].blockedServer == true)
+				skip = true
+
+				//category block
+				for (const categories in foodFile[userID]['privacy'][message.guild.id].blockedCategories) {
+					if (message.channel.parentId == foodFile[userID]['privacy'][message.guild.id].blockedCategories[categories])
+					skip = true
+				}
+
+				//channel block
+				for (const channels in foodFile[userID]['privacy'][message.guild.id].blockedChannels) {
+					if (message.channel.id == foodFile[userID]['privacy'][message.guild.id].blockedChannels[channels])
+					skip = true
+				}
+			}
+
+			if (skip == true)
+			return message.channel.send(`${userName}'s list is private.`)
+
+			if (skip == false) {
+				for (const i in foodFile[userID][begmean][midmean]) {
+					skillTxt.push(foodFile[userID][begmean][midmean][i])
+					nameTxt.push(i)
+					ownerTxt.push(userID)
+				}
+			}
+		}
+
+		sendFoodArray(message.channel, skillTxt, nameTxt, ownerTxt)
+	}
+
+	if (command == 'searchfood') {
+		const arg = message.content.slice(prefix.length).trim().split(/ +/);
+
+		if (!arg[1]) {
+			const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}searchfood`)
+				.setDescription(`(Args <Category> <Search Parameter(s)>)\nWill search within a certain food category given the search parameter.`)
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+		}
+
+		var foodPath = dataPath+'/foodConfig.json'
+		var foodRead = fs.readFileSync(foodPath);
+		var foodFile = JSON.parse(foodRead);
+
+		var skillTxt = []
+		var nameTxt = []
+		var ownerTxt = []
+
+		let input = message.content.slice(prefix.length).trim()
+		input = input.slice(command.length).trim()
+
+		const regex = new RegExp('"[^"]+"|[\\S]+', 'g');
+		let arguments = [];
+		input.match(regex).forEach(element => {
+			if (!element) return;
+			return arguments.push(element.replace(/"/g, ''));
+		});
+
+		if ((arguments[0] && arguments[0].toLowerCase() !== 'ic_flavor' && arguments[0].toLowerCase() !== 'pi_sauce' && arguments[0].toLowerCase() !== 'pi_cheese' && arguments[0].toLowerCase() !== 'pi_topping'
+		&& arguments[0].toLowerCase() !== 'pi_condiment') || !arguments[0]) {
+		const DiscordEmbed = new Discord.MessageEmbed()
+            .setColor('#0099ff')
+            .setTitle(`Invalid`)
+			.setDescription(`This is not a valid food category. Please use:`)
+			.addFields(
+				{ name: `ic_flavor`, value: `This is for ice cream flavors.`, inline: true },
+				{ name: `pi_sauce`, value: `This is for pizza sauces.`, inline: true },
+				{ name: `pi_cheese`, value: `This is for pizza cheeses.`, inline: true },
+				{ name: `pi_topping`, value: `This is for pizza toppings.`, inline: true },
+				{ name: `pi_condiment`, value: `This is for pizza condiments.`, inline: true },
+			)
+        message.channel.send({embeds: [DiscordEmbed]})
+        return false
+		}
+
+		if (!arguments[1]) {
+			message.channel.send(`Please specify a search parameter.`)
+		}
+
+		let searchP = arguments[1]
+		var category = arguments[0]
+
+		var catText = ''
+
+		var begmean = ''
+		var midmean = ''
+
+		if (category.startsWith(`ic_`)) {
+			begmean = 'iceCream'
+
+			if (category.includes(`flavor`)) {
+				midmean = 'flavors'
+				catText = 'flavor'
+			}
+		}else if (category.startsWith(`pi_`)) {
+			begmean = 'pizza'
+
+			if (category.includes(`sauce`)) {
+				midmean = 'sauces'
+				catText = 'sauce'
+			} else if (category.includes(`cheese`)) {
+				midmean = 'cheeses'
+				catText = 'cheese'
+			} else if (category.includes(`topping`)) {
+				midmean = 'toppings'
+				catText = 'topping'
+			} else if (category.includes(`condiment`)) {
+				midmean = 'condiments'
+				catText = 'condiment'
+			}
+		}
+
+		//this is for official ice cream
+		for (const i in foodFile['official'][begmean][midmean]) {
+			if (i.includes(searchP)) {
+				skillTxt.push(foodFile['official'][begmean][midmean][i])
+				nameTxt.push(i)
+				ownerTxt.push('official')
+			}
+		}
+		//and now, for user-based ice cream
+		let users = await message.guild.members.fetch().catch(console.error);
+		let list = users.map(m => m.id)
+
+		for (const userID in foodFile) {
+			for (const i in list) {
+				if (list[i] == userID) {
+
+					var skip = false
+
+					//global block
+					if (foodFile[userID]['privacy'].globalBlock == true)
+					skip = true
+
+					//server block
+					if (foodFile[userID]['privacy'][message.guild.id].blockedServer == true)
+					skip = true
+
+					//category block
+					for (const categories in foodFile[userID]['privacy'][message.guild.id].blockedCategories) {
+						if (message.channel.parentId == foodFile[userID]['privacy'][message.guild.id].blockedCategories[categories])
+						skip = true
+					}
+
+					//channel block
+					for (const channels in foodFile[userID]['privacy'][message.guild.id].blockedChannels) {
+						if (message.channel.id == foodFile[userID]['privacy'][message.guild.id].blockedChannels[channels])
+						skip = true
+					}
+
+					if (skip == false) {
+						for (const i in foodFile[userID][begmean][midmean]) {
+							if (i.includes(searchP)) {
+								skillTxt.push(foodFile[userID][begmean][midmean][i])
+								nameTxt.push(i)
+								ownerTxt.push(userID)
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if (skillTxt.length < 1)
+			return message.channel.send(`There aren't any ${catText} with **${searchP}** yet.`)
+		
+		sendFoodArray(message.channel, skillTxt, nameTxt, ownerTxt)
+	}
+
+	if (command == 'makefood') {
+		const arg = message.content.slice(prefix.length).trim().split(/ +/);
+
+		if (!arg[1]) {
+			const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}makefood`)
+				.setDescription(`(Args <Name> <Category> <Image Link / Attachment>)\nI will make your very own ice cream flavor available to the ice cream generator.\n\n**Name:** It can be pretty much any name you want.`
+				+`\n**Category:** There are some categories. If you want to see them, just type a random name after the command and nothing else.\n**Image:** You are going to be fine with it as long as it is an image file/link. **Almost however.**\n`
+				+`You see, the bigger the image in size, the longer things will load for everyone, making a huge delay. This means that a 10 MB file would take way longer than a 5 KB file. Huge stuff.\n`
+				+`There is of course no legitimate limit on the size, but for everyone's sanity, it is recommended to stick to the template's size or smaller.\n\n You can grab templates with the ${prefix}foodtemplate command.`)
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+		}
+
+		if (message.mentions.roles.first() || message.mentions.users.first() || message.mentions.channels.first() || message.content.includes(`@everyone`) || message.content.includes(`@here`))
+		return message.channel.send(`You really gotta be mean, huh?`)
+
+		let input = message.content.slice(prefix.length).trim()
+		input = input.slice(command.length).trim()
+
+		const regex = new RegExp('"[^"]+"|[\\S]+', 'g');
+		let arguments = [];
+		input.match(regex).forEach(element => {
+			if (!element) return;
+			return arguments.push(element.replace(/"/g, ''));
+		});
+
+		if ((arguments[1] && arguments[1].toLowerCase() !== 'ic_flavor' && arguments[1].toLowerCase() !== 'pi_sauce' && arguments[1].toLowerCase() !== 'pi_cheese' && arguments[1].toLowerCase() !== 'pi_topping'
+		&& arguments[1].toLowerCase() !== 'pi_condiment') || !arguments[1]) {
+		const DiscordEmbed = new Discord.MessageEmbed()
+            .setColor('#0099ff')
+            .setTitle(`Invalid`)
+			.setDescription(`This is not a valid food category. Please use:`)
+			.addFields(
+				{ name: `ic_flavor`, value: `This is for ice cream flavors.`, inline: true },
+				{ name: `pi_sauce`, value: `This is for pizza sauces.`, inline: true },
+				{ name: `pi_cheese`, value: `This is for pizza cheeses.`, inline: true },
+				{ name: `pi_topping`, value: `This is for pizza toppings.`, inline: true },
+				{ name: `pi_condiment`, value: `This is for pizza condiments.`, inline: true },
+			)
+        message.channel.send({embeds: [DiscordEmbed]})
+        return false
+		}
+
+		var name = arguments[0]
+		var category = arguments[1].toLowerCase()
+		var imageFile
+
+		if (message.attachments.first() && 
+		(   message.attachments.first().url.endsWith('.png') || message.attachments.first().url.endsWith('.jpg') || message.attachments.first().url.endsWith('.jpeg') ||
+			message.attachments.first().url.endsWith('.bmp') || message.attachments.first().url.endsWith('.gif') || message.attachments.first().url.endsWith('.apng') ||
+			message.attachments.first().url.endsWith('.tif') || message.attachments.first().url.endsWith('.tiff')   ))
+		imageFile = message.attachments.first().url;
+		else if (arguments[2]) {
+
+			if (arguments[2].startsWith('<'))
+			arguments[2] = arguments[2].slice(1, -1)
+
+			if ((arguments[2].startsWith('http') || arguments[2].startsWith('https')) && 
+			(   arguments[2].endsWith('.png') || arguments[2].endsWith('.jpg') || arguments[2].endsWith('.jpeg') ||
+				arguments[2].endsWith('.bmp') || arguments[2].endsWith('.gif') || arguments[2].endsWith('.apng') ||
+				arguments[2].endsWith('.tif') || arguments[2].endsWith('.tiff')   ))
+			imageFile = arguments[2];
+			else
+				return message.channel.send("Please send a valid URL or image.");
+		} else
+			return message.channel.send("Please send a valid URL or image.");
+
+		var foodPath = dataPath+'/foodConfig.json'
+		var foodRead = fs.readFileSync(foodPath);
+		var foodFile = JSON.parse(foodRead);
+
+		if (!foodFile[message.author.id]) {
+			foodFile[message.author.id] = {}
+
+			fs.writeFileSync(foodPath, JSON.stringify(foodFile, null, '    '));
+		}
+
+		var catText = ''
+		var smalltext = ''
+
+		var begmean = ''
+		var midmean = ''
+
+		if (category.startsWith(`ic_`)) {
+			begmean = 'iceCream'
+
+			if (category.includes(`flavor`)) {
+				midmean = 'flavors'
+				catText = 'an ice cream flavor'
+				smalltext = 'flavor'
+			}
+		}else if (category.startsWith(`pi_`)) {
+			begmean = 'pizza'
+
+			if (category.includes(`sauce`)) {
+				midmean = 'sauces'
+				catText = 'a pizza sauce'
+				smalltext = 'sauce'
+			} else if (category.includes(`cheese`)) {
+				midmean = 'cheeses'
+				catText = 'a pizza cheese'
+				smalltext = 'cheese'
+			} else if (category.includes(`topping`)) {
+				midmean = 'toppings'
+				catText = 'a pizza topping'
+				smalltext = 'topping'
+			} else if (category.includes(`condiment`)) {
+				midmean = 'condiments'
+				catText = 'a pizza condiment'
+				smalltext = 'condiment'
+			}
+		}
+
+		if (!foodFile[message.author.id][begmean]) {
+			foodFile[message.author.id][begmean] = {}
+
+			fs.writeFileSync(foodPath, JSON.stringify(foodFile, null, '    '));
+		}
+
+		if (!foodFile[message.author.id][begmean][midmean]) {
+			foodFile[message.author.id][begmean][midmean] = {}
+
+			fs.writeFileSync(foodPath, JSON.stringify(foodFile, null, '    '));
+		}
+
+		if (foodFile[message.author.id][begmean][midmean][name])
+		return message.channel.send(`The **${name}** ${smalltext} already exists in your list.`)
+
+		foodFile[message.author.id][begmean][midmean][name] = {
+			image: imageFile
+		}
+
+		fs.writeFileSync(foodPath, JSON.stringify(foodFile, null, '    '));
+
+		message.channel.send(`**${name}** registered as ${catText}.`)
+	}
+
+	if (command == 'foodtemplate') {
+		const arg = message.content.slice(prefix.length).trim().split(/ +/);
+
+		if (!arg[1]) {
+			const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}foodtemplate`)
+				.setDescription(`(Args <Category>)\nGet yourself a textbook example of what to make for a certain food category.`)
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+		}
+
+		if ((arg[1] && arg[1].toLowerCase() !== 'ic_flavor' && arg[1].toLowerCase() !== 'pi_sauce' && arg[1].toLowerCase() !== 'pi_cheese' && arg[1].toLowerCase() !== 'pi_topping'
+		&& arg[1].toLowerCase() !== 'pi_condiment') || !arg[1]) {
+		const DiscordEmbed = new Discord.MessageEmbed()
+            .setColor('#0099ff')
+            .setTitle(`Invalid`)
+			.setDescription(`This is not a valid food category. Please use:`)
+			.addFields(
+				{ name: `ic_flavor`, value: `This is for ice cream flavors.`, inline: true },
+				{ name: `pi_sauce`, value: `This is for pizza sauces.`, inline: true },
+				{ name: `pi_cheese`, value: `This is for pizza cheeses.`, inline: true },
+				{ name: `pi_topping`, value: `This is for pizza toppings.`, inline: true },
+				{ name: `pi_condiment`, value: `This is for pizza condiments.`, inline: true },
+			)
+        message.channel.send({embeds: [DiscordEmbed]})
+        return false
+		}
+
+		var category = arg[1]
+
+		var catText = ''
+		var attachment
+
+		if (category.startsWith(`ic_`)) {
+			if (category.includes(`flavor`)) {
+				catText = 'Ice Cream Flavor'
+				attachment = new Discord.MessageAttachment(`./images/foodgenerators/icecream/scoopflavors/Vanilla.png`, 'template.png');
+			}
+		}else if (category.startsWith(`pi_`)) {
+			if (category.includes(`sauce`)) {
+				catText = 'Pizza Sauce'
+				attachment = new Discord.MessageAttachment(`./images/foodgenerators/pizza/sauces/Traditional.png`, 'template.png');
+			} else if (category.includes(`cheese`)) {
+				catText = 'Pizza Cheese'
+				attachment = new Discord.MessageAttachment(`./images/foodgenerators/pizza/cheeses/Cheddar.png`, 'template.png');
+			} else if (category.includes(`topping`)) {
+				catText = 'Pizza Topping'
+				attachment = new Discord.MessageAttachment(`./images/foodgenerators/pizza/toppings/Champignons.png`, 'template.png');
+			} else if (category.includes(`condiment`)) {
+				catText = 'Pizza Condiment'
+				attachment = new Discord.MessageAttachment(`./images/foodgenerators/pizza/condiments/Ketchup.png`, 'template.png');
+			}
+		}
+
+		const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${catText} Template`)
+				.setDescription(`You don't have to follow the template to a tee but it is a textbook example.`)
+				.setImage('attachment://template.png')
+		return message.channel.send({embeds: [DiscordEmbed], files: [attachment]})
+	}
+
+	if (command == 'removefood') {
+		const arg = message.content.slice(prefix.length).trim().split(/ +/);
+
+		if (!arg[1]) {
+			const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}removefood`)
+				.setDescription(`(Args <Category> <Name>)\nIf you don't want your flavor to be there, I can make it gone.`)
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+		}
+
+		if (message.mentions.roles.first() || message.mentions.users.first() || message.mentions.channels.first() || message.content.includes(`@everyone`) || message.content.includes(`@here`))
+		return message.channel.send(`You really gotta be mean, huh?`)
+
+		let input = message.content.slice(prefix.length).trim()
+		input = input.slice(command.length).trim()
+
+		const regex = new RegExp('"[^"]+"|[\\S]+', 'g');
+		let arguments = [];
+		input.match(regex).forEach(element => {
+			if (!element) return;
+			return arguments.push(element.replace(/"/g, ''));
+		});
+
+		if ((arguments[0] && arguments[0].toLowerCase() !== 'ic_flavor' && arguments[0].toLowerCase() !== 'pi_sauce' && arguments[0].toLowerCase() !== 'pi_cheese' && arguments[0].toLowerCase() !== 'pi_topping'
+		&& arguments[0].toLowerCase() !== 'pi_condiment') || !arguments[0]) {
+		const DiscordEmbed = new Discord.MessageEmbed()
+            .setColor('#0099ff')
+            .setTitle(`Invalid`)
+			.setDescription(`This is not a valid food category. Please use:`)
+			.addFields(
+				{ name: `ic_flavor`, value: `This is for ice cream flavors.`, inline: true },
+				{ name: `pi_sauce`, value: `This is for pizza sauces.`, inline: true },
+				{ name: `pi_cheese`, value: `This is for pizza cheeses.`, inline: true },
+				{ name: `pi_topping`, value: `This is for pizza toppings.`, inline: true },
+				{ name: `pi_condiment`, value: `This is for pizza condiments.`, inline: true },
+			)
+        message.channel.send({embeds: [DiscordEmbed]})
+        return false
+		}
+
+		var name = arguments[1]
+		var category = arguments[0].toLowerCase()
+
+		var foodPath = dataPath+'/foodConfig.json'
+		var foodRead = fs.readFileSync(foodPath);
+		var foodFile = JSON.parse(foodRead);
+
+		var catText = ''
+
+		var begmean = ''
+		var midmean = ''
+
+		if (category.startsWith(`ic_`)) {
+			begmean = 'iceCream'
+
+			if (category.includes(`flavor`)) {
+				midmean = 'flavors'
+				catText = 'flavor'
+			}
+		}else if (category.startsWith(`pi_`)) {
+			begmean = 'pizza'
+
+			if (category.includes(`sauce`)) {
+				midmean = 'sauces'
+				catText = 'sauce'
+			} else if (category.includes(`cheese`)) {
+				midmean = 'cheeses'
+				catText = 'cheese'
+			} else if (category.includes(`topping`)) {
+				midmean = 'toppings'
+				catText = 'topping'
+			} else if (category.includes(`condiment`)) {
+				midmean = 'condiments'
+				catText = 'condiment'
+			}
+		}
+
+		if (!foodFile[message.author.id] || !foodFile[message.author.id][begmean] || !foodFile[message.author.id][begmean][midmean])
+		return message.channel.send(`You don't have any ${catText}s set.`)
+
+		if (!foodFile[message.author.id][begmean][midmean][name])
+		return message.channel.send(`The **${name}** ${catText} doesn't exist in your list.`)
+
+		var length = 0
+
+		for (const i in foodFile[message.author.id][begmean][midmean])
+		length++
+
+		if (length > 1) {
+			delete foodFile[message.author.id][begmean][midmean][name]
+			fs.writeFileSync(foodPath, JSON.stringify(foodFile, null, '    '));
+		} else {
+			delete foodFile[message.author.id][begmean][midmean]
+			fs.writeFileSync(foodPath, JSON.stringify(foodFile, null, '    '));
+		}
+
+		message.channel.send(`Removed the **${name}** ${catText}.`)
+	}
+
+	if (command == 'renamefood') {
+		const arg = message.content.slice(prefix.length).trim().split(/ +/);
+
+		if (!arg[1]) {
+			const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}renamefood`)
+				.setDescription(`(Args <Category> <Name> <New Name>)\nI will change the name of your ice cream flavor from one to another.`)
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+		}
+
+		if (message.mentions.roles.first() || message.mentions.users.first() || message.mentions.channels.first() || message.content.includes(`@everyone`) || message.content.includes(`@here`))
+		return message.channel.send(`You really gotta be mean, huh?`)
+
+		let input = message.content.slice(prefix.length).trim()
+		input = input.slice(command.length).trim()
+
+		const regex = new RegExp('"[^"]+"|[\\S]+', 'g');
+		let arguments = [];
+		input.match(regex).forEach(element => {
+			if (!element) return;
+			return arguments.push(element.replace(/"/g, ''));
+		});
+
+		if ((arguments[0] && arguments[0].toLowerCase() !== 'ic_flavor' && arguments[0].toLowerCase() !== 'pi_sauce' && arguments[0].toLowerCase() !== 'pi_cheese' && arguments[0].toLowerCase() !== 'pi_topping'
+		&& arguments[0].toLowerCase() !== 'pi_condiment') || !arguments[0]) {
+		const DiscordEmbed = new Discord.MessageEmbed()
+            .setColor('#0099ff')
+            .setTitle(`Invalid`)
+			.setDescription(`This is not a valid food category. Please use:`)
+			.addFields(
+				{ name: `ic_flavor`, value: `This is for ice cream flavors.`, inline: true },
+				{ name: `pi_sauce`, value: `This is for pizza sauces.`, inline: true },
+				{ name: `pi_cheese`, value: `This is for pizza cheeses.`, inline: true },
+				{ name: `pi_topping`, value: `This is for pizza toppings.`, inline: true },
+				{ name: `pi_condiment`, value: `This is for pizza condiments.`, inline: true },
+			)
+        message.channel.send({embeds: [DiscordEmbed]})
+        return false
+		}
+
+		var category = arguments[0]
+		var name = arguments[1]
+		
+		if (!arguments[2])
+		return message.channel.send(`Please specify the new name for that flavor.`)
+
+		var newname = arguments[2]
+
+		var foodPath = dataPath+'/foodConfig.json'
+		var foodRead = fs.readFileSync(foodPath);
+		var foodFile = JSON.parse(foodRead);
+
+		var catText = ''
+
+		var begmean = ''
+		var midmean = ''
+
+		if (category.startsWith(`ic_`)) {
+			begmean = 'iceCream'
+
+			if (category.includes(`flavor`)) {
+				midmean = 'flavors'
+				catText = 'flavor'
+			}
+		}else if (category.startsWith(`pi_`)) {
+			begmean = 'pizza'
+
+			if (category.includes(`sauce`)) {
+				midmean = 'sauces'
+				catText = 'sauce'
+			} else if (category.includes(`cheese`)) {
+				midmean = 'cheeses'
+				catText = 'cheese'
+			} else if (category.includes(`topping`)) {
+				midmean = 'toppings'
+				catText = 'topping'
+			} else if (category.includes(`condiment`)) {
+				midmean = 'condiments'
+				catText = 'condiment'
+			}
+		}
+
+		if (!foodFile[message.author.id] || !foodFile[message.author.id][begmean] || !foodFile[message.author.id][begmean][midmean])
+		return message.channel.send(`You don't have any ${catText}s set.`)
+
+		if (!foodFile[message.author.id][begmean][midmean][name])
+		return message.channel.send(`**${name}** does not exist in your ${catText} list.`)
+
+		if (foodFile[message.author.id][begmean][midmean][newname])
+		return message.channel.send(`**${newname}** already exists. Please change it to another name.`)
+
+		foodFile[message.author.id][begmean][midmean][newname] = foodFile[message.author.id][begmean][midmean][name]
+		delete foodFile[message.author.id][begmean][midmean][name]
+
+		fs.writeFileSync(foodPath, JSON.stringify(foodFile, null, '    '));
+
+		message.channel.send(`Changed the name of the **${name}** ${catText} to **${newname}**`)
+	}
+
+	if (command == 'foodimage') {
+		const arg = message.content.slice(prefix.length).trim().split(/ +/);
+
+		if (!arg[1]) {
+			const DiscordEmbed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`${prefix}foodimage`)
+				.setDescription(`(Args <Category> <Name> <Image Link / Attachment>)\nI will change the look of your chosen ice cream flavor.`)
+            message.channel.send({embeds: [DiscordEmbed]})
+            return false
+		}
+
+		if (message.mentions.roles.first() || message.mentions.users.first() || message.mentions.channels.first() || message.content.includes(`@everyone`) || message.content.includes(`@here`))
+		return message.channel.send(`You really gotta be mean, huh?`)
+
+		let input = message.content.slice(prefix.length).trim()
+		input = input.slice(command.length).trim()
+
+		const regex = new RegExp('"[^"]+"|[\\S]+', 'g');
+		let arguments = [];
+		input.match(regex).forEach(element => {
+			if (!element) return;
+			return arguments.push(element.replace(/"/g, ''));
+		});
+
+		if ((arguments[0] && arguments[0].toLowerCase() !== 'ic_flavor' && arguments[0].toLowerCase() !== 'pi_sauce' && arguments[0].toLowerCase() !== 'pi_cheese' && arguments[0].toLowerCase() !== 'pi_topping'
+		&& arguments[0].toLowerCase() !== 'pi_condiment') || !arguments[0]) {
+		const DiscordEmbed = new Discord.MessageEmbed()
+            .setColor('#0099ff')
+            .setTitle(`Invalid`)
+			.setDescription(`This is not a valid food category. Please use:`)
+			.addFields(
+				{ name: `ic_flavor`, value: `This is for ice cream flavors.`, inline: true },
+				{ name: `pi_sauce`, value: `This is for pizza sauces.`, inline: true },
+				{ name: `pi_cheese`, value: `This is for pizza cheeses.`, inline: true },
+				{ name: `pi_topping`, value: `This is for pizza toppings.`, inline: true },
+				{ name: `pi_condiment`, value: `This is for pizza condiments.`, inline: true },
+			)
+        message.channel.send({embeds: [DiscordEmbed]})
+        return false
+		}
+
+		var name = arguments[1]
+		var category = arguments[0]
+		var imageFile
+
+		if (message.attachments.first() && 
+		(   message.attachments.first().url.endsWith('.png') || message.attachments.first().url.endsWith('.jpg') || message.attachments.first().url.endsWith('.jpeg') ||
+			message.attachments.first().url.endsWith('.bmp') || message.attachments.first().url.endsWith('.gif') || message.attachments.first().url.endsWith('.apng') ||
+			message.attachments.first().url.endsWith('.tif') || message.attachments.first().url.endsWith('.tiff')   ))
+		imageFile = message.attachments.first().url;
+		else if (arguments[2]) {
+
+			if (arguments[2].startsWith('<'))
+			arguments[2] = arguments[2].slice(1, -1)
+
+			if ((arguments[2].startsWith('http') || arguments[2].startsWith('https')) && 
+			(   arguments[2].endsWith('.png') || arguments[2].endsWith('.jpg') || arguments[2].endsWith('.jpeg') ||
+				arguments[2].endsWith('.bmp') || arguments[2].endsWith('.gif') || arguments[2].endsWith('.apng') ||
+				arguments[2].endsWith('.tif') || arguments[2].endsWith('.tiff')   ))
+			imageFile = arguments[2];
+			else
+				return message.channel.send("Please send a valid URL or image.");
+		} else
+			return message.channel.send("Please send a valid URL or image.");
+
+		var foodPath = dataPath+'/foodConfig.json'
+		var foodRead = fs.readFileSync(foodPath);
+		var foodFile = JSON.parse(foodRead);
+
+		var catText = ''
+
+		var begmean = ''
+		var midmean = ''
+
+		if (category.startsWith(`ic_`)) {
+			begmean = 'iceCream'
+
+			if (category.includes(`flavor`)) {
+				midmean = 'flavors'
+				catText = 'flavor'
+			}
+		}else if (category.startsWith(`pi_`)) {
+			begmean = 'pizza'
+
+			if (category.includes(`sauce`)) {
+				midmean = 'sauces'
+				catText = 'sauce'
+			} else if (category.includes(`cheese`)) {
+				midmean = 'cheeses'
+				catText = 'cheese'
+			} else if (category.includes(`topping`)) {
+				midmean = 'toppings'
+				catText = 'topping'
+			} else if (category.includes(`condiment`)) {
+				midmean = 'condiments'
+				catText = 'condiment'
+			}
+		}
+
+		if (!foodFile[message.author.id] || !foodFile[message.author.id][begmean] || !foodFile[message.author.id][begmean][midmean])
+		return message.channel.send(`You don't have any ${catText}s set.`)
+
+		if (!foodFile[message.author.id][begmean][midmean][name])
+		return message.channel.send(`**${name}** does not exist in your ${catText} list.`)
+
+		foodFile[message.author.id][begmean][midmean][name].image = imageFile
+
+		fs.writeFileSync(foodPath, JSON.stringify(foodFile, null, '    '));
+
+		message.channel.send(`Changed the look of the **${name}** ${catText}.`)
+	}
+
 	if (command == 'pizza') {
-		const sauces = [
-			'Traditional','Pesto','Olive Oil and Garlic','White','Mayo','BBQ','Ranch Dressing','Hamburger','Salsa','Buffalo','Sweet Chili',
-			'Teriyaki','Fig Jam','Greek Yoghurt','Bolognese','Mystery'
-		]
+		const sauces = []
+		let sauceIDs = []
 			
-		const cheeses = [
-			'Mozarella','Provolone','Cheddar','Parmesan','Gouda','Goat','Gruyere','Ricotta','Four Cheese','Mimolette','Russian','Red Leicester',
-			'Colby-Jack'
-		]
+		const cheeses = []
+		let cheeseIDs = []
 			
-		const toppingTypes = [
-			"``you``","``your mom lol``",'Toast','Rosemary','Biscuits','Corn','Squid','Chocolate Curls','Sewage','Salt','Pepper','Scallions','Feta',
-			'Almonds','French Fries','Garlic','Basil','Oregano','Broccoli','Chili Peppers','Salmon','Clams','Chili Powder','Anchovies','Fried Eggs',
-			'Hard Boiled Eggs','Overboiled Eggs','Black Caviar','Red Caviar','Green Onion','Onion','Red Onion','Purple Onion','Peas','Pepperoni',
-			'Green Pepperoni','Tuna','Olives','Black Olives','Capers','Salami','Tomatoes','Cherry Tomatoes','Kimchi','Mochi','Rice','Sesame Seeds',
-			'Black Sesame Seeds','Natto','Nori','Arugula','Artichoke','Ham','Heavy Cream','Pineapple Cream','Sour Cream','Pepper Cream','Truffle Cream',
-			'Beef Carpaccio','Eggplant','Parsley','Mussels','Tiger Prawns','Shrimp','Frutti di Mare','Champignons','Bacon','Prosciutto','Oyster',
-			'Salsiccia','Trevisano Radicchio','Spinach','Truffle','Bell Pepper','German Sausage','Veal Schnitzel','Anchovy Fillets','Pecorino Romano',
-			'Tiny Eggs','Kit Kat','Hokkaido Slices','Seaweed','Eel','Leek','Marshmallow','Potato','Wonton Wrappers','Chicken','Chicken Breast Cutlets',
-			'Cauliflower','Ground Beef','Lettuce','Pickles','Habanero Pepper','Pineapple','Meatballs','Black Beans','Beans','Dill','Lime','Lemon',
-			'Lemon Juice','Lime Juice','Mango'
-		]
+		const toppingTypes = []
+		let toppingIDs = []
 			
-		const condimentTypes = [
-			'Ketchup','Thousand Island Sauce','Fig Jam','BBQ Sauce','Green Ketchup','Purple Ketchup','Sriracha','Mayonnaise','Garlic Sauce',
-			'Greek Yoghurt'
-		]
+		const condimentTypes = []
+		let condimentIDs = []
 
 		const arg = message.content.slice(prefix.length).trim().split(/ +/);
 
@@ -4643,6 +5750,53 @@ client.on('messageCreate', async message => {
 				.setDescription(`(Args <Amount Of Toppings> <Optional: Amount of Condiments> <Optional: Include Cheese> <Optional: Include Sauce> <Optional: Repeat Toppings> <Optional: Repeat Condiments>)\nI'll make a pizza of any amount of toppings and condiments. You can do up to 100 toppings and 20 condiments.\n\n Alternatively, you can also use:\n(Args <Sauce> <Cheese> <Toppings> <Optional: Condiment Amount>)\n that if you want to specify the sauce, cheese and toppings on a pizza.`)
             message.channel.send({embeds: [DiscordEmbed]})
             return false
+		}
+
+		var foodPath = dataPath+'/foodConfig.json'
+		var foodRead = fs.readFileSync(foodPath);
+		var foodFile = JSON.parse(foodRead);
+
+		let users = await message.guild.members.fetch().catch(console.error);
+		let list = users.map(m => m.id)
+
+		//Official Pizza Shit
+		for (const flavor in foodFile['official']['pizza']['sauces']) {
+			sauces.push(flavor)
+			sauceIDs.push('official')
+		}
+		for (const flavor in foodFile['official']['pizza']['cheeses']) {
+			cheeses.push(flavor)
+			cheeseIDs.push('official')
+		}
+		for (const flavor in foodFile['official']['pizza']['toppings']) {
+			toppingTypes.push(flavor)
+			toppingIDs.push('official')
+		}
+		for (const flavor in foodFile['official']['pizza']['condiments']) {
+			condimentTypes.push(flavor)
+			condimentIDs.push('official')
+		}
+		//User-Based
+		for (const i in list) {
+			if (foodFile[list[i]] && foodFile[list[i]]['pizza'] && foodFile[list[i]]['pizza']['sauces']) {
+				var user = list[i]
+				for (const flavor in foodFile[list[i]]['pizza']['sauces']) {
+					sauces.push(flavor)
+					sauceIDs.push(user)
+				}
+				for (const flavor in foodFile[list[i]]['pizza']['cheeses']) {
+					cheeses.push(flavor)
+					cheeseIDs.push(user)
+				}
+				for (const flavor in foodFile[list[i]]['pizza']['toppings']) {
+					toppingTypes.push(flavor)
+					toppingIDs.push(user)
+				}
+				for (const flavor in foodFile[list[i]]['pizza']['condiments']) {
+					condimentTypes.push(flavor)
+					condimentIDs.push(user)
+				}
+			}
 		}
 
 		let toppingNumber
@@ -4769,23 +5923,30 @@ client.on('messageCreate', async message => {
 			if (toppingPick.length > 10)
 				message.channel.send(`Please wait until your ice cream is done.`)
 
-			getPizzaByLetter(saucePick,cheesePick,toppingPick,condimentPick)
+			getPizzaByLetter(saucePick,cheesePick,toppingPick,condimentPick,message)
 		}
 
 		async function getPizzaByNumber(toppings, repeatToppings, condiments, repeatCondiments, allowCheese, allowSauce, message) {
-
-			if (allowSauce == 'true')
-				var sauce = sauces[Math.floor(Math.random() * sauces.length)]
+			if (allowSauce == 'true') {
+				var sauceNumber = Math.floor(Math.random() * sauces.length)
+				var sauce = sauces[sauceNumber]
+				var sauceID = sauceIDs[sauceNumber]
+			}
 			else
 				var sauce = "No Sauce"
 		
-			if (allowCheese == 'true')
-				var cheese = cheeses[Math.floor(Math.random() * cheeses.length)]
+			if (allowCheese == 'true') {
+				var cheeseNumber = Math.floor(Math.random() * cheeses.length)
+				var cheese = cheeses[cheeseNumber]
+				var cheeseID = cheeseIDs[cheeseNumber]
+			}
 			else
 				var cheese = "No Cheese"
 		
 			//Toppings
 			var toppingInput = [...toppingTypes]
+			let toppingIDList = []
+			var TIDInput = [...toppingIDs]
 			let toppingResults = []
 			var toppingList = ''
 		
@@ -4793,19 +5954,23 @@ client.on('messageCreate', async message => {
 		
 				if (toppingInput.length < 1) {
 					toppingInput = [...toppingTypes]
+					IDInput = [...iceCreamIDs]
 					console.log(`Oops. Ran out of pizza toppings. Repeating the list.`)
 				}
 		
 				var toppingNum = Math.floor(Math.random() * toppingInput.length)
 		
 				toppingResults.push(toppingInput[toppingNum])
-				toppingList += `\n- ${toppingInput[toppingNum]}`
+				toppingIDList.push(TIDInput[toppingNum])
+				toppingList += `\n- ${toppingInput[toppingNum]} *(${TIDInput[toppingNum] !== 'official' ? client.users.cache.get(TIDInput[toppingNum]) : 'Official'})*`
 		
-				if (repeatToppings == 'false')
+				if (repeatToppings == 'false') {
 					toppingInput.splice(toppingNum, 1)
+					TIDInput.splice(toppingNum, 1)
+				}
 			}
 		
-			console.log(`Toppings: ${toppingResults}`)
+			console.log(`Toppings: ${toppingResults}\nIDs: ${toppingIDList}`)
 		
 			var filteredA = new Set(toppingResults);
 			var toppingsFilteres = [...filteredA]
@@ -4814,25 +5979,31 @@ client.on('messageCreate', async message => {
 			//Condiments
 			var condimentInput = [...condimentTypes]
 			let condimentResults = []
+			let condimentIDList = []
+			var CIDInput = [...toppingIDs]
 			var condimentList = ''
 		
 			for (var i = 1; i <= condiments; i++) {
 		
 				if (condimentInput.length < 1) {
 					condimentInput = [...condimentTypes]
+					CIDInput = [...toppingIDs]
 					console.log(`Oops. Ran out of pizza condiments. Repeating the list.`)
 				}
 		
 				var condimentNum = Math.floor(Math.random() * condimentInput.length)
 		
 				condimentResults.push(condimentInput[condimentNum])
-				condimentList += `\n- ${condimentInput[condimentNum]}`
+				condimentIDList.push(CIDInput[condimentNum])
+				condimentList += `\n- ${condimentInput[condimentNum]} *(${CIDInput[condimentNum] !== 'official' ? client.users.cache.get(CIDInput[condimentNum]) : 'Official'})*`
 		
-				if (repeatCondiments == 'false')
+				if (repeatCondiments == 'false') {
 					condimentInput.splice(condimentNum, 1)
+					CIDInput.splice(condimentNum, 1)
+				}
 			}
 		
-			console.log(`Condiments: ${condimentResults}`)
+			console.log(`Condiments: ${condimentResults}\nIDs: ${condimentIDList}`)
 		
 			///////////
 			// IMAGE //
@@ -4858,22 +6029,78 @@ client.on('messageCreate', async message => {
 			drawRotated(0, crustDraw)
 			//sauce
 			if (allowSauce == 'true') {
-				const sauceDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/sauces/${sauce}.png`)
+				var sauceDraw
+
+				if (sauceID == 'official')
+					try {
+						sauceDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/sauces/${sauce}.png`)
+					} catch (error) {
+						sauceDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/error_sauce.png`)
+					}
+				else {
+					try {
+						sauceDraw = await Canvas.loadImage(foodFile[sauceID]['pizza']['sauces'][sauce].image)
+					} catch (error) {
+						sauceDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/error_sauce.png`)
+					}
+				}
 				drawRotated(Math.random() * 360, sauceDraw)
 			}
 			//cheese
 			if (allowCheese == 'true') {
-				const cheeseDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/cheeses/${cheese}.png`)
+				var cheeseDraw
+
+				if (sauceID == 'official')
+					try {
+						cheeseDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/cheeses/${cheese}.png`)
+					} catch (error) {
+						cheeseDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/error_cheese.png`)
+					}
+				else {
+					try {
+						cheeseDraw = await Canvas.loadImage(foodFile[cheeseID]['pizza']['cheeses'][cheese].image)
+					} catch (error) {
+						cheeseDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/error_cheese.png`)
+					}
+				}
 				drawRotated(Math.random() * 360, cheeseDraw)
 			}
 			//toppings
 			for (var i = 1; i <= toppings; i++) {
-				const toppingDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/toppings/${toppingResults[toppingResults.length - i]}.png`)
+				var toppingDraw
+
+				if (toppingIDList[toppingIDList.length - i] == 'official')
+					try {
+						toppingDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/toppings/${toppingResults[toppingResults.length - i]}.png`)
+					} catch (error) {
+						toppingDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/error_topping.png`)
+					}
+				else {
+					try {
+						toppingDraw = await Canvas.loadImage(foodFile[toppingIDList[toppingIDList.length - i]]['pizza']['toppings'][toppingResults[toppingResults.length - i]].image)
+					} catch (error) {
+						toppingDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/error_topping.png`)
+					}
+				}
 				drawRotated(Math.random() * 360, toppingDraw)
 			}
 			//condiments
 			for (var i = 1; i <= condiments; i++) {
-				const condimentDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/condiments/${condimentResults[condimentResults.length - i]}.png`)
+				var condimentDraw
+
+				if (condimentIDList[condimentIDList.length - i] == 'official')
+					try {
+						condimentDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/condiments/${condimentResults[condimentResults.length - i]}.png`)
+					} catch (error) {
+						condimentDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/error_condiment.png`)
+					}
+				else {
+					try {
+						condimentDraw = await Canvas.loadImage(foodFile[condimentIDList[condimentIDList.length - i]]['pizza']['condiments'][condimentResults[condimentResults.length - i]].image)
+					} catch (error) {
+						condimentDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/error_condiment.png`)
+					}
+				}
 				drawRotated(Math.random() * 360, condimentDraw)
 			}
 		
@@ -4920,8 +6147,8 @@ client.on('messageCreate', async message => {
 					.setColor('#FF6100')
 					.setTitle(`${toppingName} ${toppingName == "Title too long to process." ? '' : 'Pizza'}`)
 					.addFields(
-						{ name: 'Sauce', value: `${sauce}`, inline: true },
-						{ name: 'Cheese', value: `${cheese}`, inline: true },
+						{ name: 'Sauce', value: `${sauce} ${sauceID == undefined ? '' : (sauceID == 'official' ? '(Official)' : `(${client.users.cache.get(sauceID)})`)}`, inline: true },
+						{ name: 'Cheese', value: `${cheese} ${cheeseID == undefined ? '' : (cheeseID == 'official' ? '(Official)' : `(${client.users.cache.get(cheeseID)})`)}`, inline: true },
 						{ name: 'Topping Number', value: `${toppings}`, inline: false },
 						{ name: 'Toppings', value: `${toppingList}`, inline: true },
 						{ name: 'Condiment Number', value: `${condiments}`, inline: false },
@@ -4933,26 +6160,133 @@ client.on('messageCreate', async message => {
 			return message.channel.send({embeds: [embed], files: [attachment]})
 		}
 
-		async function getPizzaByLetter(sauce, cheese, toppings, condiments) {
-			
+		async function getPizzaByLetter(sauce, cheese, toppings, condiments, message) {
 			if (sauce == 'None')
 				sauce = 'No Sauce'
+			else {
+				var sauceID
+				var failureLevelS = 0
+				var userRandTable = []
+
+				//if this flavor exists in your personal list
+				if (Math.round(Math.random() * 100) <= 40) { //which will look into 40% of the time
+					if (foodFile[message.author.id] && foodFile[message.author.id]['pizza']['sauces'][sauce])
+					sauceID = message.author.id
+					else
+					failureLevelS = 1
+				} else
+				failureLevelS = 1
+					
+				//if not, then it will search through the user list first
+				if (failureLevelS == 1) {
+					for (const userID in foodFile) {
+						for (const a in list) {
+							if (list[a] == userID && foodFile[userID]['pizza'] && foodFile[userID]['pizza']['sauces']) {
+								for (const flavor in foodFile[userID]['pizza']['sauces']) {
+									if (flavor == sauce)
+									userRandTable.push(userID)
+								}
+							}
+						}
+					}
+
+					console.log(userRandTable)
+
+					//and pick a random ID
+					if (userRandTable.length > 0)
+					sauceID = userRandTable[Math.floor(Math.random() * userRandTable.length)]
+					else	//and if that fails, we will resort to the official flavors
+					sauceID = 'official'
+				}
+			}
 
 			if (cheese == 'None')
 				cheese = 'No Cheese'
+			else {
+				var cheeseID
+				var failureLevel = 0
+				var userRandTable = []
+
+				//if this flavor exists in your personal list
+				if (Math.round(Math.random() * 100) <= 40) { //which will look into 40% of the time
+					if (foodFile[message.author.id] && foodFile[message.author.id]['pizza']['cheeses'][cheese])
+					cheeseID = message.author.id
+					else
+					failureLevel = 1
+				} else
+				failureLevel = 1
+					
+				//if not, then it will search through the user list first
+				if (failureLevel == 1) {
+					for (const userID in foodFile) {
+						for (const a in list) {
+							if (list[a] == userID && foodFile[userID]['pizza'] && foodFile[userID]['pizza']['cheeses']) {
+								for (const flavor in foodFile[userID]['pizza']['cheeses']) {
+									if (flavor == cheese)
+									userRandTable.push(userID)
+								}
+							}
+						}
+					}
+
+					console.log(userRandTable)
+
+					//and pick a random ID
+					if (userRandTable.length > 0)
+					cheeseID = userRandTable[Math.floor(Math.random() * userRandTable.length)]
+					else	//and if that fails, we will resort to the official flavors
+					cheeseID = 'official'
+				}
+			}
 
 			let toppingResults = []
+			let toppingIDList = []
 			var toppingList = ''
 			
 			for (const i in toppings) {
 				toppings[i].slice(1,toppings[i].length - 1)
 
 				toppingResults.push(toppings[i])
-				toppingList += `\n- ${toppings[i]}`
+
+				var failureLevelT = 0
+				var userRandTable = []
+
+				//if this flavor exists in your personal list
+				if (Math.round(Math.random() * 100) <= 40) { //which will look into 40% of the time
+					if (foodFile[message.author.id] && foodFile[message.author.id]['pizza']['toppings'][toppings[i]])
+					toppingIDList.push(message.author.id)
+					else
+					failureLevelT = 1
+				} else
+				failureLevelT = 1
+					
+				//if not, then it will search through the user list first
+				if (failureLevelT == 1) {
+					for (const userID in foodFile) {
+						for (const a in list) {
+							if (list[a] == userID && foodFile[userID]['pizza'] && foodFile[userID]['pizza']['toppings']) {
+								for (const flavor in foodFile[userID]['pizza']['toppings']) {
+									if (flavor == toppings[i])
+									userRandTable.push(userID)
+								}
+							}
+						}
+					}
+
+					console.log(userRandTable)
+
+					//and pick a random ID
+					if (userRandTable.length > 0)
+					toppingIDList.push(userRandTable[Math.floor(Math.random() * userRandTable.length)])
+					else	//and if that fails, we will resort to the official flavors
+					toppingIDList.push('official')
+				}
+
+				toppingList += `\n- ${toppings[i]} *(${toppingIDList[i] !== 'official' ? client.users.cache.get(toppingIDList[i]) : 'Official'})*`
 			}
 			toppings = toppings.length
 
-			console.log(`Toppings: ${toppingResults}`)
+			console.log(`Toppings: ${toppingResults}\nIDs: ${toppingIDList}`)
 		
 			var filteredA = new Set(toppingResults);
 			var toppingsFilteres = [...filteredA]
@@ -4961,16 +6295,19 @@ client.on('messageCreate', async message => {
 			//Condiments
 			var condimentInput = [...condimentTypes]
 			let condimentResults = []
+			var CIDInput = [...condimentIDs]
+			let condimentIDList = []
 			var condimentList = ''
 		
 			for (var i = 1; i <= condiments; i++) {
 				var condimentNum = Math.floor(Math.random() * condimentInput.length)
 		
 				condimentResults.push(condimentInput[condimentNum])
-				condimentList += `\n- ${condimentInput[condimentNum]}`
+				condimentIDList.push(CIDInput[condimentNum])
+				condimentList += `\n- ${condimentInput[condimentNum]} *(${CIDInput[condimentNum] !== 'official' ? client.users.cache.get(CIDInput[condimentNum]) : 'Official'})*`
 			}
 		
-			console.log(`Condiments: ${condimentResults}`)
+			console.log(`Condiments: ${condimentResults}\nIDs: ${condimentIDList}`)
 
 			///////////
 			// IMAGE //
@@ -4996,22 +6333,78 @@ client.on('messageCreate', async message => {
 			drawRotated(0, crustDraw)
 			//sauce
 			if (sauce !== 'No Sauce') {
-				const sauceDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/sauces/${sauce}.png`)
+				var sauceDraw
+
+				if (sauceID == 'official')
+					try {
+						sauceDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/sauces/${sauce}.png`)
+					} catch (error) {
+						sauceDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/error_sauce.png`)
+					}
+				else {
+					try {
+						sauceDraw = await Canvas.loadImage(foodFile[sauceID]['pizza']['sauces'][sauce].image)
+					} catch (error) {
+						sauceDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/error_sauce.png`)
+					}
+				}
 				drawRotated(Math.random() * 360, sauceDraw)
 			}
 			//cheese
 			if (cheese !== 'No Cheese') {
-				const cheeseDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/cheeses/${cheese}.png`)
+				var cheeseDraw
+
+				if (sauceID == 'official')
+					try {
+						cheeseDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/cheeses/${cheese}.png`)
+					} catch (error) {
+						cheeseDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/error_cheese.png`)
+					}
+				else {
+					try {
+						cheeseDraw = await Canvas.loadImage(foodFile[cheeseID]['pizza']['cheeses'][cheese].image)
+					} catch (error) {
+						cheeseDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/error_cheese.png`)
+					}
+				}
 				drawRotated(Math.random() * 360, cheeseDraw)
 			}
 			//toppings
 			for (var i = 1; i <= toppings; i++) {
-				const toppingDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/toppings/${toppingResults[toppingResults.length - i]}.png`)
+				var toppingDraw
+
+				if (toppingIDList[toppingIDList.length - i] == 'official')
+					try {
+						toppingDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/toppings/${toppingResults[toppingResults.length - i]}.png`)
+					} catch (error) {
+						toppingDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/error_topping.png`)
+					}
+				else {
+					try {
+						toppingDraw = await Canvas.loadImage(foodFile[toppingIDList[toppingIDList.length - i]]['pizza']['toppings'][toppingResults[toppingResults.length - i]].image)
+					} catch (error) {
+						toppingDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/error_topping.png`)
+					}
+				}
 				drawRotated(Math.random() * 360, toppingDraw)
 			}
 			//condiments
 			for (var i = 1; i <= condiments; i++) {
-				const condimentDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/condiments/${condimentResults[condimentResults.length - i]}.png`)
+				var condimentDraw
+
+				if (condimentIDList[condimentIDList.length - i] == 'official')
+					try {
+						condimentDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/condiments/${condimentResults[condimentResults.length - i]}.png`)
+					} catch (error) {
+						condimentDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/error_condiment.png`)
+					}
+				else {
+					try {
+						condimentDraw = await Canvas.loadImage(foodFile[condimentIDList[condimentIDList.length - i]]['pizza']['condiments'][condimentResults[condimentResults.length - i]].image)
+					} catch (error) {
+						condimentDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/error_condiment.png`)
+					}
+				}
 				drawRotated(Math.random() * 360, condimentDraw)
 			}
 		
@@ -5058,8 +6451,8 @@ client.on('messageCreate', async message => {
 					.setColor('#FF6100')
 					.setTitle(`${toppingName} ${toppingName == "Title too long to process." ? '' : 'Pizza'}`)
 					.addFields(
-						{ name: 'Sauce', value: `${sauce}`, inline: true },
-						{ name: 'Cheese', value: `${cheese}`, inline: true },
+						{ name: 'Sauce', value: `${sauce} ${sauceID == undefined ? '' : (sauceID == 'official' ? '(Official)' : `(${client.users.cache.get(sauceID)})`)}`, inline: true },
+						{ name: 'Cheese', value: `${cheese} ${cheeseID == undefined ? '' : (cheeseID == 'official' ? '(Official)' : `(${client.users.cache.get(cheeseID)})`)}`, inline: true },
 						{ name: 'Topping Number', value: `${toppings}`, inline: false },
 						{ name: 'Toppings', value: `${toppingList}`, inline: true },
 						{ name: 'Condiment Number', value: `${condiments}`, inline: false },
