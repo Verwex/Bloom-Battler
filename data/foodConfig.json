@@ -1,6 +1,17 @@
 {
     "official": {
         "iceCream": {
+            "cones": {
+                "Waffle": {
+                    "image": "image"
+                },
+                "Sugar": {
+                    "image": "image"
+                },
+                "Cake": {
+                    "image": "image"
+                }
+            },
             "flavors": {
                 "Chocolate": {
                     "image": "image"
@@ -506,6 +517,32 @@
             }
         },
         "pizza": {
+            "crusts": {
+                "Standard": {
+                    "image": "image"
+                },
+                "Thin": {
+                    "image": "image"
+                },
+                "Cheese": {
+                    "image": "image"
+                },
+                "Sausage": {
+                    "image": "image"
+                },
+                "Sausage And Cheese": {
+                    "image": "image"
+                },
+                "Stuffed": {
+                    "image": "image"
+                },
+                "Sausage Stuffed": {
+                    "image": "image"
+                },
+                "Cheese Stuffed": {
+                    "image": "image"
+                }
+            },
             "sauces": {
                 "Traditional": {
                     "image": "image"
@@ -941,6 +978,27 @@
                 },
                 "Greek Yoghurt": {
                     "image": "image"
+                }
+            }
+        }
+    },
+    "712602499823042620": {
+        "iceCream": {
+            "cones": {
+                "Souls": {
+                    "image": "https://cdn.discordapp.com/attachments/737986977210695731/891760094629478420/Descone.png"
+                }
+            },
+            "flavors": {
+                "Remains": {
+                    "image": "https://cdn.discordapp.com/attachments/737986977210695731/891760576299151390/FC9939A4-EE8B-4D23-9F13-DA556FD86954.png"
+                }
+            }
+        },
+        "pizza": {
+            "crusts": {
+                "Consumation": {
+                    "image": "https://cdn.discordapp.com/attachments/737986977210695731/891765167631765565/Damned.png"
                 }
             }
         }

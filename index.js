@@ -451,8 +451,8 @@ const sendFoodArray = async(channel, theArray, nameArray, ownerArray) => {
 			title: `Showing results ${start + 1}-${start + current.length} out of ${theArray.length}`,
 			fields: await Promise.all(
 				current.map(async arrayDefs => ({
-					name: `- ${arrayDefs.name}`,
-					value: `Owner: ${arrayDefs.owner !== 'official' ? arrayDefs.owner : `${client.user.username} *(Official)*`}\nImage: ${arrayDefs.image !== 'image' ? arrayDefs.image : 'Image separate from a link'}`
+					name: `- ${arrayDefs.name} *(${arrayDefs.owner !== 'official' ? arrayDefs.owner : `Official`})*`,
+					value: `Image: ${arrayDefs.image !== 'image' ? arrayDefs.image : 'Image separate from a link'}`
 				}))
 			)
 		})
@@ -3782,7 +3782,7 @@ client.on('messageCreate', async message => {
 					.setColor('#0099ff')
 					.setTitle('You can make yourself some food however you like, or even make your own food with the official ones.')
 					.addFields(
-						{ name: `${prefix}makefood`, value: "(Args <Name> <Category> <Image Link / Attachment>)\nI will make your very own food available to the ice cream generator.", inline: false },
+						{ name: `${prefix}makefood`, value: "(Args <Name> <Category> <Image Link / Attachment>)\nI will make your very own food available to their generator.", inline: false },
 						{ name: `${prefix}foodtemplate`, value: "Get yourself a textbook example of what to make for a certain food category.", inline: true },
 						{ name: `${prefix}removefood`, value: "(Args <Category> <Name>)\nIf you don't want your food to be there, I can make it gone.", inline: true },
 						{ name: `${prefix}renamefood`, value: "(Args <Category> <Name> <New Name>)\nI will change the name of your food from one to another.", inline: true },
@@ -4482,8 +4482,11 @@ client.on('messageCreate', async message => {
 	/////////////////////
 
 	if (command === 'icecream') {
-		let iceCreamFlavors = []
-		let iceCreamIDs = []
+		let cones = []
+		let coneIDs = []
+
+		let flavors = []
+		let flavorIDs = []
 			
 		const arg = message.content.slice(prefix.length).trim().split(/ +/);
 
@@ -4491,7 +4494,7 @@ client.on('messageCreate', async message => {
 			const DiscordEmbed = new Discord.MessageEmbed()
 				.setColor('#0099ff')
 				.setTitle(`${prefix}icecream`)
-				.setDescription("(Args <Amount Of Scoops> <Optional: Repeat Scoop Flavors>)\nI'll make an ice cream of any amount of scoop with randomized flavors. You can do up to 100 scoops.\n\n Alternatively, you can also use:\n(Args <Scoop Flavors>)\n that if you want to specify flavors on an ice cream.")
+				.setDescription("(Args <Amount Of Scoops> <Optional: Repeat Scoop Flavors>)\nI'll make an ice cream of any amount of scoop with randomized flavors. You can do up to 100 scoops.\n\n Alternatively, you can also use:\n(Args <Cone>)\n to start making your very own ice cream.")
 			message.channel.send({embeds: [DiscordEmbed]})
 			return false
 		}
@@ -4502,22 +4505,31 @@ client.on('messageCreate', async message => {
 
 		let scoopNumber
 		let repeatscoops
+		let conePick
 
 		let users = await message.guild.members.fetch().catch(console.error);
 		let list = users.map(m => m.id)
 
 		//Official Ice Creams
+		for (const flavor in foodFile['official']['iceCream']['cones']) {
+			cones.push(flavor)
+			coneIDs.push('official')
+		}
 		for (const flavor in foodFile['official']['iceCream']['flavors']) {
-			iceCreamFlavors.push(flavor)
-			iceCreamIDs.push('official')
+			flavors.push(flavor)
+			flavorIDs.push('official')
 		}
 		//User-Based
 		for (const i in list) {
-			if (foodFile[list[i]] && foodFile[list[i]]['iceCream'] && foodFile[list[i]]['iceCream']['flavors']) {
+			if (foodFile[list[i]] && foodFile[list[i]]['iceCream']) {
 				var user = list[i]
+				for (const flavor in foodFile[list[i]]['iceCream']['cones']) {
+					cones.push(flavor)
+					coneIDs.push(user)
+				}
 				for (const flavor in foodFile[list[i]]['iceCream']['flavors']) {
-					iceCreamFlavors.push(flavor)
-					iceCreamIDs.push(user)
+					flavors.push(flavor)
+					flavorIDs.push(user)
 				}
 			}
 		}
@@ -4541,6 +4553,8 @@ client.on('messageCreate', async message => {
 
 			if (scoopNumber > 10)
 				message.channel.send(`Please wait until your ice cream is done.`)
+
+			getIceCream(scoopNumber, repeatscoops, message, flavorIDs)
 		} else {
 
 			let input = message.content.slice(prefix.length).trim()
@@ -4553,37 +4567,84 @@ client.on('messageCreate', async message => {
 				return arguments.push(element.replace(/"/g, ''));
 			});
 
-			if (arguments.length > 100) {
-				message.channel.send(`<:warning:878094052208296007>That's way too much. Please specify the scoop flavors, but make their amount below or equal to 100. Changing the amount to 100.`)
-				arguments.length = 100
+			conePick = arguments[0]
+
+			if (cones.indexOf(conePick) < 0 && conePick !== 'None') {
+				message.channel.send(`${conePick} is not a valid cone. Defaulting to 'Waffle'.`)
+				.then(msg => {
+					setTimeout(() => msg.delete(), 5000)
+				})
+				conePick = 'None'
 			}
 
-			if (arguments[0] == "None") {
-				arguments = []
-			}
+			var onetoListenTo = message.author.id
+			var contentOfMessage
 
-			let invalidFlavors = ''
+			message.channel.send(`👍 Now please, specify the scoops. You have 5 minutes.\nIf you don't want any scoops, please type 'None'.`)
+			.then(msg => {
+				setTimeout(() => msg.delete(), 10000)
+			})
 
-			for (const i in arguments) {
-				if (iceCreamFlavors.indexOf(arguments[i]) < 0) {
-					invalidFlavors += `\n- ${arguments[i]}`
-					arguments[i] = ''
+			const filter = m => m.author.id === onetoListenTo && !m.content.startsWith(prefix)
+			const collectorTopping = message.channel.createMessageCollector({ filter, time: 300000, max: 1 });
+
+			collectorTopping.on('collect', m => {
+				console.log(`Collected ${m.content}`);
+				contentOfMessage = m.content.toString()
+			});
+
+			collectorTopping.on('end', collected => {
+				if (collected.size == 0) {
+					return message.channel.send(`I'm sorry, ${client.users.cache.get(onetoListenTo)}, but you didn't type in time. Please try again.`)
+					.then(msg => {
+						setTimeout(() => msg.delete(), 5000)
+					})
 				}
-			}
-			const filterArray=(a,b)=>{return a.filter((e)=>{return e!=b})}
-			arguments = filterArray(arguments,'')
 
-			if (invalidFlavors.length > 0)
-				message.channel.send(`<:warning:878094052208296007>**Your invalid flavors are:**${invalidFlavors}`)
+				let input = contentOfMessage.trim()
 
-			scoopNumber = arguments
-			repeatscoops = `true`
+				const regex = new RegExp('"[^"]+"|[\\S]+', 'g');
+				let arguments = [];
+				input.match(regex).forEach(element => {
+					if (!element) return;
+					return arguments.push(element.replace(/"/g, ''));
+				});
 
-			if (scoopNumber.length > 10)
+				scoopNumber = [...arguments]
+
+				if (scoopNumber[0] == 'None')
+				scoopNumber = []
+
+				if (scoopNumber.length > 100) {
+					message.channel.send(`<:warning:878094052208296007>That's way too much. Please make their amount below or equal to 100. Changing the amount to 100.`)
+					.then(msg => {
+						setTimeout(() => msg.delete(), 5000)
+					})
+					scoopNumber.length = 100
+				}
+
+				let invalidFlavors = ''
+
+				for (const i in scoopNumber) {
+					if (flavors.indexOf(scoopNumber[i]) < 0) {
+						invalidFlavors += `\n- ${scoopNumber[i]}`
+						scoopNumber[i] = ''
+					}
+				}
+				const filterArray=(a,b)=>{return a.filter((e)=>{return e!=b})}
+				scoopNumber = filterArray(scoopNumber,'')
+
+				if (invalidFlavors.length > 0)
+					message.channel.send(`<:warning:878094052208296007>**Your invalid flavors are:**${invalidFlavors}`)
+
+				repeatscoops = `true`
+
+				if (scoopNumber.length > 10)
 				message.channel.send(`Please wait until your ice cream is done.`)
-		}
 
-		getIceCream(scoopNumber, repeatscoops, message, iceCreamIDs)
+				getIceCream(scoopNumber, repeatscoops, message, flavorIDs)
+			});
+		}
 
 		async function getIceCream(scoops, repeatScoops, message) {
 			let iceCreamResults = []
@@ -4591,6 +4652,48 @@ client.on('messageCreate', async message => {
 			var iceCreamFlavorList = ''
 
 			if (!isFinite(scoops)) {
+				var cone = conePick
+
+				if (cone == 'None') {
+					cone = 'Waffle'
+					var coneID = 'official'
+				} else {
+					var coneID
+					var failureLevelC = 0
+					var userRandTable = []
+	
+					//if this flavor exists in your personal list
+					if (Math.round(Math.random() * 100) <= 40) { //which will look into 40% of the time
+						if (foodFile[message.author.id] && foodFile[message.author.id]['iceCream'] && foodFile[message.author.id]['iceCream']['cones'] && foodFile[message.author.id]['iceCream']['cones'][cone])
+						coneID = message.author.id
+						else
+						failureLevelC = 1
+					} else
+					failureLevelC = 1
+						
+					//if not, then it will search through the user list first
+					if (failureLevelC == 1) {
+						for (const userID in foodFile) {
+							for (const a in list) {
+								if (list[a] == userID && foodFile[userID]['iceCream'] && foodFile[userID]['iceCream']['cones']) {
+									for (const flavor in foodFile[userID]['iceCream']['cones']) {
+										if (flavor == cone)
+										userRandTable.push(userID)
+									}
+								}
+							}
+						}
+	
+						console.log(userRandTable)
+	
+						//and pick a random ID
+						if (userRandTable.length > 0)
+						coneID = userRandTable[Math.floor(Math.random() * userRandTable.length)]
+						else	//and if that fails, we will resort to the official flavors
+						coneID = 'official'
+					}
+				}
+
 				for (const i in scoops) {
 					scoops[i].slice(1,scoops[i].length - 1)
 
@@ -4601,7 +4704,7 @@ client.on('messageCreate', async message => {
 
 					//if this flavor exists in your personal list
 					if (Math.round(Math.random() * 100) <= 40) { //which will look into 40% of the time
-						if (foodFile[message.author.id] && foodFile[message.author.id]['iceCream']['flavors'][scoops[i]])
+						if (foodFile[message.author.id] && foodFile[message.author.id]['iceCream'] && foodFile[message.author.id]['iceCream']['flavors'] && foodFile[message.author.id]['iceCream']['flavors'][scoops[i]])
 						iceCreamIDList.push(message.author.id)
 						else
 						failureLevel = 1
@@ -4635,16 +4738,20 @@ client.on('messageCreate', async message => {
 
 				scoops = scoops.length
 			} else {
-				var iceCreamInput = [...iceCreamFlavors]
-				var IDInput = [...iceCreamIDs]
+				var coneNumber = Math.floor(Math.random() * cones.length)
+				var cone = cones[coneNumber]
+				var coneID = coneIDs[coneNumber]
+
+				var iceCreamInput = [...flavors]
+				var IDInput = [...flavorIDs]
 				iceCreamResults = []
 				iceCreamFlavorList = ''
 			
 				for (var i = 1; i <= scoops; i++) {
 			
 					if (iceCreamInput.length < 1) {
-						iceCreamInput = [...iceCreamFlavors]
-						IDInput = [...iceCreamIDs]
+						iceCreamInput = [...flavors]
+						IDInput = [...flavorIDs]
 						console.log(`Oops. Ran out of ice cream flavors. Repeating the list.`)
 					}
 			
@@ -4675,11 +4782,25 @@ client.on('messageCreate', async message => {
 			const context = canvas.getContext('2d');
 		
 			// Since the image takes time to load, you should await it
-			const cone = await Canvas.loadImage('./images/foodgenerators/icecream/cone.png')
+			var coneDraw
+			
+			if (coneID == 'official')
+				try {
+					coneDraw = await Canvas.loadImage(`./images/foodgenerators/icecream/cones/${cone}.png`)
+				} catch (error) {
+					coneDraw = await Canvas.loadImage(`./images/foodgenerators/icecream/error_cone.png`)
+				}
+			else {
+				try {
+					coneDraw = await Canvas.loadImage(foodFile[coneID]['iceCream']['cones'][cone].image)
+				} catch (error) {
+					coneDraw = await Canvas.loadImage(`./images/foodgenerators/icecream/error_cone.png`)
+				}
+			}
 		
 			// This uses the canvas dimensions to stretch the image onto the entire canvas
 			var coneY = canvas.height - 240
-			context.drawImage(cone, 20, coneY, 161, 231);
+			context.drawImage(coneDraw, 20, coneY, 161, 231);
 		
 			var lastScoopY
 			for (var i = 1; i <= scoops; i++) {
@@ -4736,6 +4857,7 @@ client.on('messageCreate', async message => {
 					.setColor('#F0B2ED')
 					.setTitle(`${iceCreamName} ${iceCreamName == "Title too long to process." ? '' : 'Ice Cream'}`)
 					.addFields(
+						{ name: 'Cone', value: `${cone} ${coneID == undefined ? '' : (coneID == 'official' ? '*(Official)*' : `*(${client.users.cache.get(coneID)})*`)}`, inline: false },
 						{ name: 'Scoops', value: `${scoops}`, inline: true },
 						{ name: 'Flavors', value: `${iceCreamFlavorList}`, inline: false },
 					)
@@ -4887,7 +5009,7 @@ client.on('messageCreate', async message => {
 			const DiscordEmbed = new Discord.MessageEmbed()
                 .setColor('#0099ff')
                 .setTitle(`${prefix}listfood`)
-				.setDescription(`(Args <Category> <'official'/'users'/__<User ID / User Mention>__/'me'/'all'>)\nWill make a list of food in a certain categorys.`)
+				.setDescription(`(Args <Category> <'official'/'users'/__<User ID / User Mention>__/'me'/'all'>)\nWill make a list of food in a certain category.`)
             message.channel.send({embeds: [DiscordEmbed]})
             return false
 		}
@@ -4901,13 +5023,15 @@ client.on('messageCreate', async message => {
 		var ownerTxt = []
 
 		if ((arg[1] && arg[1].toLowerCase() !== 'ic_flavor' && arg[1].toLowerCase() !== 'pi_sauce' && arg[1].toLowerCase() !== 'pi_cheese' && arg[1].toLowerCase() !== 'pi_topping'
-		&& arg[1].toLowerCase() !== 'pi_condiment') || !arg[1]) {
+		&& arg[1].toLowerCase() !== 'pi_condiment' && arg[1].toLowerCase() !== 'pi_crust' && arg[1].toLowerCase() !== 'ic_cone') || !arg[1]) {
 		const DiscordEmbed = new Discord.MessageEmbed()
             .setColor('#0099ff')
             .setTitle(`Invalid`)
 			.setDescription(`This is not a valid food category. Please use:`)
 			.addFields(
+				{ name: `ic_cone`, value: `This is for ice cream cones.`, inline: true },
 				{ name: `ic_flavor`, value: `This is for ice cream flavors.`, inline: true },
+				{ name: `pi_crust`, value: `This is for pizza crusts.`, inline: true },
 				{ name: `pi_sauce`, value: `This is for pizza sauces.`, inline: true },
 				{ name: `pi_cheese`, value: `This is for pizza cheeses.`, inline: true },
 				{ name: `pi_topping`, value: `This is for pizza toppings.`, inline: true },
@@ -4930,6 +5054,9 @@ client.on('messageCreate', async message => {
 			if (category.includes(`flavor`)) {
 				midmean = 'flavors'
 				catText = 'ice cream flavors'
+			} else if (category.includes(`cone`)) {
+				midmean = 'cones'
+				catText = 'ice cream cones'
 			}
 		}else if (category.startsWith(`pi_`)) {
 			begmean = 'pizza'
@@ -4946,6 +5073,9 @@ client.on('messageCreate', async message => {
 			} else if (category.includes(`condiment`)) {
 				midmean = 'condiments'
 				catText = 'pizza condiments'
+			} else if (category.includes(`crust`)) {
+				midmean = 'crusts'
+				catText = 'pizza crusts'
 			}
 		}
 
@@ -4968,24 +5098,42 @@ client.on('messageCreate', async message => {
 
 						var skip = false
 
+						var proceed = true
+
+						if (!foodFile[userID])
+							proceed = false
+
+						if (proceed == true) {
+							if (!foodFile[userID]['privacy'])
+							proceed = false
+						}
+
 						//global block
-						if (foodFile[userID]['privacy'].globalBlock == true)
-						skip = true
-
-						//server block
-						if (foodFile[userID]['privacy'][message.guild.id].blockedServer == true)
-						skip = true
-
-						//category block
-						for (const categories in foodFile[userID]['privacy'][message.guild.id].blockedCategories) {
-							if (message.channel.parentId == foodFile[userID]['privacy'][message.guild.id].blockedCategories[categories])
+						if (proceed == true) {
+							if (foodFile[userID]['privacy'].globalBlock == true)
 							skip = true
 						}
 
-						//channel block
-						for (const channels in foodFile[userID]['privacy'][message.guild.id].blockedChannels) {
-							if (message.channel.id == foodFile[userID]['privacy'][message.guild.id].blockedChannels[channels])
+						//server block
+						if (proceed == true) {
+							if (foodFile[userID]['privacy'][message.guild.id].blockedServer == true)
 							skip = true
+						}
+
+						//category 
+						if (proceed == true) {
+							for (const categories in foodFile[userID]['privacy'][message.guild.id].blockedCategories) {
+								if (message.channel.parentId == foodFile[userID]['privacy'][message.guild.id].blockedCategories[categories])
+								skip = true
+							}
+						}
+
+						//channel block
+						if (proceed == true) {
+							for (const channels in foodFile[userID]['privacy'][message.guild.id].blockedChannels) {
+								if (message.channel.id == foodFile[userID]['privacy'][message.guild.id].blockedChannels[channels])
+								skip = true
+							}
 						}
 
 						if (skip == false) {
@@ -4998,7 +5146,7 @@ client.on('messageCreate', async message => {
 					}
 				}
 			}
-			if (skillTxt.length < 2)
+			if (skillTxt.length < 2 && arg[2] == 'users')
 			return message.channel.send(`There aren't any user-based ${catText} available to the public yet.`)
 		}
 
@@ -5017,13 +5165,14 @@ client.on('messageCreate', async message => {
 		}
 
 		if (arg[2] !== 'all' && arg[2] !== 'users' && arg[2] !== 'official' && arg[2] !== 'me' && arg[2]) {
-			if (message.mentions.users.first())
-			arg[3] = message.mentions.users.first()
+			if (message.mentions.users.first()) {
+				arg[3] = message.mentions.users.first()
+			}
 			else {
-			arg[3] = client.users.cache.find(user => user.id === arg[2].toString())
+				arg[3] = client.users.cache.find(user => user.id === arg[2].toString())
 
-			if (arg[3] == undefined)
-			return message.channel.send(`Please provide a valid member ID, or mention someone.`)
+				if (arg[3] == undefined)
+				return message.channel.send(`Please provide a valid member ID, or mention someone.`)
 			}
 
 			var userID = arg[3].id
@@ -5035,24 +5184,43 @@ client.on('messageCreate', async message => {
 			var skip = false
 
 			if (userID !== message.author.id) {
+
+				var proceed = true
+
+				if (!foodFile[userID])
+					proceed = false
+
+				if (proceed == true) {
+					if (!foodFile[userID]['privacy'])
+					proceed = false
+				}
+
 				//global block
-				if (foodFile[userID]['privacy'].globalBlock == true)
-				skip = true
-
-				//server block
-				if (foodFile[userID]['privacy'][message.guild.id].blockedServer == true)
-				skip = true
-
-				//category block
-				for (const categories in foodFile[userID]['privacy'][message.guild.id].blockedCategories) {
-					if (message.channel.parentId == foodFile[userID]['privacy'][message.guild.id].blockedCategories[categories])
+				if (proceed == true) {
+					if (foodFile[userID]['privacy'].globalBlock == true)
 					skip = true
 				}
 
-				//channel block
-				for (const channels in foodFile[userID]['privacy'][message.guild.id].blockedChannels) {
-					if (message.channel.id == foodFile[userID]['privacy'][message.guild.id].blockedChannels[channels])
+				//server block
+				if (proceed == true) {
+					if (foodFile[userID]['privacy'][message.guild.id].blockedServer == true)
 					skip = true
+				}
+
+				//category 
+				if (proceed == true) {
+					for (const categories in foodFile[userID]['privacy'][message.guild.id].blockedCategories) {
+						if (message.channel.parentId == foodFile[userID]['privacy'][message.guild.id].blockedCategories[categories])
+						skip = true
+					}
+				}
+
+				//channel block
+				if (proceed == true) {
+					for (const channels in foodFile[userID]['privacy'][message.guild.id].blockedChannels) {
+						if (message.channel.id == foodFile[userID]['privacy'][message.guild.id].blockedChannels[channels])
+						skip = true
+					}
 				}
 			}
 
@@ -5102,13 +5270,15 @@ client.on('messageCreate', async message => {
 		});
 
 		if ((arguments[0] && arguments[0].toLowerCase() !== 'ic_flavor' && arguments[0].toLowerCase() !== 'pi_sauce' && arguments[0].toLowerCase() !== 'pi_cheese' && arguments[0].toLowerCase() !== 'pi_topping'
-		&& arguments[0].toLowerCase() !== 'pi_condiment') || !arguments[0]) {
+		&& arguments[0].toLowerCase() !== 'pi_condiment' && arguments[0].toLowerCase() !== 'pi_crust' && arguments[0].toLowerCase() !== 'ic_cone') || !arguments[0]) {
 		const DiscordEmbed = new Discord.MessageEmbed()
             .setColor('#0099ff')
             .setTitle(`Invalid`)
 			.setDescription(`This is not a valid food category. Please use:`)
 			.addFields(
+				{ name: `ic_cone`, value: `This is for ice cream cones.`, inline: true },
 				{ name: `ic_flavor`, value: `This is for ice cream flavors.`, inline: true },
+				{ name: `pi_crust`, value: `This is for pizza crusts.`, inline: true },
 				{ name: `pi_sauce`, value: `This is for pizza sauces.`, inline: true },
 				{ name: `pi_cheese`, value: `This is for pizza cheeses.`, inline: true },
 				{ name: `pi_topping`, value: `This is for pizza toppings.`, inline: true },
@@ -5135,23 +5305,29 @@ client.on('messageCreate', async message => {
 
 			if (category.includes(`flavor`)) {
 				midmean = 'flavors'
-				catText = 'flavor'
+				catText = 'flavors'
+			} else if (category.includes(`cone`)) {
+				midmean = 'cones'
+				catText = 'cones'
 			}
 		}else if (category.startsWith(`pi_`)) {
 			begmean = 'pizza'
 
 			if (category.includes(`sauce`)) {
 				midmean = 'sauces'
-				catText = 'sauce'
+				catText = 'sauces'
 			} else if (category.includes(`cheese`)) {
 				midmean = 'cheeses'
-				catText = 'cheese'
+				catText = 'cheeses'
 			} else if (category.includes(`topping`)) {
 				midmean = 'toppings'
-				catText = 'topping'
+				catText = 'toppings'
 			} else if (category.includes(`condiment`)) {
 				midmean = 'condiments'
-				catText = 'condiment'
+				catText = 'condiments'
+			} else if (category.includes(`crust`)) {
+				midmean = 'crusts'
+				catText = 'crusts'
 			}
 		}
 
@@ -5173,24 +5349,42 @@ client.on('messageCreate', async message => {
 
 					var skip = false
 
+					var proceed = true
+
+					if (!foodFile[userID])
+						proceed = false
+
+					if (proceed == true) {
+						if (!foodFile[userID]['privacy'])
+						proceed = false
+					}
+
 					//global block
-					if (foodFile[userID]['privacy'].globalBlock == true)
-					skip = true
-
-					//server block
-					if (foodFile[userID]['privacy'][message.guild.id].blockedServer == true)
-					skip = true
-
-					//category block
-					for (const categories in foodFile[userID]['privacy'][message.guild.id].blockedCategories) {
-						if (message.channel.parentId == foodFile[userID]['privacy'][message.guild.id].blockedCategories[categories])
+					if (proceed == true) {
+						if (foodFile[userID]['privacy'].globalBlock == true)
 						skip = true
 					}
 
-					//channel block
-					for (const channels in foodFile[userID]['privacy'][message.guild.id].blockedChannels) {
-						if (message.channel.id == foodFile[userID]['privacy'][message.guild.id].blockedChannels[channels])
+					//server block
+					if (proceed == true) {
+						if (foodFile[userID]['privacy'][message.guild.id].blockedServer == true)
 						skip = true
+					}
+
+					//category 
+					if (proceed == true) {
+						for (const categories in foodFile[userID]['privacy'][message.guild.id].blockedCategories) {
+							if (message.channel.parentId == foodFile[userID]['privacy'][message.guild.id].blockedCategories[categories])
+							skip = true
+						}
+					}
+
+					//channel block
+					if (proceed == true) {
+						for (const channels in foodFile[userID]['privacy'][message.guild.id].blockedChannels) {
+							if (message.channel.id == foodFile[userID]['privacy'][message.guild.id].blockedChannels[channels])
+							skip = true
+						}
 					}
 
 					if (skip == false) {
@@ -5219,7 +5413,7 @@ client.on('messageCreate', async message => {
 			const DiscordEmbed = new Discord.MessageEmbed()
                 .setColor('#0099ff')
                 .setTitle(`${prefix}makefood`)
-				.setDescription(`(Args <Name> <Category> <Image Link / Attachment>)\nI will make your very own ice cream flavor available to the ice cream generator.\n\n**Name:** It can be pretty much any name you want.`
+				.setDescription(`(Args <Name> <Category> <Image Link / Attachment>)\nI will make your very own food available to their generator.\n\n**Name:** It can be pretty much any name you want.`
 				+`\n**Category:** There are some categories. If you want to see them, just type a random name after the command and nothing else.\n**Image:** You are going to be fine with it as long as it is an image file/link. **Almost however.**\n`
 				+`You see, the bigger the image in size, the longer things will load for everyone, making a huge delay. This means that a 10 MB file would take way longer than a 5 KB file. Huge stuff.\n`
 				+`There is of course no legitimate limit on the size, but for everyone's sanity, it is recommended to stick to the template's size or smaller.\n\n You can grab templates with the ${prefix}foodtemplate command.`)
@@ -5241,13 +5435,15 @@ client.on('messageCreate', async message => {
 		});
 
 		if ((arguments[1] && arguments[1].toLowerCase() !== 'ic_flavor' && arguments[1].toLowerCase() !== 'pi_sauce' && arguments[1].toLowerCase() !== 'pi_cheese' && arguments[1].toLowerCase() !== 'pi_topping'
-		&& arguments[1].toLowerCase() !== 'pi_condiment') || !arguments[1]) {
+		&& arguments[1].toLowerCase() !== 'pi_condiment' && arguments[1].toLowerCase() !== 'pi_crust' && arguments[1].toLowerCase() !== 'ic_cone') || !arguments[1]) {
 		const DiscordEmbed = new Discord.MessageEmbed()
             .setColor('#0099ff')
             .setTitle(`Invalid`)
 			.setDescription(`This is not a valid food category. Please use:`)
 			.addFields(
+				{ name: `ic_cone`, value: `This is for ice cream cones.`, inline: true },
 				{ name: `ic_flavor`, value: `This is for ice cream flavors.`, inline: true },
+				{ name: `pi_crust`, value: `This is for pizza crusts.`, inline: true },
 				{ name: `pi_sauce`, value: `This is for pizza sauces.`, inline: true },
 				{ name: `pi_cheese`, value: `This is for pizza cheeses.`, inline: true },
 				{ name: `pi_topping`, value: `This is for pizza toppings.`, inline: true },
@@ -5304,6 +5500,10 @@ client.on('messageCreate', async message => {
 				midmean = 'flavors'
 				catText = 'an ice cream flavor'
 				smalltext = 'flavor'
+			} else if (category.includes(`cone`)) {
+				midmean = 'cones'
+				catText = 'an ice cream cone'
+				smalltext = 'cone'
 			}
 		}else if (category.startsWith(`pi_`)) {
 			begmean = 'pizza'
@@ -5324,6 +5524,10 @@ client.on('messageCreate', async message => {
 				midmean = 'condiments'
 				catText = 'a pizza condiment'
 				smalltext = 'condiment'
+			} else if (category.includes(`crust`)) {
+				midmean = 'crusts'
+				catText = 'a pizza crust'
+				smalltext = 'crust'
 			}
 		}
 
@@ -5364,13 +5568,15 @@ client.on('messageCreate', async message => {
 		}
 
 		if ((arg[1] && arg[1].toLowerCase() !== 'ic_flavor' && arg[1].toLowerCase() !== 'pi_sauce' && arg[1].toLowerCase() !== 'pi_cheese' && arg[1].toLowerCase() !== 'pi_topping'
-		&& arg[1].toLowerCase() !== 'pi_condiment') || !arg[1]) {
+		&& arg[1].toLowerCase() !== 'pi_condiment' && arg[1].toLowerCase() !== 'pi_crust' && arg[1].toLowerCase() !== 'ic_cone') || !arg[1]) {
 		const DiscordEmbed = new Discord.MessageEmbed()
             .setColor('#0099ff')
             .setTitle(`Invalid`)
 			.setDescription(`This is not a valid food category. Please use:`)
 			.addFields(
+				{ name: `ic_cone`, value: `This is for ice cream cones.`, inline: true },
 				{ name: `ic_flavor`, value: `This is for ice cream flavors.`, inline: true },
+				{ name: `pi_crust`, value: `This is for pizza crusts.`, inline: true },
 				{ name: `pi_sauce`, value: `This is for pizza sauces.`, inline: true },
 				{ name: `pi_cheese`, value: `This is for pizza cheeses.`, inline: true },
 				{ name: `pi_topping`, value: `This is for pizza toppings.`, inline: true },
@@ -5389,6 +5595,9 @@ client.on('messageCreate', async message => {
 			if (category.includes(`flavor`)) {
 				catText = 'Ice Cream Flavor'
 				attachment = new Discord.MessageAttachment(`./images/foodgenerators/icecream/scoopflavors/Vanilla.png`, 'template.png');
+			} else if (category.includes(`cone`)) {
+				midmean = 'Ice Cream Cone'
+				attachment = new Discord.MessageAttachment(`./images/foodgenerators/icecream/cones/Waffle.png`, 'template.png');
 			}
 		}else if (category.startsWith(`pi_`)) {
 			if (category.includes(`sauce`)) {
@@ -5403,13 +5612,16 @@ client.on('messageCreate', async message => {
 			} else if (category.includes(`condiment`)) {
 				catText = 'Pizza Condiment'
 				attachment = new Discord.MessageAttachment(`./images/foodgenerators/pizza/condiments/Ketchup.png`, 'template.png');
+			} else if (category.includes(`crust`)) {
+				catText = 'Pizza Crust'
+				attachment = new Discord.MessageAttachment(`./images/foodgenerators/pizza/crusts/Standard.png`, 'template.png');
 			}
 		}
 
 		const DiscordEmbed = new Discord.MessageEmbed()
                 .setColor('#0099ff')
                 .setTitle(`${catText} Template`)
-				.setDescription(`You don't have to follow the template to a tee but it is a textbook example.`)
+				.setDescription(`You don't have to follow the template to a tee but it is a textbook example.\n**BEWARE:** The image may be stretched in the final result if it is a different size then the templates.`)
 				.setImage('attachment://template.png')
 		return message.channel.send({embeds: [DiscordEmbed], files: [attachment]})
 	}
@@ -5421,7 +5633,7 @@ client.on('messageCreate', async message => {
 			const DiscordEmbed = new Discord.MessageEmbed()
                 .setColor('#0099ff')
                 .setTitle(`${prefix}removefood`)
-				.setDescription(`(Args <Category> <Name>)\nIf you don't want your flavor to be there, I can make it gone.`)
+				.setDescription(`(Args <Category> <Name>)\nIf you don't want your food to be there, I can make it gone.`)
             message.channel.send({embeds: [DiscordEmbed]})
             return false
 		}
@@ -5440,13 +5652,15 @@ client.on('messageCreate', async message => {
 		});
 
 		if ((arguments[0] && arguments[0].toLowerCase() !== 'ic_flavor' && arguments[0].toLowerCase() !== 'pi_sauce' && arguments[0].toLowerCase() !== 'pi_cheese' && arguments[0].toLowerCase() !== 'pi_topping'
-		&& arguments[0].toLowerCase() !== 'pi_condiment') || !arguments[0]) {
+		&& arguments[0].toLowerCase() !== 'pi_condiment' && arguments[0].toLowerCase() !== 'pi_crust' && arguments[0].toLowerCase() !== 'ic_cone') || !arguments[0]) {
 		const DiscordEmbed = new Discord.MessageEmbed()
             .setColor('#0099ff')
             .setTitle(`Invalid`)
 			.setDescription(`This is not a valid food category. Please use:`)
 			.addFields(
+				{ name: `ic_cone`, value: `This is for ice cream cones.`, inline: true },
 				{ name: `ic_flavor`, value: `This is for ice cream flavors.`, inline: true },
+				{ name: `pi_crust`, value: `This is for pizza crusts.`, inline: true },
 				{ name: `pi_sauce`, value: `This is for pizza sauces.`, inline: true },
 				{ name: `pi_cheese`, value: `This is for pizza cheeses.`, inline: true },
 				{ name: `pi_topping`, value: `This is for pizza toppings.`, inline: true },
@@ -5474,6 +5688,9 @@ client.on('messageCreate', async message => {
 			if (category.includes(`flavor`)) {
 				midmean = 'flavors'
 				catText = 'flavor'
+			} else if (category.includes(`cone`)) {
+				midmean = 'cones'
+				catText = 'cone'
 			}
 		}else if (category.startsWith(`pi_`)) {
 			begmean = 'pizza'
@@ -5490,6 +5707,9 @@ client.on('messageCreate', async message => {
 			} else if (category.includes(`condiment`)) {
 				midmean = 'condiments'
 				catText = 'condiment'
+			} else if (category.includes(`crust`)) {
+				midmean = 'crusts'
+				catText = 'crust'
 			}
 		}
 
@@ -5522,7 +5742,7 @@ client.on('messageCreate', async message => {
 			const DiscordEmbed = new Discord.MessageEmbed()
                 .setColor('#0099ff')
                 .setTitle(`${prefix}renamefood`)
-				.setDescription(`(Args <Category> <Name> <New Name>)\nI will change the name of your ice cream flavor from one to another.`)
+				.setDescription(`(Args <Category> <Name> <New Name>)\nI will change the name of your food from one to another.`)
             message.channel.send({embeds: [DiscordEmbed]})
             return false
 		}
@@ -5541,13 +5761,15 @@ client.on('messageCreate', async message => {
 		});
 
 		if ((arguments[0] && arguments[0].toLowerCase() !== 'ic_flavor' && arguments[0].toLowerCase() !== 'pi_sauce' && arguments[0].toLowerCase() !== 'pi_cheese' && arguments[0].toLowerCase() !== 'pi_topping'
-		&& arguments[0].toLowerCase() !== 'pi_condiment') || !arguments[0]) {
+		&& arguments[0].toLowerCase() !== 'pi_condiment' && arguments[0].toLowerCase() !== 'pi_crust' && arguments[0].toLowerCase() !== 'ic_cone') || !arguments[0]) {
 		const DiscordEmbed = new Discord.MessageEmbed()
             .setColor('#0099ff')
             .setTitle(`Invalid`)
 			.setDescription(`This is not a valid food category. Please use:`)
 			.addFields(
+				{ name: `ic_cone`, value: `This is for ice cream cones.`, inline: true },
 				{ name: `ic_flavor`, value: `This is for ice cream flavors.`, inline: true },
+				{ name: `pi_crust`, value: `This is for pizza crusts.`, inline: true },
 				{ name: `pi_sauce`, value: `This is for pizza sauces.`, inline: true },
 				{ name: `pi_cheese`, value: `This is for pizza cheeses.`, inline: true },
 				{ name: `pi_topping`, value: `This is for pizza toppings.`, inline: true },
@@ -5580,6 +5802,9 @@ client.on('messageCreate', async message => {
 			if (category.includes(`flavor`)) {
 				midmean = 'flavors'
 				catText = 'flavor'
+			} else if (category.includes(`cone`)) {
+				midmean = 'cones'
+				catText = 'cone'
 			}
 		}else if (category.startsWith(`pi_`)) {
 			begmean = 'pizza'
@@ -5596,6 +5821,9 @@ client.on('messageCreate', async message => {
 			} else if (category.includes(`condiment`)) {
 				midmean = 'condiments'
 				catText = 'condiment'
+			} else if (category.includes(`crust`)) {
+				midmean = 'crusts'
+				catText = 'crust'
 			}
 		}
 
@@ -5623,7 +5851,7 @@ client.on('messageCreate', async message => {
 			const DiscordEmbed = new Discord.MessageEmbed()
                 .setColor('#0099ff')
                 .setTitle(`${prefix}foodimage`)
-				.setDescription(`(Args <Category> <Name> <Image Link / Attachment>)\nI will change the look of your chosen ice cream flavor.`)
+				.setDescription(`(Args <Category> <Name> <Image Link / Attachment>)\nI will change the look of your chosen food.`)
             message.channel.send({embeds: [DiscordEmbed]})
             return false
 		}
@@ -5642,13 +5870,15 @@ client.on('messageCreate', async message => {
 		});
 
 		if ((arguments[0] && arguments[0].toLowerCase() !== 'ic_flavor' && arguments[0].toLowerCase() !== 'pi_sauce' && arguments[0].toLowerCase() !== 'pi_cheese' && arguments[0].toLowerCase() !== 'pi_topping'
-		&& arguments[0].toLowerCase() !== 'pi_condiment') || !arguments[0]) {
+		&& arguments[0].toLowerCase() !== 'pi_condiment' && arguments[0].toLowerCase() !== 'pi_crust' && arguments[0].toLowerCase() !== 'ic_cone') || !arguments[0]) {
 		const DiscordEmbed = new Discord.MessageEmbed()
             .setColor('#0099ff')
             .setTitle(`Invalid`)
 			.setDescription(`This is not a valid food category. Please use:`)
 			.addFields(
+				{ name: `ic_cone`, value: `This is for ice cream cones.`, inline: true },
 				{ name: `ic_flavor`, value: `This is for ice cream flavors.`, inline: true },
+				{ name: `pi_crust`, value: `This is for pizza crusts.`, inline: true },
 				{ name: `pi_sauce`, value: `This is for pizza sauces.`, inline: true },
 				{ name: `pi_cheese`, value: `This is for pizza cheeses.`, inline: true },
 				{ name: `pi_topping`, value: `This is for pizza toppings.`, inline: true },
@@ -5697,6 +5927,9 @@ client.on('messageCreate', async message => {
 			if (category.includes(`flavor`)) {
 				midmean = 'flavors'
 				catText = 'flavor'
+			} else if (category.includes(`cone`)) {
+				midmean = 'cones'
+				catText = 'cone'
 			}
 		}else if (category.startsWith(`pi_`)) {
 			begmean = 'pizza'
@@ -5713,6 +5946,9 @@ client.on('messageCreate', async message => {
 			} else if (category.includes(`condiment`)) {
 				midmean = 'condiments'
 				catText = 'condiment'
+			} else if (category.includes(`crust`)) {
+				midmean = 'crusts'
+				catText = 'crust'
 			}
 		}
 
@@ -5730,6 +5966,9 @@ client.on('messageCreate', async message => {
 	}
 
 	if (command == 'pizza') {
+		const crusts = []
+		let crustIDs = []
+
 		const sauces = []
 		let sauceIDs = []
 			
@@ -5748,7 +5987,7 @@ client.on('messageCreate', async message => {
 			const DiscordEmbed = new Discord.MessageEmbed()
                 .setColor('#0099ff')
                 .setTitle(`${prefix}pizza`)
-				.setDescription(`(Args <Amount Of Toppings> <Optional: Amount of Condiments> <Optional: Include Cheese> <Optional: Include Sauce> <Optional: Repeat Toppings> <Optional: Repeat Condiments>)\nI'll make a pizza of any amount of toppings and condiments. You can do up to 100 toppings and 20 condiments.\n\n Alternatively, you can also use:\n(Args <Sauce> <Cheese> <Toppings> <Optional: Condiment Amount>)\n that if you want to specify the sauce, cheese and toppings on a pizza.`)
+				.setDescription(`(Args <Amount Of Toppings> <Optional: Amount of Condiments> <Optional: Include Cheese> <Optional: Include Sauce> <Optional: Repeat Toppings> <Optional: Repeat Condiments>)\nI'll make a pizza of any amount of toppings and condiments. You can do up to 100 toppings and 20 condiments.\n\n Alternatively, you can also use:\n(Args <Crust> <Optional: Sauce> <Optional: Cheese>)\n to start making your very own pizza.`)
             message.channel.send({embeds: [DiscordEmbed]})
             return false
 		}
@@ -5761,6 +6000,10 @@ client.on('messageCreate', async message => {
 		let list = users.map(m => m.id)
 
 		//Official Pizza Shit
+		for (const flavor in foodFile['official']['pizza']['crusts']) {
+			crusts.push(flavor)
+			crustIDs.push('official')
+		}
 		for (const flavor in foodFile['official']['pizza']['sauces']) {
 			sauces.push(flavor)
 			sauceIDs.push('official')
@@ -5779,8 +6022,12 @@ client.on('messageCreate', async message => {
 		}
 		//User-Based
 		for (const i in list) {
-			if (foodFile[list[i]] && foodFile[list[i]]['pizza'] && foodFile[list[i]]['pizza']['sauces']) {
+			if (foodFile[list[i]] && foodFile[list[i]]['pizza']) {
 				var user = list[i]
+				for (const flavor in foodFile[list[i]]['pizza']['crusts']) {
+					crusts.push(flavor)
+					crustIDs.push(user)
+				}
 				for (const flavor in foodFile[list[i]]['pizza']['sauces']) {
 					sauces.push(flavor)
 					sauceIDs.push(user)
@@ -5868,66 +6115,175 @@ client.on('messageCreate', async message => {
 			});
 
 			//assigning variables
-			let saucePick = arguments[0]
-			let cheesePick = arguments[1]
+			let crustPick = arguments[0]
+			let saucePick = arguments[1]
+			let cheesePick = arguments[2]
+
 			let toppingPick
 			let condimentPick
 
-			arguments = arguments.slice(2)
+			var whatwentwrong = ``
 
-			if (isFinite(parseInt(arguments[arguments.length-1]))) {
-				condimentPick = arguments[arguments.length-1]
-				arguments = arguments.slice(0,arguments.length-1)
-			} else {
-				condimentPick = 0
+			if (crusts.indexOf(crustPick) < 0 && crustPick !== 'None') {
+				whatwentwrong += (`\n-${crustPick} is not a valid crust. Defaulting to 'Standard'.`)
+				crustPick = 'None'
 			}
 
-			toppingPick = [...arguments]
-
 			if (sauces.indexOf(saucePick) < 0 && saucePick !== 'None') {
-				message.channel.send(`<:warning:878094052208296007>${saucePick} is not a valid sauce. Defaulting to 'None'.`)
+				whatwentwrong += (`\n-${saucePick} is not a valid sauce. Defaulting to 'None'.`)
 				saucePick = 'None'
 			}
 
+
 			if (cheeses.indexOf(cheesePick) < 0 && cheesePick !== 'None') {
-				message.channel.send(`<:warning:878094052208296007>${cheesePick} is not a valid cheese. Defaulting to 'None'.`)
+				whatwentwrong += (`\n-${cheesePick} is not a valid cheese. Defaulting to 'None'.`)
 				cheesePick = 'None'
 			}
 
-			if (toppingPick[0] == 'None')
-			toppingPick = []
+			if (whatwentwrong.length > 3)
+			message.channel.send(`<:warning:878094052208296007>What went wrong:${whatwentwrong}`)
+			.then(msg => {
+				setTimeout(() => msg.delete(), 5000)
+			})
 
-			if (toppingPick.length > 100) {
-				message.channel.send(`<:warning:878094052208296007>That's way too much. Please specify the topping, but make their amount below or equal to 100. Changing the amount to 100.`)
-				toppingPick.length = 100
-			}
+			var onetoListenTo = message.author.id
+			var contentOfMessage
 
-			let invalidToppings = ''
+			message.channel.send(`👍 Now please, specify the toppings. You have 5 minutes.\nIf you don't want any toppigns, please type 'None'.`)
+			.then(msg => {
+				setTimeout(() => msg.delete(), 10000)
+			})
 
-			for (const i in toppingPick) {
-				if (toppingTypes.indexOf(toppingPick[i]) < 0) {
-					invalidToppings += `\n- ${toppingPick[i]}`
-					toppingPick[i] = ''
+			const filter = m => m.author.id === onetoListenTo && !m.content.startsWith(prefix)
+			const collectorTopping = message.channel.createMessageCollector({ filter, time: 300000, max: 1 });
+
+			collectorTopping.on('collect', m => {
+				console.log(`Collected ${m.content}`);
+				contentOfMessage = m.content.toString()
+			});
+
+			collectorTopping.on('end', collected => {
+				if (collected.size == 0) {
+					return message.channel.send(`I'm sorry, ${client.users.cache.get(onetoListenTo)}, but you didn't type in time. Please try again.`)
+					.then(msg => {
+						setTimeout(() => msg.delete(), 5000)
+					})
 				}
-			}
-			const filterArray=(a,b)=>{return a.filter((e)=>{return e!=b})}
-			toppingPick = filterArray(toppingPick,'')
 
-			if (invalidToppings.length > 0)
-				message.channel.send(`<:warning:878094052208296007>**Your invalid toppings are:**${invalidToppings}`)
+				let input = contentOfMessage.trim()
 
-			if (parseFloat(condimentPick) > 20) {
-				message.channel.send(`<:warning:878094052208296007>That's way too much. Please use a number of condiments below or equal to 20. Changing the value to 20.`)
-				condimentPick = 20
-			}
+				const regex = new RegExp('"[^"]+"|[\\S]+', 'g');
+				let arguments = [];
+				input.match(regex).forEach(element => {
+					if (!element) return;
+					return arguments.push(element.replace(/"/g, ''));
+				});
 
-			if (toppingPick.length > 10)
-				message.channel.send(`Please wait until your ice cream is done.`)
+				toppingPick = [...arguments]
 
-			getPizzaByLetter(saucePick,cheesePick,toppingPick,condimentPick,message)
+				if (toppingPick[0] == 'None')
+				toppingPick = []
+
+				if (toppingPick.length > 100) {
+					message.channel.send(`<:warning:878094052208296007>That's way too much. Please make their amount below or equal to 100. Changing the amount to 100.`)
+					.then(msg => {
+						setTimeout(() => msg.delete(), 5000)
+					})
+					toppingPick.length = 100
+				}
+
+				let invalidToppings = ''
+
+				for (const i in toppingPick) {
+					if (toppingTypes.indexOf(toppingPick[i]) < 0) {
+						invalidToppings += `\n- ${toppingPick[i]}`
+						toppingPick[i] = ''
+					}
+				}
+				const filterArray=(a,b)=>{return a.filter((e)=>{return e!=b})}
+				toppingPick = filterArray(toppingPick,'')
+
+				if (invalidToppings.length > 0) {
+					message.channel.send(`<:warning:878094052208296007>**Your invalid toppings are:**${invalidToppings}`)
+					.then(msg => {
+						setTimeout(() => msg.delete(), 5000)
+					})
+				}
+
+				message.channel.send(`👍 Now please, specify the condiments. You have 5 minutes.\nIf you don't want any toppings, please type 'None'.`)
+				.then(msg => {
+					setTimeout(() => msg.delete(), 10000)
+				})
+
+				const collectorCondiment = message.channel.createMessageCollector({ filter, time: 300000, max: 1 });
+
+				collectorCondiment.on('collect', m => {
+					console.log(`Collected ${m.content}`);
+					contentOfMessage = m.content.toString()
+				});
+
+				collectorCondiment.on('end', collected => {
+					if (collected.size == 0) {
+						return message.channel.send(`I'm sorry, ${client.users.cache.get(onetoListenTo)}, but you didn't type in time. Please try again.`)
+						.then(msg => {
+							setTimeout(() => msg.delete(), 5000)
+						})
+					}
+
+					let input = contentOfMessage.trim()
+
+					const regex = new RegExp('"[^"]+"|[\\S]+', 'g');
+					let arguments = [];
+					input.match(regex).forEach(element => {
+						if (!element) return;
+						return arguments.push(element.replace(/"/g, ''));
+					});
+
+					condimentPick = [...arguments]
+
+					if (condimentPick[0] == 'None')
+					condimentPick = []
+
+					if (condimentPick.length > 20) {
+						message.channel.send(`<:warning:878094052208296007>That's way too much. Please make their amount below or equal to 20. Changing the amount to 20.`)
+						.then(msg => {
+							setTimeout(() => msg.delete(), 5000)
+						})
+						condimentPick.length = 20
+					}
+	
+					let invalidCondiments = ''
+	
+					for (const i in condimentPick) {
+						if (condimentTypes.indexOf(condimentPick[i]) < 0) {
+							invalidCondiments += `\n- ${condimentPick[i]}`
+							condimentPick[i] = ''
+						}
+					}
+					const filterArray=(a,b)=>{return a.filter((e)=>{return e!=b})}
+					condimentPick = filterArray(condimentPick,'')
+	
+					if (invalidCondiments.length > 0) {
+						message.channel.send(`<:warning:878094052208296007>**Your invalid condiments are:**${invalidCondiments}`)
+						.then(msg => {
+							setTimeout(() => msg.delete(), 5000)
+						})
+					}
+
+					if (toppingPick.length > 10)
+					message.channel.send(`Please wait until your pizza is done.`)
+
+					getPizzaByLetter(crustPick,saucePick,cheesePick,toppingPick,condimentPick,message)
+				});
+			});
 		}
 
 		async function getPizzaByNumber(toppings, repeatToppings, condiments, repeatCondiments, allowCheese, allowSauce, message) {
+			
+			var crustNumber = Math.floor(Math.random() * crusts.length)
+			var crust = crusts[crustNumber]
+			var crustID = crustIDs[crustNumber]
+			
 			if (allowSauce == 'true') {
 				var sauceNumber = Math.floor(Math.random() * sauces.length)
 				var sauce = sauces[sauceNumber]
@@ -5955,7 +6311,7 @@ client.on('messageCreate', async message => {
 		
 				if (toppingInput.length < 1) {
 					toppingInput = [...toppingTypes]
-					IDInput = [...iceCreamIDs]
+					TIDInput = [...toppingIDs]
 					console.log(`Oops. Ran out of pizza toppings. Repeating the list.`)
 				}
 		
@@ -6026,7 +6382,21 @@ client.on('messageCreate', async message => {
 			}
 		
 			//crust
-			const crustDraw = await Canvas.loadImage('./images/foodgenerators/pizza/crust.png')
+			var crustDraw
+
+			if (crustID == 'official')
+				try {
+					crustDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/crusts/${crust}.png`)
+				} catch (error) {
+					crustDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/error_crust.png`)
+				}
+			else {
+				try {
+					crustDraw = await Canvas.loadImage(foodFile[crustID]['pizza']['crusts'][crust].image)
+				} catch (error) {
+					crustDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/error_crust.png`)
+				}
+			}
 			drawRotated(0, crustDraw)
 			//sauce
 			if (allowSauce == 'true') {
@@ -6148,8 +6518,9 @@ client.on('messageCreate', async message => {
 					.setColor('#FF6100')
 					.setTitle(`${toppingName} ${toppingName == "Title too long to process." ? '' : 'Pizza'}`)
 					.addFields(
-						{ name: 'Sauce', value: `${sauce} ${sauceID == undefined ? '' : (sauceID == 'official' ? '(Official)' : `(${client.users.cache.get(sauceID)})`)}`, inline: true },
-						{ name: 'Cheese', value: `${cheese} ${cheeseID == undefined ? '' : (cheeseID == 'official' ? '(Official)' : `(${client.users.cache.get(cheeseID)})`)}`, inline: true },
+						{ name: 'Crust', value: `${crust} ${crustID == undefined ? '' : (crustID == 'official' ? '*(Official)*' : `*(${client.users.cache.get(crustID)})*`)}`, inline: true },
+						{ name: 'Sauce', value: `${sauce} ${sauceID == undefined ? '' : (sauceID == 'official' ? '*(Official)*' : `*(${client.users.cache.get(sauceID)})*`)}`, inline: true },
+						{ name: 'Cheese', value: `${cheese} ${cheeseID == undefined ? '' : (cheeseID == 'official' ? '*(Official)*' : `*(${client.users.cache.get(cheeseID)})*`)}`, inline: true },
 						{ name: 'Topping Number', value: `${toppings}`, inline: false },
 						{ name: 'Toppings', value: `${toppingList}`, inline: true },
 						{ name: 'Condiment Number', value: `${condiments}`, inline: false },
@@ -6161,7 +6532,49 @@ client.on('messageCreate', async message => {
 			return message.channel.send({embeds: [embed], files: [attachment]})
 		}
 
-		async function getPizzaByLetter(sauce, cheese, toppings, condiments, message) {
+		async function getPizzaByLetter(crust, sauce, cheese, toppings, condiments, message) {
+
+			if (crust == 'None') {
+				crust = 'Standard'
+				var crustID = 'official'
+			} else {
+				var crustID
+				var failureLevelC = 0
+				var userRandTable = []
+
+				//if this flavor exists in your personal list
+				if (Math.round(Math.random() * 100) <= 40) { //which will look into 40% of the time
+					if (foodFile[message.author.id] && foodFile[message.author.id]['pizza'] && foodFile[message.author.id]['pizza']['crusts'] && foodFile[message.author.id]['pizza']['crusts'][crust])
+					crustID = message.author.id
+					else
+					failureLevelC = 1
+				} else
+				failureLevelC = 1
+					
+				//if not, then it will search through the user list first
+				if (failureLevelC == 1) {
+					for (const userID in foodFile) {
+						for (const a in list) {
+							if (list[a] == userID && foodFile[userID]['pizza'] && foodFile[userID]['pizza']['crusts']) {
+								for (const flavor in foodFile[userID]['pizza']['crusts']) {
+									if (flavor == crust)
+									userRandTable.push(userID)
+								}
+							}
+						}
+					}
+
+					console.log(userRandTable)
+
+					//and pick a random ID
+					if (userRandTable.length > 0)
+					crustID = userRandTable[Math.floor(Math.random() * userRandTable.length)]
+					else	//and if that fails, we will resort to the official flavors
+					crustID = 'official'
+				}
+			}
+
+
 			if (sauce == 'None')
 				sauce = 'No Sauce'
 			else {
@@ -6171,7 +6584,7 @@ client.on('messageCreate', async message => {
 
 				//if this flavor exists in your personal list
 				if (Math.round(Math.random() * 100) <= 40) { //which will look into 40% of the time
-					if (foodFile[message.author.id] && foodFile[message.author.id]['pizza']['sauces'][sauce])
+					if (foodFile[message.author.id] && foodFile[message.author.id]['pizza'] && foodFile[message.author.id]['pizza']['sauces'] && foodFile[message.author.id]['pizza']['sauces'][sauce])
 					sauceID = message.author.id
 					else
 					failureLevelS = 1
@@ -6210,7 +6623,7 @@ client.on('messageCreate', async message => {
 
 				//if this flavor exists in your personal list
 				if (Math.round(Math.random() * 100) <= 40) { //which will look into 40% of the time
-					if (foodFile[message.author.id] && foodFile[message.author.id]['pizza']['cheeses'][cheese])
+					if (foodFile[message.author.id] && foodFile[message.author.id]['pizza'] && foodFile[message.author.id]['pizza']['cheeses'] && foodFile[message.author.id]['pizza']['cheeses'][cheese])
 					cheeseID = message.author.id
 					else
 					failureLevel = 1
@@ -6254,7 +6667,7 @@ client.on('messageCreate', async message => {
 
 				//if this flavor exists in your personal list
 				if (Math.round(Math.random() * 100) <= 40) { //which will look into 40% of the time
-					if (foodFile[message.author.id] && foodFile[message.author.id]['pizza']['toppings'][toppings[i]])
+					if (foodFile[message.author.id] && foodFile[message.author.id]['pizza'] && foodFile[message.author.id]['pizza']['toppings'] && foodFile[message.author.id]['pizza']['toppings'][toppings[i]])
 					toppingIDList.push(message.author.id)
 					else
 					failureLevelT = 1
@@ -6294,20 +6707,53 @@ client.on('messageCreate', async message => {
 			var toppingName = toppingsFilteres.join(' ');
 		
 			//Condiments
-			var condimentInput = [...condimentTypes]
 			let condimentResults = []
-			var CIDInput = [...condimentIDs]
 			let condimentIDList = []
 			var condimentList = ''
-		
-			for (var i = 1; i <= condiments; i++) {
-				var condimentNum = Math.floor(Math.random() * condimentInput.length)
-		
-				condimentResults.push(condimentInput[condimentNum])
-				condimentIDList.push(CIDInput[condimentNum])
-				condimentList += `\n- ${condimentInput[condimentNum]} *(${CIDInput[condimentNum] !== 'official' ? client.users.cache.get(CIDInput[condimentNum]) : 'Official'})*`
+			
+			for (const i in condiments) {
+				condiments[i].slice(1,condiments[i].length - 1)
+
+				condimentResults.push(condiments[i])
+
+				var failureLevelC = 0
+				var userRandTable = []
+
+				//if this flavor exists in your personal list
+				if (Math.round(Math.random() * 100) <= 40) { //which will look into 40% of the time
+					if (foodFile[message.author.id] && foodFile[message.author.id]['pizza'] && foodFile[message.author.id]['pizza']['condiments'] && foodFile[message.author.id]['pizza']['condiments'][condiments[i]])
+					condimentIDList.push(message.author.id)
+					else
+					failureLevelC = 1
+				} else
+				failureLevelC = 1
+					
+				//if not, then it will search through the user list first
+				if (failureLevelC == 1) {
+					for (const userID in foodFile) {
+						for (const a in list) {
+							if (list[a] == userID && foodFile[userID]['pizza'] && foodFile[userID]['pizza']['condiments']) {
+								for (const flavor in foodFile[userID]['pizza']['condiments']) {
+									if (flavor == condiments[i])
+									userRandTable.push(userID)
+								}
+							}
+						}
+					}
+
+					console.log(userRandTable)
+
+					//and pick a random ID
+					if (userRandTable.length > 0)
+					condimentIDList.push(userRandTable[Math.floor(Math.random() * userRandTable.length)])
+					else	//and if that fails, we will resort to the official flavors
+					condimentIDList.push('official')
+				}
+
+				condimentList += `\n- ${condiments[i]} *(${toppingIDList[i] !== 'official' ? client.users.cache.get(toppingIDList[i]) : 'Official'})*`
 			}
-		
+			condiments = condiments.length
+
 			console.log(`Condiments: ${condimentResults}\nIDs: ${condimentIDList}`)
 
 			///////////
@@ -6330,7 +6776,21 @@ client.on('messageCreate', async message => {
 			}
 		
 			//crust
-			const crustDraw = await Canvas.loadImage('./images/foodgenerators/pizza/crust.png')
+			var crustDraw
+
+			if (crustID == 'official')
+				try {
+					crustDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/crusts/${crust}.png`)
+				} catch (error) {
+					crustDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/error_crust.png`)
+				}
+			else {
+				try {
+					crustDraw = await Canvas.loadImage(foodFile[crustID]['pizza']['crusts'][crust].image)
+				} catch (error) {
+					crustDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/error_crust.png`)
+				}
+			}
 			drawRotated(0, crustDraw)
 			//sauce
 			if (sauce !== 'No Sauce') {
@@ -6452,8 +6912,9 @@ client.on('messageCreate', async message => {
 					.setColor('#FF6100')
 					.setTitle(`${toppingName} ${toppingName == "Title too long to process." ? '' : 'Pizza'}`)
 					.addFields(
-						{ name: 'Sauce', value: `${sauce} ${sauceID == undefined ? '' : (sauceID == 'official' ? '(Official)' : `(${client.users.cache.get(sauceID)})`)}`, inline: true },
-						{ name: 'Cheese', value: `${cheese} ${cheeseID == undefined ? '' : (cheeseID == 'official' ? '(Official)' : `(${client.users.cache.get(cheeseID)})`)}`, inline: true },
+						{ name: 'Crust', value: `${crust} ${crustID == undefined ? '' : (crustID == 'official' ? '*(Official)*' : `*(${client.users.cache.get(crustID)})*`)}`, inline: true },
+						{ name: 'Sauce', value: `${sauce} ${sauceID == undefined ? '' : (sauceID == 'official' ? '*(Official)*' : `*(${client.users.cache.get(sauceID)})*`)}`, inline: true },
+						{ name: 'Cheese', value: `${cheese} ${cheeseID == undefined ? '' : (cheeseID == 'official' ? '*(Official)*' : `*(${client.users.cache.get(cheeseID)})*`)}`, inline: true },
 						{ name: 'Topping Number', value: `${toppings}`, inline: false },
 						{ name: 'Toppings', value: `${toppingList}`, inline: true },
 						{ name: 'Condiment Number', value: `${condiments}`, inline: false },
