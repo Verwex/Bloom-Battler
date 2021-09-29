@@ -6815,7 +6815,7 @@ client.on('messageCreate', async message => {
 			if (cheese !== 'No Cheese') {
 				var cheeseDraw
 
-				if (sauceID == 'official')
+				if (cheeseID == 'official')
 					try {
 						cheeseDraw = await Canvas.loadImage(`./images/foodgenerators/pizza/cheeses/${cheese}.png`)
 					} catch (error) {

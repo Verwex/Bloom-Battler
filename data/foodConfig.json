@@ -1002,5 +1002,37 @@
                 }
             }
         }
+    },
+    "441198920668938260": {
+        "pizza": {
+            "cheeses": {
+                "Real": {
+                    "image": "https://cdn.discordapp.com/attachments/820036937791438859/892891098119303218/real.png"
+                },
+                "No": {
+                    "image": "https://cdn.discordapp.com/attachments/877143757697454123/892897485775859732/Sutela_-_Neutral.png"
+                }
+            },
+            "sauces": {
+                "No": {
+                    "image": "https://cdn.discordapp.com/attachments/877143757697454123/892897485775859732/Sutela_-_Neutral.png"
+                }
+            },
+            "crusts": {
+                "No": {
+                    "image": "https://cdn.discordapp.com/attachments/877143757697454123/892897485775859732/Sutela_-_Neutral.png"
+                }
+            },
+            "toppings": {
+                "No": {
+                    "image": "https://cdn.discordapp.com/attachments/877143757697454123/892897485775859732/Sutela_-_Neutral.png"
+                }
+            },
+            "condiments": {
+                "No": {
+                    "image": "https://cdn.discordapp.com/attachments/877143757697454123/892897485775859732/Sutela_-_Neutral.png"
+                }
+            }
+        }
     }
 }
