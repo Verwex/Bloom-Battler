@@ -5136,7 +5136,7 @@ client.on('messageCreate', async message => {
 							}
 						}
 
-						if (skip == false) {
+						if (skip == false && foodFile[userID] && foodFile[userID][begmean] && foodFile[userID][begmean][midmean]) {
 							for (const i in foodFile[userID][begmean][midmean]) {
 								skillTxt.push(foodFile[userID][begmean][midmean][i])
 								nameTxt.push(i)
@@ -5346,6 +5346,9 @@ client.on('messageCreate', async message => {
 		for (const userID in foodFile) {
 			for (const i in list) {
 				if (list[i] == userID) {
+
+					if (!foodFile[userID] || !foodFile[userID][begmean] || !foodFile[userID][begmean][midmean])
+					continue;
 
 					var skip = false
 
