@@ -6340,14 +6340,14 @@ client.on('messageCreate', async message => {
 			var condimentInput = [...condimentTypes]
 			let condimentResults = []
 			let condimentIDList = []
-			var CIDInput = [...toppingIDs]
+			var CIDInput = [...condimentIDs]
 			var condimentList = ''
 		
 			for (var i = 1; i <= condiments; i++) {
 		
 				if (condimentInput.length < 1) {
 					condimentInput = [...condimentTypes]
-					CIDInput = [...toppingIDs]
+					CIDInput = [...condimentIDs]
 					console.log(`Oops. Ran out of pizza condiments. Repeating the list.`)
 				}
 		
