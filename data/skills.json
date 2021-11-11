@@ -2835,6 +2835,22 @@
         "atktype": "magic",
         "target": "one"
     },
+    "AirSlash": {
+        "name": "AirSlash",
+        "cost": 20,
+        "costtype": "mp",
+        "pow": 50,
+        "acc": 95,
+        "crit": 5,
+        "hits": 3,
+        "type": "wind",
+        "status": "bleed",
+        "statuschance": 15,
+        "atktype": "magic",
+        "target": "one",
+        "desc": "The user attacks with a blade of air that slices even the sky. It may also make the target bleed.",
+        "originalAuthor": "461050360832720904"
+    },
     "Garu": {
         "costtype": "mp",
         "cost": 4,
@@ -3069,22 +3085,6 @@
         "type": "wind",
         "atktype": "magic",
         "target": "one"
-    },
-    "AirSlash": {
-        "name": "AirSlash",
-        "cost": 20,
-        "costtype": "mp",
-        "pow": 50,
-        "acc": 95,
-        "crit": 5,
-        "hits": 3,
-        "type": "wind",
-        "status": "bleed",
-        "statuschance": 15,
-        "atktype": "magic",
-        "target": "one",
-        "desc": "The user attacks with a blade of air that slices even the sky. It may also make the target bleed.",
-        "originalAuthor": "461050360832720904"
     },
     "Bonemerang": {
         "name": "Bonemerang",
@@ -7211,5 +7211,32 @@
         "originalAuthor": "412328234198237189",
         "passive": "damagephys",
         "pow": 15
+    },
+    "MultiI": {
+        "name": "MultiI",
+        "type": "passive",
+        "desc": "The uses gets one extra hit dealing 30% of damage when attacking.",
+        "originalAuthor": "441198920668938260",
+        "passive": "extrahit",
+        "extra": 1,
+        "pow": 30
+    },
+    "MultiII": {
+        "name": "MultiII",
+        "type": "passive",
+        "desc": "The uses gets two extra hits dealing 30% of damage when attacking.",
+        "originalAuthor": "441198920668938260",
+        "passive": "extrahit",
+        "extra": 2,
+        "pow": 30
+    },
+    "MultiIII": {
+        "name": "MultiIII",
+        "type": "passive",
+        "desc": "The uses gets three extra hits dealing 30% of damage when attacking.",
+        "originalAuthor": "441198920668938260",
+        "passive": "extrahit",
+        "extra": 3,
+        "pow": 30
     }
 }

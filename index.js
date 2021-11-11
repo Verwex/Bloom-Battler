@@ -1013,6 +1013,10 @@ function writePassive(msg, name, passivetype, extra1, extra2, desc) {
 	} else if (passiveType === 'swordbreaker') {
 		skillFile[name].pow = parseInt(extra1)
 		skillFile[name].swordbreaker = true
+	} else if (passiveType === 'extrahit') {
+		skillFile[name].passive = passiveType
+		skillFile[name].extra = parseInt(extra1) <= 0 ? 1 : parseInt(extra1)
+		skillFile[name].pow = parseInt(extra2) <= 0 ? 30 : parseInt(extra2)
 	}
 
     fs.writeFileSync(skillPath, JSON.stringify(skillFile, null, '    '))
@@ -9570,7 +9574,8 @@ client.on('messageCreate', async message => {
 				.setTitle(`${prefix}registerpassive`)
 				.setDescription(`(Args <Name> <Passive Type> <Extra Value 1> <Extra Value 2> "<Desc>")\nCreates a skill to be used in battle. \nThese skills have certain properties that can change how they're used.\n\nAllow me to explain`)
                 .addFields(
-                    { name: 'Passive Type', value: "This is the thing this passive skill will do. Input things such as 'boost', 'damagephys', 'healonturn', 'healmponturn', 'counterphys', 'dodgephys' & 'affinitypoint'", inline: true },
+                    { name: `${prefix}registerpassive`, value: `(Args <Name> <Passive Type> <Extra Value 1> <Extra Value 2> "<Desc>")\nCreates a skill to be used in battle. \nThese skills have certain properties that can change how they're used.\n\nAllow me to explain`, inline: false },
+                    { name: 'Passive Type', value: "This is the thing this passive skill will do. Input things such as 'boost', 'damagephys', 'healonturn', 'healmponturn', 'counterphys', 'dodgephys', 'extrahit' & 'affinitypoint'", inline: true },
                     { name: 'Extra Value 1', value: "A value that affects the usage of the skill. For example, if 'Passive Type' is 'counterphys', this would be the chance the attack is countered.", inline: true },
 					{ name: 'Extra Value 2', value: "A value that affects the usage of the skill. For example, if 'Passive Type Type' is 'counterphys', this would be the power of the counterattack.", inline: true },
                     { name: 'Description', value: "This Skills's description. Try to explain what the move does, so your friends can imagine it! Enclose this value in quotation marks.", inline: true },
@@ -16414,4 +16419,4 @@ process.on('unhandledRejection', error => {
 	console.error('Unhandled promise rejection:', error);
 });
 
-client.login('bot-id');
+client.login(process.env.BOT_TOKEN);

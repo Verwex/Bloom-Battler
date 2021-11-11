@@ -237,7 +237,7 @@ function knowsEnemy(oppDefs, server) {
 }
 
 // Determine the Damage that this move will deal. Also handles Status Effects, Affinities and Critical Hits
-function genDmg(userDefs, targDefs, skillDefs, server) {
+function genDmg(userDefs, targDefs, skillDefs, powerAfter) {
 	console.log("genDmg:")
 
     var values = [0, "normal", false, false, false]; // Damage, Damagestate, Hit a Weakness?, Crit?, Inflict Status?
@@ -329,9 +329,9 @@ function genDmg(userDefs, targDefs, skillDefs, server) {
 		var servFile = JSON.parse(servRead);
 
 		if (servFile[server].damageFormula === 'pokemon')
-			values[0] = Math.round((((2*userDefs.level)/5+2)*skillPow*def)/50+2)
+			values[0] = Math.round((((2*userDefs.level)/5+2)*skillPow*def)/50+2 * (!powerAfter ? 1 : powerAfter/100))
 		else
-			values[0] = Math.round(5 * Math.sqrt(def * skillPow));
+			values[0] = Math.round(5 * Math.sqrt(def * skillPow) * (!powerAfter ? 1 : powerAfter/100));
 
 		if (targDefs.shield) {
 			values[0] *= 0.33;
@@ -885,6 +885,20 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 			if (skillDefs2 && skillDefs2.type && skillDefs2.type === "passive") {
 				if (skillDefs2.passive === "boost" && skillDefs2.boosttype == skillDefs.type)
 					movepow += Math.round((movepow/100)*skillDefs2.pow)
+			}
+		}
+
+		// Extra Hit Passives
+		var trueHitCount = !skillDefs.hits ? 1 : skillDegs.hits
+		let powerAfter = 0;
+		for (const i in userDefs.skills) {
+			const skillDefs2 = skillFile[userDefs.skills[i]]
+
+			if (skillDefs2 && skillDefs2.type && skillDefs2.type === "passive") {
+				if (skillDefs2.passive === "extrahit") {
+					skillDefs.hits = (!skillDefs.hits ? 1 + skillDefs2.extra : skillDefs.hits + skillDefs2.extra)
+					powerAfter = skillDefs2.pow;
+				}
 			}
 		}
 		
@@ -1601,7 +1615,10 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 					var resulttext = ``;
 					for (let i = 1; i <= hitCount; i++) {
 						skillDefs.acc = 999
-						var dmg = genDmg(userDefs, oppDefs, skillDefs, server)
+						if (i <= trueHitCount)
+							var dmg = genDmg(userDefs, oppDefs, skillDefs)
+						else
+							var dmg = genDmg(userDefs, oppDefs, skillDefs, powerAfter)
 						var rand = Math.floor(Math.random() * 10);
 						dmg[0] += +rand;
 						

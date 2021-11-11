@@ -2,7 +2,7 @@
     "712602499823042620": {
         "rolls": 10,
         "canfind": true,
-        "findcooldown": 21,
+        "findcooldown": 20,
         "stars": 10,
         "relics": [
             "Master Emerald"
@@ -12,7 +12,7 @@
     "441198920668938260": {
         "rolls": 10,
         "canfind": true,
-        "findcooldown": 33,
+        "findcooldown": 32,
         "stars": 8,
         "relics": [
             "Real Knife"
@@ -22,7 +22,7 @@
     "516359709779820544": {
         "rolls": 10,
         "canfind": true,
-        "findcooldown": 33,
+        "findcooldown": 32,
         "stars": 6,
         "relics": [
             "Kirby's Sword"
@@ -31,21 +31,21 @@
     "332619720802959361": {
         "rolls": 10,
         "canfind": true,
-        "findcooldown": 50,
+        "findcooldown": 49,
         "stars": 0,
         "relics": []
     },
     "532291526634635285": {
         "rolls": 10,
         "canfind": true,
-        "findcooldown": 56,
+        "findcooldown": 55,
         "stars": 0,
         "relics": []
     },
     "461050360832720904": {
         "rolls": 10,
         "canfind": true,
-        "findcooldown": 42,
+        "findcooldown": 41,
         "stars": 0,
         "relics": []
     }

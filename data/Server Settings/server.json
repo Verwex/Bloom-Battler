@@ -502,5 +502,37 @@
             "loss": []
         },
         "banned": []
+    },
+    "877143757697454120": {
+        "prefix": "rpg!",
+        "limitbreaks": false,
+        "showtimes": false,
+        "onemores": false,
+        "currency": "Bloom Token",
+        "xprate": 1,
+        "damageFormula": "persona",
+        "pvpstuff": {
+            "none": {},
+            "metronome": {},
+            "randskills": {},
+            "randstats": {},
+            "charfuck": {}
+        },
+        "themes": {
+            "battle": [],
+            "advantage": [],
+            "disadvantage": [],
+            "bossfight": [],
+            "miniboss": [],
+            "strongfoe": [],
+            "finalboss": [],
+            "colosseum": [],
+            "colosseumstrong": [],
+            "pvp": [],
+            "victory": [],
+            "colosseumvictory": [],
+            "loss": []
+        },
+        "banned": []
     }
 }
