@@ -45,7 +45,7 @@ const elementEmoji = {
 	poison: "☠️",
 	metal: "🔩",
 	curse: "👻",
-	bless: "⭐",
+	bless: "<:bless:903369721980813322>",
 	nuclear: "☢",
 	
 	almighty: "💫",
@@ -122,7 +122,7 @@ function enemyThinker(userDefs, allySide, oppSide) {
 	for (const i in userDefs.skills) {
 		var skillDefs = skillFile[userDefs.skills[i]]
 		
-		if (!skillDefs.passive && skillDefs.type != "passive") {
+		if (skillDefs && !skillDefs.passive && skillDefs.type != "passive") {
 			if (userDefs.status === "ego") {
 				if (skillDefs.type != "heal") {possibleSkills.push(userDefs.skills[i])}
 			} else {
@@ -132,28 +132,30 @@ function enemyThinker(userDefs, allySide, oppSide) {
 	}
 	
 	// Heal if under 1/5 hp
-	var healSkills = [];
-	for (const i in possibleSkills) {
-		var skillDefs = skillFile[possibleSkills[i]]
-		
-		if (skillDefs.type === "heal" || skillDefs.terrain && skillDefs.terrain === "grassy" || skillDefs.drain)
-			healSkills.push(possibleSkills[i]);
-	}
+	if (!userDefs.miniboss && !userDefs.boss && !userDefs.finalboss) {
+		var healSkills = [];
+		for (const i in possibleSkills) {
+			var skillDefs = skillFile[possibleSkills[i]]
+			
+			if (skillDefs.type === "heal" || skillDefs.terrain && skillDefs.terrain === "grassy" || skillDefs.drain)
+				healSkills.push(possibleSkills[i]);
+		}
 	
-	if (healSkills.length > 0 && userDefs.hp < Math.round(userDefs.maxhp/3)) {
-		var healSkill = healSkills[Math.round(Math.random() * (healSkills.length-1))];
-		for (const i in allySide) {
-			if (allySide[i] == userDefs)
-				return [healSkill, userDefs, i];
-		}
-		
-		var targNum = Math.round(Math.random() * (allySide.length-1))
-		if (allySide[targNum]) {
-			while (allySide[targNum].hp <= 0) {
-				targNum = Math.round(Math.random() * (allySide.length-1))
+		if (healSkills.length > 0 && userDefs.hp < Math.round(userDefs.maxhp/3)) {
+			var healSkill = healSkills[Math.round(Math.random() * (healSkills.length-1))];
+			for (const i in allySide) {
+				if (allySide[i] == userDefs)
+					return [healSkill, userDefs, i];
 			}
+			
+			var targNum = Math.round(Math.random() * (allySide.length-1))
+			if (allySide[targNum]) {
+				while (allySide[targNum].hp <= 0) {
+					targNum = Math.round(Math.random() * (allySide.length-1))
+				}
+			}
+			return [healSkill, allySide[targNum], targNum];
 		}
-		return [healSkill, allySide[targNum], targNum];
 	}
 
 	// Finally, attack.
@@ -187,7 +189,7 @@ function enemyThinker(userDefs, allySide, oppSide) {
 
 // Export Functions
 module.exports = {
-	genEnm: function(enemy) {
+	genEnm: function(enemy, server) {
 		if (!enemy) {
 			console.log(`Invalid enemy: ${enemy}.`)
 			return undefined
@@ -268,7 +270,21 @@ module.exports = {
 			lbquote: enm.lbquote ? enm.lbquote : [],
 			
 			trust: {},
-			loot: enm.loot
+			
+			negotiateOptions: enm.negotiate ? enm.negotiate : null,
+			negotiateDefs: enm.negotiateDefs ? enm.negotiateDefs : {}
+		}
+		
+		if (!enm.boss && !enm.miniboss && !enm.finalboss && !enm.bigboss && !enm.diety) {
+			var servPath = dataPath+'/Server Settings/server.json'
+			var servRead = fs.readFileSync(servPath);
+			var servFile = JSON.parse(servRead);
+			
+			if (!servFile[server].goldChance)
+				servFile[server].goldChance = 0.1
+			
+			if (Math.random() <= servFile[server].goldChance/100)
+				enemyDefs.golden = true;
 		}
 		
 		return enemyDefs
@@ -286,6 +302,7 @@ module.exports = {
 		if (!servFile[server].encountered) {
 			servFile[server].encountered = []
 			fs.writeFileSync(servPath, JSON.stringify(servFile, null, '    '));
+			return false
 		}
 		
 		for (const i in servFile[server].encountered) {

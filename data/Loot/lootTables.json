@@ -3,20 +3,38 @@
         "name": "Grassimp",
         "items": [
             "SparkleBerry",
-            "ShineBerry"
+            "ShineBerry",
+            "PlumpBerry"
         ],
         "itemChances": [
             50,
-            20
+            20,
+            5
         ]
+    },
+    "Ice": {
+        "name": "Ice",
+        "items": ["SparkleBerry", "IcyFang", "FrostGem"],
+        "itemChances": [20, 9, 7]
+    },
+    "IcyBoss": {
+        "name": "IcyBoss",
+        "items": ["FrozenFist", "IcyFang"],
+        "itemChances": [30, 30]
     },
     "Metalic": {
         "name": "Metalic",
         "items": [
-            "SliceOfPizza"
+            "RoboticFist",
+            "RoboticFlamethrower",
+			"WaterGun",
+			"GrassGem"
         ],
         "itemChances": [
-            100
+            5,
+            5,
+			5,
+			8
         ]
     }
 }

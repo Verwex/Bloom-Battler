@@ -1,24 +1,35 @@
 {
-    "877143757697454120": {
-        "877143757697454123": {
-            "Sutela's": {
-                "name": "Sutela's",
+    "819616171086577667": {
+        "846122218608918549": {
+            "Storage": {
+                "name": "Storage",
                 "inputLoot": "",
-                "inputItems": [
-                    "Slice of Pizza",
-                    "Slice of Pizza"
-                ],
+                "inputItems": [],
                 "itemsFromLoot": {},
-                "items": {
-                    "Slice of Pizza": 2
-                },
-                "party": "Sutela",
-                "locked": true,
-                "lockOpener": "ShineBerry",
-                "spoiler": true,
-                "encountered": true
+                "items": {},
+                "party": "",
+                "locked": false,
+                "lockOpener": "",
+                "spoiler": false,
+                "encountered": false
             }
         },
-        "888872413469753414": {}
+        "893978927104671785": {
+            "TrainStorage": {
+                "name": "TrainStorage",
+                "inputLoot": "",
+                "inputItems": [],
+                "itemsFromLoot": {},
+                "items": {
+                    "Wooden Shield": 1,
+                    "Berry Blend": 1
+                },
+                "party": "",
+                "locked": false,
+                "lockOpener": "",
+                "spoiler": false,
+                "encountered": true
+            }
+        }
     }
 }
