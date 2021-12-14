@@ -1,12 +1,23 @@
 {
-    "877143757697454120": {
-        "877143757697454123": {
-            "name": "Test",
+    "819616171086577667": {
+        "845397163201789972": {
+            "name": "SpiralShop",
             "items": [
+                "WoodenSword",
+                "WoodenShield",
+                "WoodenWand",
+                "Potion",
                 "MPPotion",
-                "MPPotion"
+                "BottleOfWater",
+                "SparkleBerry",
+                "ShineBerry",
+                "PlumpBerry",
+                "AgiGem",
+                "BufuGem",
+                "ZioGem",
+                "RevivalSpray"
             ],
-            "party": "Sutela"
+            "party": "none"
         }
     }
 }
