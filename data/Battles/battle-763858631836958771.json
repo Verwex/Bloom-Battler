@@ -1,6 +1,6 @@
 {
     "763858631836958771": {
-        "battling": false,
+        "battling": true,
         "colosseum": [
             false,
             0,
@@ -61,26 +61,471 @@
             }
         },
         "allies": {
-            "members": [],
+            "members": [
+                {
+                    "name": "Sutela",
+                    "truename": "Sutela",
+                    "team": "allies",
+                    "id": 0,
+                    "mainElement": "psychic",
+                    "melee": [
+                        "Strike Attack",
+                        "strike"
+                    ],
+                    "level": 52,
+                    "hp": 999999426,
+                    "mp": 819999839,
+                    "maxhp": 999999999,
+                    "maxmp": 999999999,
+                    "basehp": 27,
+                    "basemp": 34,
+                    "mpMeter": [
+                        "SpiritFlow",
+                        "SF"
+                    ],
+                    "lb": 2930,
+                    "xp": 138014,
+                    "maxxp": 147074,
+                    "status": "none",
+                    "statusturns": 0,
+                    "atk": 21,
+                    "mag": 58,
+                    "prc": 31,
+                    "end": 29,
+                    "chr": 59,
+                    "int": 58,
+                    "agl": 0,
+                    "luk": 20,
+                    "baseatk": 4,
+                    "basemag": 7,
+                    "baseprc": 6,
+                    "baseend": 4,
+                    "basechr": 8,
+                    "baseint": 7,
+                    "baseagl": 6,
+                    "baseluk": 3,
+                    "weapon": "none",
+                    "guard": false,
+                    "buffs": {
+                        "atk": 0,
+                        "mag": 1,
+                        "prc": 0,
+                        "end": 0,
+                        "agl": 0
+                    },
+                    "meleequote": [],
+                    "physquote": [],
+                    "magquote": [],
+                    "strongquote": [],
+                    "critquote": [],
+                    "missquote": [
+                        "Aw man...",
+                        "God, seriously?",
+                        "Man I feel embarrassed.",
+                        "Aɯ ƈσɱҽ σɳ!"
+                    ],
+                    "weakquote": [],
+                    "dodgequote": [
+                        "Lame.",
+                        "Well that happened.",
+                        "Nice try, but not today!",
+                        "Iiiii think you need some glasses or something.",
+                        "Uhhhhhhhhhh...",
+                        "Okay then, I'll accept that.",
+                        "This is just sad, you know?",
+                        "An eye exam is necessary for you.",
+                        "Please try next time.",
+                        "Maybe practice your aim after we beat the shit out of you.",
+                        "God this is making me feel weird.",
+                        "Okay watch where you're aiming first.",
+                        "Phew. That was close.",
+                        "Not even close, my guy.",
+                        "Eαƚ ყσυɾ ʂԋιƚ αιɱ!",
+                        "Cσɱҽ σɳ! Hιƚ ɱҽ ɳҽxƚ ƚιɱҽ!",
+                        "NGAAAAAAH, JUST BE BETTER!",
+                        "Man this is getting boring.",
+                        "Man...",
+                        "Seriously??",
+                        "Come on. You're better than that.",
+                        "Just give up already.",
+                        "Sigh...",
+                        "Okay what time is it? I feel bored.",
+                        "𝓝𝓸𝓽 𝓽𝓱𝓲𝓼 𝓽𝓲𝓶𝓮.",
+                        "...",
+                        "No comment.",
+                        "Were you seriously aiming for my crotch? Why???",
+                        "Maybe go a little to the left this time.",
+                        "You missed me by a few inches.",
+                        "Well thanks for trying to get some wind on my fur.",
+                        "Please just use your eyes.",
+                        "How do you even???",
+                        "I'll just take a nap.",
+                        "I feel like your ancestors were better than this.",
+                        "Dude, my head is big.",
+                        "Am I too far away for you?",
+                        "Am I not big enough of a target",
+                        "You'll just tire yourself out.",
+                        "Hooo boy.",
+                        "Appreciated.",
+                        "We like that happening, you know?",
+                        "Aim for something else.",
+                        "Are you blind?",
+                        "You have no excuse to be this bad.",
+                        "Give up.",
+                        "Close, but no cigar.",
+                        "To put it bluntly, you suck.",
+                        "Stop trying.",
+                        "https://www.youtube.com/watch?v=ub82Xb1C8os"
+                    ],
+                    "resistquote": [
+                        "Well this did a little bit of a scratch.",
+                        "Try something else.",
+                        "Glad to have some thick skin for that."
+                    ],
+                    "blockquote": [],
+                    "repelquote": [
+                        "Not this time, YOU get the treatment!",
+                        "And it bounces back.",
+                        "Denied!"
+                    ],
+                    "drainquote": [
+                        "Neat.",
+                        "Well a little more health is always needed.",
+                        "T: Mm! [Delicious.](https://cdn.discordapp.com/attachments/820036937791438859/873538603375013928/KyogreDelicious.jpg)"
+                    ],
+                    "hurtquote": [
+                        "AIIIII!",
+                        "I'll get back at you soon.",
+                        "Karma will get you for that.",
+                        "Ugh.....",
+                        "Come on...",
+                        "Are you serious right now?",
+                        "Well this is gonna be a mistake for you, I'm sure of it.",
+                        "Oh I hate what's going on.",
+                        "Just don't finish me off yet, okay?",
+                        "Really?",
+                        "AAAGH, that hurt."
+                    ],
+                    "healquote": [],
+                    "helpedquote": [
+                        "Thanks... Really appreciating it.",
+                        "You didn't have to, but thank you.",
+                        "Iii think I should try harder next time.",
+                        "https://www.youtube.com/watch?v=ub82Xb1C8os",
+                        "Thank you very much.",
+                        "I'll repay you later.",
+                        "I'll make sure not to disappoint now.",
+                        "I hope this is the last time for now.",
+                        "How many times is this gonna happen? This is embarrassing.",
+                        "I feel embarrassed from this.",
+                        "Hey, make sure to keep me secure, okay?",
+                        "Thanks, you're a real one.",
+                        "You're the best.",
+                        "Remember to stay positive, Sutela.",
+                        "Time to change the strategy.",
+                        "You think I should invest in more defense?"
+                    ],
+                    "killquote": [
+                        "Who said a three spirit doesn't know how to beat up somebody.",
+                        "...Nailed that one.",
+                        "Sƚαყ ƚԋҽ ϝυƈƙ ԃσɯɳ.",
+                        "Goodness gracious this is getting so cheesy.",
+                        "How do you like that, huh?",
+                        "Well that's one thing done.",
+                        "Hey would you look at that?",
+                        "So what are you gonna do now?",
+                        "Sucks to be you.",
+                        "I would've given you an L, but you have given it to yourself already.",
+                        "Sucks to suck."
+                    ],
+                    "deathquote": [
+                        "𝓐𝓐𝓐𝓐𝓐𝓖𝓖𝓗.. Tԋιʂ ʂԋσυʅԃɳ'ƚ ҽɳԃ ʅιƙҽ ƚԋιʂ. Not... Like this..",
+                        "Well it was a good run.",
+                        "Ugh...",
+                        "𝓢𝓱𝓸𝓾𝓵𝓭'𝓿𝓮 𝓰𝓸𝓷𝓮 𝓫𝓪𝓬𝓴 𝓽𝓸 𝓲𝓼𝓸𝓵𝓪𝓽𝓲𝓸𝓷.",
+                        "Next time for sure..",
+                        "Was that worth it?",
+                        "[cough] God...",
+                        "Guess this is it for me, huh?",
+                        "Avenge me, guys..",
+                        "I knew I wasn't good enough...",
+                        "\n\n\n\n\n\n\n\n\n\n\n\n\n\n[cough]"
+                    ],
+                    "allydeathquote": [
+                        "It seems"
+                    ],
+                    "lbquote": [],
+                    "lvlquote": [
+                        "Alllright! We're getting somewhere!",
+                        "𝓞𝓱 𝓫𝓸𝔂 𝓘 𝓬𝓪𝓷'𝓽 𝔀𝓪𝓲𝓽 𝓽𝓸 𝓼𝓮𝓮 𝓽𝓱𝓮 𝓷𝓮𝔀 𝓼𝓽𝓻𝓮𝓷𝓰𝓽𝓱! Ok I am being too optimistic.",
+                        "Sԋιƚ ყҽʂ. Tιɱҽ ƚσ ƙιƈƙ ʂσɱҽ αʂʂҽʂ!",
+                        "Aw yeah. We're getting closer.",
+                        "Wooo!!",
+                        "Oh hey. Neat.",
+                        "I wonder how much this affects me for now.",
+                        "This is what I like to see.",
+                        "Awesome.",
+                        "Fantastic!"
+                    ],
+                    "bio": {
+                        "info": "A man with three spirits of separate identity, mind, and control. 3'9 in height. likes to explore on his own. Prefers to be alone, he feels his identities can hurt. Guilty for things out of control, but with great cover up, as a __trick__, hence 'Sutela'. Likely to hide emotions, yet ends up being like a magnet for people (relevant in the future).",
+                        "backstory": "He was born with multi-spirituality, from weakness. __The Ascended__, finally born. It was a secret kept to his parents. He was forced to not reveal the secret. Yet he gathered friends with it. But at 16, it was revealed, ~~from rumors~~.\n\n```The Ascended, from Mythology of Ventrah: someone on an illegal state of ascension, growing in spiritual force. Never meant to exist, met with hatred.\nMaturity, harmony, and confidence, grants them infinitude.``` \n\nVentrah locals were ready for a hunt, by greed, and is still active. He had to run away. (Yaretza - dimensional travel).",
+                        "voice": "\n__Neutral (Sunburn)__: Pheonix Wright (Ace Attorney)\n__Laut__: Commander Shepard (Mass Effect)\n__Tempus__: Aang (Avatar TLA)",
+                        "theme": "[TBA]",
+                        "species": "Red Panda",
+                        "age": 18,
+                        "likes": "Peace and quiet (unless used to chaos), tea, solitude (sometimes), friends (when solitude inapplicable)",
+                        "dislikes": "The feeling of weakness, disruptions of his normal lives, overly bad jokes, seeing people being in pain",
+                        "fears": "To be found __again__ by ones with a specific intent, horror-like situations",
+                        "appearance": "https://cdn.discordapp.com/attachments/763858632319434792/885612999329611886/Sutela.png",
+                        "height": "3'9",
+                        "weight": "Unknown (Involves Density)",
+                        "\"a": "A man of three identities, with the ability of changing between them, on accident. Tho they're pretty subtle right now, they can strengthen in a way or another. 3'9 in height, a guy that likes to explore on his own, or not try and spend time with the group. He prefers to be alone because of identity issues and how he believes it can hurt other people. A man of regrets, feeling guilty for a lot of things, but with great ways to cover that up, as a trick, hence 'Sutela'. A stoic, distant person with trust issues, hence why he likes to leave groups whenever he feels like it.\n\nEDIT: As of now he is getting a lot better with himself. He still hides stuff but he is going to be a lot more open about it.",
+                        "gender": "male"
+                    },
+                    "weak": [
+                        [
+                            "pierce",
+                            2
+                        ]
+                    ],
+                    "resist": [
+                        [
+                            "curse",
+                            0.75
+                        ],
+                        "grass"
+                    ],
+                    "block": [],
+                    "repel": [],
+                    "drain": [],
+                    "skills": [
+                        "Agilao",
+                        "WaterPulse",
+                        "Hanama",
+                        "AwayWithTheWave",
+                        "WayOfMirroringYourself",
+                        "FeedingOnYourDespair"
+                    ],
+                    "trust": {
+                        "Flara": {
+                            "value": 80,
+                            "nextLevel": 200,
+                            "level": 3
+                        },
+                        "Sun": {
+                            "value": 200,
+                            "nextLevel": 300,
+                            "level": 5
+                        },
+                        "Spectra": {
+                            "value": 55,
+                            "nextLevel": 100,
+                            "level": 1
+                        },
+                        "Sky": {
+                            "value": 30,
+                            "nextLevel": 100,
+                            "level": 1
+                        },
+                        "Ira": {
+                            "value": 5,
+                            "nextLevel": 150,
+                            "level": 2
+                        },
+                        "Lanagu": {
+                            "value": 5,
+                            "nextLevel": 150,
+                            "level": 2
+                        },
+                        "Euphorica": {
+                            "value": 25,
+                            "nextLevel": 150,
+                            "level": 2
+                        },
+                        "Hurricane": {
+                            "value": 25,
+                            "nextLevel": 100,
+                            "level": 1
+                        },
+                        "Karma": {
+                            "value": 40,
+                            "nextLevel": 100,
+                            "level": 1
+                        },
+                        "Permic": {
+                            "value": 35,
+                            "nextLevel": 100,
+                            "level": 1
+                        },
+                        "John": {
+                            "value": 25,
+                            "nextLevel": 100,
+                            "level": 1
+                        },
+                        "Miles": {
+                            "value": 25,
+                            "nextLevel": 100,
+                            "level": 1
+                        },
+                        "Harcvuk": {
+                            "value": 60,
+                            "nextLevel": 100,
+                            "level": 1
+                        },
+                        "Patella": {
+                            "value": -100,
+                            "nextLevel": 100,
+                            "level": 1,
+                            "dislike": 10
+                        },
+                        "Sparky": {
+                            "value": 25,
+                            "nextLevel": 100,
+                            "level": 1
+                        },
+                        "XCyan": {
+                            "value": 25,
+                            "nextLevel": 100,
+                            "level": 1
+                        },
+                        "Firestorm": {
+                            "value": 10,
+                            "nextLevel": 100,
+                            "level": 1
+                        }
+                    },
+                    "charms": [],
+                    "owner": "441198920668938260",
+                    "leader": true,
+                    "leaderSkill": {
+                        "name": "PhantomSupport",
+                        "type": "buff",
+                        "target": "mag",
+                        "percent": 1
+                    }
+                }
+            ],
             "backup": []
         },
         "enemies": {
-            "members": [],
+            "members": [
+                {
+                    "name": "Grassimp",
+                    "truename": "Grassimp",
+                    "team": "enemies",
+                    "enemy": true,
+                    "id": 1,
+                    "maxhp": 999999999,
+                    "maxmp": 999999999,
+                    "hp": 99988354,
+                    "mp": 999999887,
+                    "lb": 885,
+                    "boss": false,
+                    "miniboss": false,
+                    "finalboss": false,
+                    "diety": false,
+                    "atk": 18,
+                    "mag": 18,
+                    "prc": 16,
+                    "end": 19,
+                    "chr": 11,
+                    "int": 12,
+                    "agl": 12,
+                    "luk": 17,
+                    "weapon": "none",
+                    "guard": false,
+                    "status": "none",
+                    "statusturns": 0,
+                    "melee": [
+                        "Strike Attack",
+                        "strike"
+                    ],
+                    "skills": [
+                        "Hanama"
+                    ],
+                    "weak": [
+                        [
+                            "fire",
+                            20
+                        ]
+                    ],
+                    "resist": [],
+                    "block": [],
+                    "repel": [],
+                    "drain": [
+                        "water"
+                    ],
+                    "buffs": {
+                        "atk": 0,
+                        "mag": 0,
+                        "prc": 0,
+                        "end": 0,
+                        "agl": 0
+                    },
+                    "limitbreak": null,
+                    "meleequote": [],
+                    "physquote": [],
+                    "magquote": [],
+                    "strongquote": [],
+                    "critquote": [],
+                    "weakquote": [],
+                    "missquote": [],
+                    "dodgequote": [],
+                    "resistquote": [],
+                    "blockquote": [],
+                    "repelquote": [],
+                    "drainquote": [],
+                    "hurtquote": [],
+                    "healquote": [],
+                    "helpedquote": [],
+                    "killquote": [],
+                    "deathquote": [],
+                    "lbquote": [],
+                    "trust": {},
+                    "negotiateOptions": [
+                        {
+                            "name": "Pet",
+                            "desc": "Pet the Grassimp.",
+                            "action": "%PLAYER% pets the Grassimp! It's satisfied.",
+                            "convince": 100
+                        }
+                    ],
+                    "negotiateDefs": {
+                        "required": 4,
+                        "qualities": {
+                            "atk": 1,
+                            "mag": 7,
+                            "def": 1,
+                            "skill": "Hanama"
+                        }
+                    },
+                    "oppAff": {
+                        "0": {
+                            "weak": [],
+                            "resist": [],
+                            "block": [],
+                            "repel": [],
+                            "drain": []
+                        }
+                    }
+                }
+            ],
             "items": {},
             "rings": 0,
             "backup": []
         },
-        "battleteam": "none",
+        "battleteam": "Sutela",
         "battleteam2": "none",
-        "battlechannel": "none",
-        "doturn": 0,
-        "turn": 0,
+        "battlechannel": "763858632319434792",
+        "doturn": 1,
+        "turn": 24,
         "turnorder": [],
         "pvp": false,
         "pvpmode": "none",
         "ranked": false,
         "weather": "clear",
-        "terrain": "normal",
+        "terrain": "none",
         "canshowtime": false,
         "canRun": true
     }

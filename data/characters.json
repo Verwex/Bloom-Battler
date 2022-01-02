@@ -32,14 +32,23 @@
         "xp": 51817,
         "maxxp": 347075,
         "weak": [
-            "curse"
+            [
+                "curse",
+                2
+            ]
         ],
         "resist": [
-            "ice"
+            [
+                "ice",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [
-            "psychic"
+            [
+                "psychic",
+                1
+            ]
         ],
         "drain": [],
         "skills": [
@@ -365,17 +374,35 @@
         "xp": 17249,
         "maxxp": 260692,
         "weak": [
-            "earth",
-            "fire",
-            "bless"
+            [
+                "earth",
+                2
+            ],
+            [
+                "fire",
+                2
+            ],
+            [
+                "bless",
+                2
+            ]
         ],
         "resist": [
-            "grass",
-            "water"
+            [
+                "grass",
+                0.5
+            ],
+            [
+                "water",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [
-            "curse"
+            [
+                "curse",
+                1
+            ]
         ],
         "drain": [],
         "skills": [
@@ -583,11 +610,20 @@
         "xp": 38092,
         "maxxp": 195809,
         "weak": [
-            "ice"
+            [
+                "ice",
+                2
+            ]
         ],
         "resist": [
-            "grass",
-            "fire"
+            [
+                "grass",
+                0.5
+            ],
+            [
+                "fire",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [],
@@ -850,17 +886,29 @@
         "xp": 18434,
         "maxxp": 195809,
         "weak": [
-            "strike",
-            "bless"
+            [
+                "strike",
+                2
+            ],
+            [
+                "bless",
+                2
+            ]
         ],
         "resist": [
-            "curse"
+            [
+                "curse",
+                0.5
+            ]
         ],
         "block": [
             "pierce"
         ],
         "repel": [
-            "slash"
+            [
+                "slash",
+                1
+            ]
         ],
         "drain": [],
         "skills": [
@@ -1053,17 +1101,32 @@
         "xp": 61008,
         "maxxp": 225933,
         "weak": [
-            "curse",
-            "earth"
+            [
+                "curse",
+                2
+            ],
+            [
+                "earth",
+                2
+            ]
         ],
         "resist": [
-            "water",
-            "strike"
+            [
+                "water",
+                0.5
+            ],
+            [
+                "strike",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [],
         "drain": [
-            "nuclear"
+            [
+                "nuclear",
+                1
+            ]
         ],
         "skills": [
             "FrostBurn",
@@ -1281,17 +1344,32 @@
         "xp": 76894,
         "maxxp": 169701,
         "weak": [
-            "earth",
-            "fire"
+            [
+                "earth",
+                2
+            ],
+            [
+                "fire",
+                2
+            ]
         ],
         "resist": [
-            "psychic",
-            "grass"
+            [
+                "psychic",
+                0.5
+            ],
+            [
+                "grass",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [],
         "drain": [
-            "poison"
+            [
+                "poison",
+                1
+            ]
         ],
         "skills": [
             "BrainBite",
@@ -1525,18 +1603,36 @@
         "xp": 77302,
         "maxxp": 225933,
         "weak": [
-            "poison",
-            "electric",
-            "grass"
+            [
+                "poison",
+                2
+            ],
+            [
+                "electric",
+                2
+            ],
+            [
+                "grass",
+                2
+            ]
         ],
         "resist": [
-            "fire",
-            "earth"
+            [
+                "fire",
+                0.5
+            ],
+            [
+                "earth",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [],
         "drain": [
-            "water"
+            [
+                "water",
+                1
+            ]
         ],
         "skills": [
             "Aquadyne",
@@ -1681,19 +1777,37 @@
         "xp": 4511,
         "maxxp": 260692,
         "weak": [
-            "metal",
-            "grass",
-            "strike"
+            [
+                "metal",
+                2
+            ],
+            [
+                "grass",
+                2
+            ],
+            [
+                "strike",
+                2
+            ]
         ],
         "resist": [
-            "curse",
-            "bless"
+            [
+                "curse",
+                0.5
+            ],
+            [
+                "bless",
+                0.5
+            ]
         ],
         "block": [
             "ice"
         ],
         "repel": [
-            "earth"
+            [
+                "earth",
+                1
+            ]
         ],
         "drain": [],
         "skills": [
@@ -1973,12 +2087,24 @@
         "xp": 0,
         "maxxp": 54014,
         "weak": [
-            "pierce",
-            "bless"
+            [
+                "pierce",
+                2
+            ],
+            [
+                "bless",
+                2
+            ]
         ],
         "resist": [
-            "grass",
-            "metal"
+            [
+                "grass",
+                0.5
+            ],
+            [
+                "metal",
+                0.5
+            ]
         ],
         "block": [
             "curse"
@@ -2089,10 +2215,16 @@
         "xp": 164498,
         "maxxp": 195809,
         "weak": [
-            "earth"
+            [
+                "earth",
+                2
+            ]
         ],
         "resist": [
-            "electric"
+            [
+                "electric",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [],
@@ -2367,16 +2499,31 @@
         "xp": 0,
         "maxxp": 300798,
         "weak": [
-            "fire",
-            "earth"
+            [
+                "fire",
+                2
+            ],
+            [
+                "earth",
+                2
+            ]
         ],
         "resist": [
-            "water",
-            "psychic"
+            [
+                "water",
+                0.5
+            ],
+            [
+                "psychic",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [
-            "ice"
+            [
+                "ice",
+                1
+            ]
         ],
         "drain": [],
         "skills": [
@@ -2633,11 +2780,20 @@
         "xp": 138014,
         "maxxp": 147074,
         "weak": [
-            "poison",
-            "pierce"
+            [
+                "pierce",
+                2
+            ]
         ],
         "resist": [
-            "curse"
+            [
+                "curse",
+                0.75
+            ],
+            [
+                "wind",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [],
@@ -2958,12 +3114,24 @@
         "xp": 159441,
         "maxxp": 347075,
         "weak": [
-            "fire",
-            "bless"
+            [
+                "fire",
+                2
+            ],
+            [
+                "bless",
+                2
+            ]
         ],
         "resist": [
-            "ice",
-            "psychic"
+            [
+                "ice",
+                0.5
+            ],
+            [
+                "psychic",
+                0.5
+            ]
         ],
         "block": [
             "curse"
@@ -3516,22 +3684,31 @@
         "xp": 81843,
         "maxxp": 147074,
         "weak": [
-            "poison"
+            [
+                "poison",
+                2
+            ]
         ],
         "resist": [
-            "grass"
+            [
+                "grass",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [],
         "drain": [
-            "water"
+            [
+                "water",
+                1
+            ]
         ],
         "skills": [
             "Magnara",
             "Mamagna",
             "Hanamadyne",
             "Mahanama",
-            "Makakaja",
+            "Mamakakaja",
             "Makarakarn",
             "Mediarama",
             "Bloom"
@@ -3660,18 +3837,30 @@
         "xp": 29029,
         "maxxp": 110469,
         "weak": [
-            "water",
-            "ice"
+            [
+                "water",
+                2
+            ],
+            [
+                "ice",
+                2
+            ]
         ],
         "resist": [
-            "strike"
+            [
+                "strike",
+                0.5
+            ]
         ],
         "block": [
             "grass"
         ],
         "repel": [],
         "drain": [
-            "fire"
+            [
+                "fire",
+                1
+            ]
         ],
         "skills": [
             "GiganticFist",
@@ -4022,16 +4211,28 @@
         "xp": 0,
         "maxxp": 225933,
         "weak": [
-            "water",
-            "ice"
+            [
+                "water",
+                2
+            ],
+            [
+                "ice",
+                2
+            ]
         ],
         "resist": [
-            "bless"
+            [
+                "bless",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [],
         "drain": [
-            "electric"
+            [
+                "electric",
+                1
+            ]
         ],
         "skills": [
             "AssaultDive",
@@ -4229,17 +4430,35 @@
         "xp": 0,
         "maxxp": 195809,
         "weak": [
-            "bless",
-            "water",
-            "ice"
+            [
+                "bless",
+                2
+            ],
+            [
+                "water",
+                2
+            ],
+            [
+                "ice",
+                2
+            ]
         ],
         "resist": [
-            "poison",
-            "earth"
+            [
+                "poison",
+                0.5
+            ],
+            [
+                "earth",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [
-            "curse"
+            [
+                "curse",
+                1
+            ]
         ],
         "drain": [],
         "skills": [
@@ -4467,11 +4686,20 @@
         "xp": 0,
         "maxxp": 110469,
         "weak": [
-            "earth",
-            "electric"
+            [
+                "earth",
+                2
+            ],
+            [
+                "electric",
+                2
+            ]
         ],
         "resist": [
-            "fire"
+            [
+                "fire",
+                0.5
+            ]
         ],
         "block": [
             "metal"
@@ -4627,20 +4855,41 @@
         "xp": 0,
         "maxxp": 6314,
         "weak": [
-            "grass",
-            "electric",
-            "pierce"
+            [
+                "grass",
+                2
+            ],
+            [
+                "electric",
+                2
+            ],
+            [
+                "pierce",
+                2
+            ]
         ],
         "resist": [
-            "fire",
-            "strike",
-            "earth"
+            [
+                "fire",
+                0.5
+            ],
+            [
+                "strike",
+                0.5
+            ],
+            [
+                "earth",
+                0.5
+            ]
         ],
         "block": [
             "metal"
         ],
         "repel": [
-            "water"
+            [
+                "water",
+                1
+            ]
         ],
         "drain": [],
         "skills": [
@@ -4724,17 +4973,32 @@
         "xp": 94215.45679012345,
         "maxxp": 147074,
         "weak": [
-            "bless",
-            "water"
+            [
+                "bless",
+                2
+            ],
+            [
+                "water",
+                2
+            ]
         ],
         "resist": [
-            "poison",
-            "fire"
+            [
+                "poison",
+                0.5
+            ],
+            [
+                "fire",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [],
         "drain": [
-            "curse"
+            [
+                "curse",
+                1
+            ]
         ],
         "skills": [
             "BoneRush",
@@ -5044,12 +5308,24 @@
         "xp": 72178,
         "maxxp": 110469,
         "weak": [
-            "fire",
-            "ice"
+            [
+                "fire",
+                2
+            ],
+            [
+                "ice",
+                2
+            ]
         ],
         "resist": [
-            "strike",
-            "psychic"
+            [
+                "strike",
+                0.5
+            ],
+            [
+                "psychic",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [],
@@ -5296,15 +5572,24 @@
         "xp": 176056,
         "maxxp": 225933,
         "weak": [
-            "earth",
-            "ice"
+            [
+                "earth",
+                2
+            ],
+            [
+                "ice",
+                2
+            ]
         ],
         "resist": [],
         "block": [
             "metal"
         ],
         "repel": [
-            "grass"
+            [
+                "grass",
+                1
+            ]
         ],
         "drain": [],
         "skills": [
@@ -5426,9 +5711,18 @@
         "xp": 38021,
         "maxxp": 147074,
         "weak": [
-            "curse",
-            "electric",
-            "wind"
+            [
+                "curse",
+                2
+            ],
+            [
+                "electric",
+                2
+            ],
+            [
+                "wind",
+                2
+            ]
         ],
         "resist": [],
         "block": [
@@ -5437,7 +5731,10 @@
             "slash"
         ],
         "repel": [
-            "bless"
+            [
+                "bless",
+                1
+            ]
         ],
         "drain": [],
         "skills": [
@@ -5642,17 +5939,32 @@
         "xp": 108147,
         "maxxp": 195809,
         "weak": [
-            "fire",
-            "electric"
+            [
+                "fire",
+                2
+            ],
+            [
+                "electric",
+                2
+            ]
         ],
         "resist": [
-            "psychic",
-            "wind"
+            [
+                "psychic",
+                0.5
+            ],
+            [
+                "wind",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [],
         "drain": [
-            "ice"
+            [
+                "ice",
+                1
+            ]
         ],
         "skills": [
             "WolfBite",
@@ -5894,16 +6206,31 @@
         "xp": 53832,
         "maxxp": 82975,
         "weak": [
-            "grass",
-            "earth"
+            [
+                "grass",
+                2
+            ],
+            [
+                "earth",
+                2
+            ]
         ],
         "resist": [
-            "strike",
-            "fire"
+            [
+                "strike",
+                0.5
+            ],
+            [
+                "fire",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [
-            "water"
+            [
+                "water",
+                1
+            ]
         ],
         "drain": [],
         "skills": [
@@ -6030,17 +6357,32 @@
         "xp": 26756081288,
         "maxxp": 122599344,
         "weak": [
-            "fire",
-            "psychic"
+            [
+                "fire",
+                2
+            ],
+            [
+                "psychic",
+                2
+            ]
         ],
         "resist": [
-            "wind",
-            "ice"
+            [
+                "wind",
+                0.5
+            ],
+            [
+                "ice",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [],
         "drain": [
-            "nuclear"
+            [
+                "nuclear",
+                1
+            ]
         ],
         "skills": [
             "TheRail",
@@ -6159,15 +6501,24 @@
         "xp": {},
         "maxxp": 122599344,
         "weak": [
-            "ice"
+            [
+                "ice",
+                2
+            ]
         ],
         "resist": [
-            "wind"
+            [
+                "wind",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [],
         "drain": [
-            "fire"
+            [
+                "fire",
+                1
+            ]
         ],
         "skills": [
             "God'sHand",
@@ -6342,10 +6693,22 @@
         "xp": 0,
         "maxxp": 54014,
         "weak": [
-            "electric",
-            "psychic",
-            "bless",
-            "pierce"
+            [
+                "electric",
+                2
+            ],
+            [
+                "psychic",
+                2
+            ],
+            [
+                "bless",
+                2
+            ],
+            [
+                "pierce",
+                2
+            ]
         ],
         "resist": [],
         "block": [],
@@ -6435,11 +6798,20 @@
         "xp": 169210,
         "maxxp": 225933,
         "weak": [
-            "nuclear",
-            "curse"
+            [
+                "nuclear",
+                2
+            ],
+            [
+                "curse",
+                2
+            ]
         ],
         "resist": [
-            "bless"
+            [
+                "bless",
+                0.5
+            ]
         ],
         "block": [
             "psychic"
@@ -6450,7 +6822,7 @@
             "Psiodyne",
             "Bapsio",
             "Psionize",
-            "Makakaja",
+            "Mamakakaja",
             "Mediarama",
             "Diarahan",
             "Recarm",
@@ -6708,13 +7080,28 @@
         "xp": 0,
         "maxxp": 110469,
         "weak": [
-            "wind",
-            "psychic",
-            "pierce"
+            [
+                "wind",
+                2
+            ],
+            [
+                "psychic",
+                2
+            ],
+            [
+                "pierce",
+                2
+            ]
         ],
         "resist": [
-            "earth",
-            "slash"
+            [
+                "earth",
+                0.5
+            ],
+            [
+                "slash",
+                0.5
+            ]
         ],
         "block": [
             "strike"
@@ -6892,10 +7279,16 @@
         "xp": 0,
         "maxxp": 361,
         "weak": [
-            "curse"
+            [
+                "curse",
+                2
+            ]
         ],
         "resist": [
-            "bless"
+            [
+                "bless",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [],
@@ -7158,11 +7551,20 @@
         "xp": 0,
         "maxxp": 260692,
         "weak": [
-            "ice",
-            "fire"
+            [
+                "ice",
+                2
+            ],
+            [
+                "fire",
+                2
+            ]
         ],
         "resist": [
-            "psychic"
+            [
+                "psychic",
+                0.5
+            ]
         ],
         "block": [
             "bless",
@@ -7307,10 +7709,16 @@
         "xp": 0,
         "maxxp": 361,
         "weak": [
-            "earth"
+            [
+                "earth",
+                2
+            ]
         ],
         "resist": [
-            "electric"
+            [
+                "electric",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [],
@@ -7790,12 +8198,24 @@
         "xp": 0,
         "maxxp": 110469,
         "weak": [
-            "psychic",
-            "earth"
+            [
+                "psychic",
+                2
+            ],
+            [
+                "earth",
+                2
+            ]
         ],
         "resist": [
-            "grass",
-            "water"
+            [
+                "grass",
+                0.5
+            ],
+            [
+                "water",
+                0.5
+            ]
         ],
         "block": [
             "poison"
@@ -7961,12 +8381,24 @@
         "xp": 0,
         "maxxp": 260692,
         "weak": [
-            "poison",
-            "wind"
+            [
+                "poison",
+                2
+            ],
+            [
+                "wind",
+                2
+            ]
         ],
         "resist": [
-            "earth",
-            "metal"
+            [
+                "earth",
+                0.5
+            ],
+            [
+                "metal",
+                0.5
+            ]
         ],
         "block": [
             "water"
@@ -8163,18 +8595,36 @@
         "xp": 1252,
         "maxxp": 110469,
         "weak": [
-            "fire",
-            "ice",
-            "earth"
+            [
+                "fire",
+                2
+            ],
+            [
+                "ice",
+                2
+            ],
+            [
+                "earth",
+                2
+            ]
         ],
         "resist": [
-            "grass",
-            "wind"
+            [
+                "grass",
+                0.5
+            ],
+            [
+                "wind",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [],
         "drain": [
-            "poison"
+            [
+                "poison",
+                1
+            ]
         ],
         "skills": [
             "DragonAscent",
@@ -8259,19 +8709,40 @@
         "xp": 0,
         "maxxp": 195809,
         "weak": [
-            "fire",
-            "ice",
-            "electric"
+            [
+                "fire",
+                2
+            ],
+            [
+                "ice",
+                2
+            ],
+            [
+                "electric",
+                2
+            ]
         ],
         "resist": [
-            "grass",
-            "earth",
-            "metal"
+            [
+                "grass",
+                0.5
+            ],
+            [
+                "earth",
+                0.5
+            ],
+            [
+                "metal",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [],
         "drain": [
-            "water"
+            [
+                "water",
+                1
+            ]
         ],
         "skills": [
             "Aques",
@@ -8356,17 +8827,32 @@
         "xp": 0,
         "maxxp": 127464,
         "weak": [
-            "curse",
-            "earth"
+            [
+                "curse",
+                2
+            ],
+            [
+                "earth",
+                2
+            ]
         ],
         "resist": [
-            "ice",
-            "bless"
+            [
+                "ice",
+                0.5
+            ],
+            [
+                "bless",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [],
         "drain": [
-            "electric"
+            [
+                "electric",
+                1
+            ]
         ],
         "skills": [
             "ElectricLaser",
@@ -8527,10 +9013,16 @@
         "xp": 0,
         "maxxp": 127464,
         "weak": [
-            "grass"
+            [
+                "grass",
+                2
+            ]
         ],
         "resist": [
-            "psychic"
+            [
+                "psychic",
+                0.5
+            ]
         ],
         "block": [
             "strike"
@@ -8675,12 +9167,24 @@
         "xp": 0,
         "maxxp": 300798,
         "weak": [
-            "water",
-            "gravity"
+            [
+                "water",
+                2
+            ],
+            [
+                "gravity",
+                2
+            ]
         ],
         "resist": [
-            "pierce",
-            "electric"
+            [
+                "pierce",
+                0.5
+            ],
+            [
+                "electric",
+                0.5
+            ]
         ],
         "block": [
             "poison"
@@ -8919,11 +9423,20 @@
         "xp": 0,
         "maxxp": 1451787,
         "weak": [
-            "water",
-            "earth"
+            [
+                "water",
+                2
+            ],
+            [
+                "earth",
+                2
+            ]
         ],
         "resist": [
-            "ice"
+            [
+                "ice",
+                0.5
+            ]
         ],
         "block": [
             "fire"
@@ -9009,16 +9522,31 @@
         "xp": 86001,
         "maxxp": 127464,
         "weak": [
-            "poison",
-            "psychic"
+            [
+                "poison",
+                2
+            ],
+            [
+                "psychic",
+                2
+            ]
         ],
         "resist": [
-            "water",
-            "pierce"
+            [
+                "water",
+                0.5
+            ],
+            [
+                "pierce",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [
-            "grass"
+            [
+                "grass",
+                1
+            ]
         ],
         "drain": [],
         "skills": [
@@ -9272,16 +9800,28 @@
         "xp": 0,
         "maxxp": 127464,
         "weak": [
-            "psychic",
-            "water"
+            [
+                "psychic",
+                2
+            ],
+            [
+                "water",
+                2
+            ]
         ],
         "resist": [
-            "strike"
+            [
+                "strike",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [],
         "drain": [
-            "nuclear"
+            [
+                "nuclear",
+                1
+            ]
         ],
         "skills": [
             "SteelSlam",
@@ -9426,17 +9966,29 @@
         "xp": 0,
         "maxxp": 110469,
         "weak": [
-            "curse",
-            "nuclear"
+            [
+                "curse",
+                2
+            ],
+            [
+                "nuclear",
+                2
+            ]
         ],
         "resist": [
-            "bless"
+            [
+                "bless",
+                0.5
+            ]
         ],
         "block": [
             "psychic"
         ],
         "repel": [
-            "wind"
+            [
+                "wind",
+                1
+            ]
         ],
         "drain": [],
         "skills": [
@@ -9527,12 +10079,24 @@
         "xp": 27510,
         "maxxp": 127464,
         "weak": [
-            "fire",
-            "ice"
+            [
+                "fire",
+                2
+            ],
+            [
+                "ice",
+                2
+            ]
         ],
         "resist": [
-            "strike",
-            "grass"
+            [
+                "strike",
+                0.5
+            ],
+            [
+                "grass",
+                0.5
+            ]
         ],
         "block": [
             "wind"
@@ -9686,11 +10250,20 @@
         "xp": 0,
         "maxxp": 62324,
         "weak": [
-            "fire"
+            [
+                "fire",
+                2
+            ]
         ],
         "resist": [
-            "ice",
-            "grass"
+            [
+                "ice",
+                0.5
+            ],
+            [
+                "grass",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [],
@@ -9776,18 +10349,36 @@
         "xp": 0,
         "maxxp": 122599344,
         "weak": [
-            "electric",
-            "grass",
-            "poison"
+            [
+                "electric",
+                2
+            ],
+            [
+                "grass",
+                2
+            ],
+            [
+                "poison",
+                2
+            ]
         ],
         "resist": [
-            "fire",
-            "earth"
+            [
+                "fire",
+                0.5
+            ],
+            [
+                "earth",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [],
         "drain": [
-            "water"
+            [
+                "water",
+                1
+            ]
         ],
         "skills": [
             "Aquadyne",
@@ -9920,13 +10511,28 @@
         "xp": 0,
         "maxxp": 122599344,
         "weak": [
-            "electric",
-            "bless",
-            "fire"
+            [
+                "electric",
+                2
+            ],
+            [
+                "bless",
+                2
+            ],
+            [
+                "fire",
+                2
+            ]
         ],
         "resist": [
-            "ice",
-            "poison"
+            [
+                "ice",
+                0.5
+            ],
+            [
+                "poison",
+                0.5
+            ]
         ],
         "block": [
             "psychic"
@@ -10021,15 +10627,24 @@
         "xp": 0,
         "maxxp": 169701,
         "weak": [
-            "water",
-            "psychic"
+            [
+                "water",
+                2
+            ],
+            [
+                "psychic",
+                2
+            ]
         ],
         "resist": [],
         "block": [
             "fire"
         ],
         "repel": [
-            "strike"
+            [
+                "strike",
+                1
+            ]
         ],
         "drain": [],
         "skills": [
@@ -10144,17 +10759,29 @@
         "xp": 8067,
         "maxxp": 195809,
         "weak": [
-            "water",
-            "fire"
+            [
+                "water",
+                2
+            ],
+            [
+                "fire",
+                2
+            ]
         ],
         "resist": [
-            "water"
+            [
+                "water",
+                0.5
+            ]
         ],
         "block": [
             "strike"
         ],
         "repel": [
-            "psychic"
+            [
+                "psychic",
+                1
+            ]
         ],
         "drain": [],
         "skills": [
@@ -10561,20 +11188,38 @@
         "xp": 594,
         "maxxp": 122599344,
         "weak": [
-            "grass",
-            "wind",
-            "electric"
+            [
+                "grass",
+                2
+            ],
+            [
+                "wind",
+                2
+            ],
+            [
+                "electric",
+                2
+            ]
         ],
         "resist": [
-            "metal",
-            "fire"
+            [
+                "metal",
+                0.5
+            ],
+            [
+                "fire",
+                0.5
+            ]
         ],
         "block": [
             "curse"
         ],
         "repel": [],
         "drain": [
-            "nuclear"
+            [
+                "nuclear",
+                1
+            ]
         ],
         "skills": [
             "OneShotKill",
@@ -10765,18 +11410,33 @@
         "xp": 122599343,
         "maxxp": 122599344,
         "weak": [
-            "bless"
+            [
+                "bless",
+                2
+            ]
         ],
         "resist": [
-            "psychic",
-            "nuclear",
-            "poison"
+            [
+                "psychic",
+                0.5
+            ],
+            [
+                "nuclear",
+                0.5
+            ],
+            [
+                "poison",
+                0.5
+            ]
         ],
         "block": [
             "almighty"
         ],
         "repel": [
-            "curse"
+            [
+                "curse",
+                1
+            ]
         ],
         "drain": [],
         "skills": [
@@ -11236,8 +11896,14 @@
         "maxxp": 127464,
         "weak": [],
         "resist": [
-            "curse",
-            "bless"
+            [
+                "curse",
+                0.5
+            ],
+            [
+                "bless",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [],
@@ -11590,11 +12256,20 @@
         "xp": 0,
         "maxxp": 195809,
         "weak": [
-            "bless",
-            "fire"
+            [
+                "bless",
+                2
+            ],
+            [
+                "fire",
+                2
+            ]
         ],
         "resist": [
-            "psychic"
+            [
+                "psychic",
+                0.5
+            ]
         ],
         "block": [
             "slash"
@@ -11685,10 +12360,22 @@
         "xp": 0,
         "maxxp": 225933,
         "weak": [
-            "fire",
-            "wind",
-            "earth",
-            "curse"
+            [
+                "fire",
+                2
+            ],
+            [
+                "wind",
+                2
+            ],
+            [
+                "earth",
+                2
+            ],
+            [
+                "curse",
+                2
+            ]
         ],
         "resist": [],
         "block": [],
@@ -11777,14 +12464,20 @@
         "xp": 0,
         "maxxp": 225933,
         "weak": [
-            "electric"
+            [
+                "electric",
+                2
+            ]
         ],
         "resist": [],
         "block": [
             "pierce"
         ],
         "repel": [
-            "water"
+            [
+                "water",
+                1
+            ]
         ],
         "drain": [],
         "skills": [
@@ -12079,12 +12772,24 @@
         "xp": 0,
         "maxxp": 533172,
         "weak": [
-            "fire",
-            "ice"
+            [
+                "fire",
+                2
+            ],
+            [
+                "ice",
+                2
+            ]
         ],
         "resist": [
-            "strike",
-            "psychic"
+            [
+                "strike",
+                0.5
+            ],
+            [
+                "psychic",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [],
@@ -12429,15 +13134,24 @@
         "xp": 0,
         "maxxp": 100,
         "weak": [
-            "wind"
+            [
+                "wind",
+                2
+            ]
         ],
         "resist": [
-            "metal"
+            [
+                "metal",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [],
         "drain": [
-            "bless"
+            [
+                "bless",
+                1
+            ]
         ],
         "skills": [
             "BitchSlap",
@@ -12531,18 +13245,33 @@
         "xp": 0,
         "maxxp": 100,
         "weak": [
-            "bless",
-            "water"
+            [
+                "bless",
+                2
+            ],
+            [
+                "water",
+                2
+            ]
         ],
         "resist": [
-            "sound"
+            [
+                "sound",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [
-            "fire"
+            [
+                "fire",
+                1
+            ]
         ],
         "drain": [
-            "curse"
+            [
+                "curse",
+                1
+            ]
         ],
         "skills": [
             "Agi",
@@ -12731,18 +13460,30 @@
         "xp": 0,
         "maxxp": 100,
         "weak": [
-            "bless",
-            "sound"
+            [
+                "bless",
+                2
+            ],
+            [
+                "sound",
+                2
+            ]
         ],
         "resist": [
-            "poison"
+            [
+                "poison",
+                0.5
+            ]
         ],
         "block": [
             "gravity"
         ],
         "repel": [],
         "drain": [
-            "curse"
+            [
+                "curse",
+                1
+            ]
         ],
         "skills": [
             "HateCry",
@@ -13001,19 +13742,34 @@
         "xp": 0,
         "maxxp": 100,
         "weak": [
-            "psychic",
-            "curse",
-            "ice"
+            [
+                "psychic",
+                2
+            ],
+            [
+                "curse",
+                2
+            ],
+            [
+                "ice",
+                2
+            ]
         ],
         "resist": [
-            "fire"
+            [
+                "fire",
+                0.5
+            ]
         ],
         "block": [
             "electric"
         ],
         "repel": [],
         "drain": [
-            "sound"
+            [
+                "sound",
+                1
+            ]
         ],
         "skills": [
             "Voca",
@@ -13106,11 +13862,20 @@
         "xp": 0,
         "maxxp": 100,
         "weak": [
-            "curse"
+            [
+                "curse",
+                2
+            ]
         ],
         "resist": [
-            "bless",
-            "fire"
+            [
+                "bless",
+                0.5
+            ],
+            [
+                "fire",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [],
@@ -13146,7 +13911,10 @@
             "dislikes": "",
             "fears": "",
             "voice": "",
-            "theme": ""
+            "theme": "",
+            "gender": "",
+            "height": "",
+            "weight": ""
         },
         "trust": {},
         "autoLearn": [
@@ -13159,7 +13927,9 @@
             1,
             2
         ],
-        "mainElement": "strike"
+        "mainElement": "strike",
+        "charms": [],
+        "curCharms": []
     },
     "Bayrero": {
         "name": "Bayrero",
@@ -13202,17 +13972,35 @@
         "xp": 0,
         "maxxp": 225933,
         "weak": [
-            "water",
-            "ice",
-            "metal"
+            [
+                "water",
+                2
+            ],
+            [
+                "ice",
+                2
+            ],
+            [
+                "metal",
+                2
+            ]
         ],
         "resist": [
-            "strike",
-            "fire"
+            [
+                "strike",
+                0.5
+            ],
+            [
+                "fire",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [
-            "earth"
+            [
+                "earth",
+                1
+            ]
         ],
         "drain": [],
         "skills": [
@@ -13272,7 +14060,9 @@
             "target": "physical",
             "percent": 10
         },
-        "nickname": "Bay"
+        "nickname": "Bay",
+        "charms": [],
+        "curCharms": []
     },
     "Snow": {
         "name": "Snow",
@@ -13315,16 +14105,28 @@
         "xp": 0,
         "maxxp": 100,
         "weak": [
-            "poison",
-            "electric"
+            [
+                "poison",
+                2
+            ],
+            [
+                "electric",
+                2
+            ]
         ],
         "resist": [
-            "ice"
+            [
+                "ice",
+                0.5
+            ]
         ],
         "block": [],
         "repel": [],
         "drain": [
-            "water"
+            [
+                "water",
+                1
+            ]
         ],
         "skills": [
             "WaterWave",
@@ -13359,9 +14161,14 @@
             "dislikes": "",
             "fears": "",
             "voice": "",
-            "theme": ""
+            "theme": "",
+            "gender": "",
+            "height": "",
+            "weight": ""
         },
         "trust": {},
-        "mainElement": "ice"
+        "mainElement": "ice",
+        "charms": [],
+        "curCharms": []
     }
 }

@@ -1,6 +1,6 @@
 {
     "819616171086577667": {
-        "prefix": "rpg!",
+        "prefix": "test!",
         "limitbreaks": true,
         "showtimes": false,
         "onemores": false,
@@ -238,7 +238,7 @@
         "desc": "On Yaretza, there are 17 main species of monster roaming the lands. One for each planetary element. The planet has lasted for quite a while, and is still going through disasters today. Can the rag-tag group of \"friends\" survive, and help others?"
     },
     "808462313262415893": {
-        "prefix": "rpg!",
+        "prefix": "test!",
         "limitbreaks": false,
         "showtimes": false,
         "onemores": false,
@@ -262,7 +262,7 @@
         "damageFormula": "persona"
     },
     "874635107300933682": {
-        "prefix": "rpg!",
+        "prefix": "test!",
         "limitbreaks": true,
         "showtimes": false,
         "onemores": false,
@@ -371,7 +371,7 @@
         "desc": ""
     },
     "763858631836958771": {
-        "prefix": "rpg!",
+        "prefix": "test!",
         "limitbreaks": true,
         "showtimes": true,
         "onemores": false,
@@ -400,13 +400,15 @@
             "Shrivelimp",
             "Patella(Enemy)",
             "Necromancy",
-            "Patella"
+            "Patella",
+            "Barista",
+            "Grassimp"
         ],
         "goldChance": 0.1,
         "desc": ""
     },
     "728307995901034546": {
-        "prefix": "rpg!",
+        "prefix": "test!",
         "limitbreaks": false,
         "showtimes": false,
         "onemores": false,
@@ -441,7 +443,7 @@
         }
     },
     "836346842848428092": {
-        "prefix": "rpg!",
+        "prefix": "test!",
         "limitbreaks": false,
         "showtimes": false,
         "onemores": false,
@@ -458,7 +460,7 @@
         "banned": []
     },
     "739088538964066345": {
-        "prefix": "rpg!",
+        "prefix": "test!",
         "limitbreaks": false,
         "showtimes": false,
         "onemores": false,
@@ -490,7 +492,7 @@
         }
     },
     "759805005913260062": {
-        "prefix": "rpg!",
+        "prefix": "test!",
         "limitbreaks": false,
         "showtimes": false,
         "onemores": false,
@@ -560,7 +562,7 @@
         "banned": []
     },
     "487751823604711435": {
-        "prefix": "rpg!",
+        "prefix": "test!",
         "limitbreaks": false,
         "showtimes": false,
         "onemores": false,
@@ -596,5 +598,37 @@
         ],
         "goldChance": 0.1,
         "desc": ""
+    },
+    "877143757697454120": {
+        "prefix": "test!",
+        "limitbreaks": false,
+        "showtimes": false,
+        "onemores": false,
+        "currency": "Bloom Token",
+        "xprate": 1,
+        "damageFormula": "persona",
+        "pvpstuff": {
+            "none": {},
+            "metronome": {},
+            "randskills": {},
+            "randstats": {},
+            "charfuck": {}
+        },
+        "themes": {
+            "battle": [],
+            "advantage": [],
+            "disadvantage": [],
+            "bossfight": [],
+            "miniboss": [],
+            "strongfoe": [],
+            "finalboss": [],
+            "colosseum": [],
+            "colosseumstrong": [],
+            "pvp": [],
+            "victory": [],
+            "colosseumvictory": [],
+            "loss": []
+        },
+        "banned": []
     }
 }

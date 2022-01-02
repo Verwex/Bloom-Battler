@@ -287,7 +287,7 @@ function knowsEnemy(oppDefs, server) {
 }
 
 // Determine the Damage that this move will deal. Also handles Status Effects, Affinities and Critical Hits
-function genDmg(userDefs, targDefs, skillDefs, server, forceDmgType) {
+function genDmg(userDefs, targDefs, skillDefs, server, multiplier, forceDmgType) {
 	console.log("genDmg:")
 
     var values = [0, "normal", false, false, false, false]; // Damage, Damagestate, Hit a Weakness?, Crit?, Inflict Status?, Technical?
@@ -302,8 +302,15 @@ function genDmg(userDefs, targDefs, skillDefs, server, forceDmgType) {
 			const affinities = ["weak", "resist", "block", "repel", "drain"]
 			for (const i in affinities) {
 				for (const k in targDefs[affinities[i]]) {
-					if (targDefs[affinities[i]][k] == skillDefs.type)
+					if (Array.isArray(targDefs[affinities[i]][k])) {
+						if (targDefs[affinities[i]][k][0] == skillDefs.type) {
 						dmgtype = affinities[i];
+						multiplier = targDefs[affinities[i]][k][1];
+						}
+					} else {
+						if (targDefs[affinities[i]][k] == skillDefs.type)
+						dmgtype = affinities[i];
+					}
 				}
 			}
 		}
@@ -410,10 +417,10 @@ function genDmg(userDefs, targDefs, skillDefs, server, forceDmgType) {
 		if (dmgtype === "weak") {
 			values[2] = true;
 			values[1] = "weak";
-			values[0] = Math.round((values[0] * 3) / 2);
+			values[0] = (multiplier != null ? Math.round(values[0] * multiplier) : Math.round(values[0] * 1.5));
 		} else if (dmgtype === "resist" || dmgtype === "repel" || dmgtype === "block") {
 			values[1] = "resist";
-			values[0] = Math.round(values[0] / 2);
+			values[0] = (multiplier != null ? Math.round(values[0] * multiplier) : Math.round(values[0] / 2));
 		}
 	} else {
 		var servPath = dataPath+'/Server Settings/server.json'
@@ -433,16 +440,16 @@ function genDmg(userDefs, targDefs, skillDefs, server, forceDmgType) {
 		}
 
 		if (dmgtype === "repel" || dmgtype === "drain")
-			return [Math.round(values[0]), dmgtype, false, false, false, false];
+			return [Math.round(values[0] * (multiplier != null ? multiplier : 1)), dmgtype, false, false, false, false];
 		
 		// Damage Types
 		if (dmgtype === "weak") {
 			values[2] = true;
 			values[1] = "weak";
-			values[0] = Math.round(values[0]*1.5);
+			values[0] = (multiplier != null ? Math.round(values[0] * multiplier) : Math.round(values[0] * 1.5));
 		} else if (dmgtype === "resist") {
 			values[1] = "resist";
-			values[0] = Math.round(values[0] / 2);
+			values[0] = (multiplier != null ? Math.round(values[0] * multiplier) : Math.round(values[0] / 2));
 		}
 
 		// Crits
@@ -641,7 +648,9 @@ function getAffinity(charDefs, skillType) {
 		const affinities = ["weak", "resist", "block", "repel", "drain"]
 		for (const i in affinities) {
 			for (const k in charDefs[affinities[i]]) {
-				if (charDefs[affinities[i]][k] == skillType)
+				if (!Array.isArray(charDefs[affinities[i]][k]) && charDefs[affinities[i]][k] == skillType)
+					affinity = affinities[i];
+				else if (Array.isArray(charDefs[affinities[i]][k]) && charDefs[affinities[i]][k][0] == skillType)
 					affinity = affinities[i];
 			}
 		}
@@ -869,13 +878,28 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 			}
 			
 			var dmgType = getAffinity(oppDefs, skillDefs.type)
+
+			var isArray = false
+			var multi = null
+			if (Array.isArray(dmgType)) {
+				isArray = true
+				multi = dmgType[1]
+				dmgType = dmgType[0]
+			}
+
 			switch(dmgType) {
 				case 'weak':
+					if (!isArray)
 					skillDefs.acc *= 2
+					else
+					skillDefs.acc *= multi
 					break
 				
 				case 'resist':
+					if (!isArray)
 					skillDefs.acc /= 2
+					else
+					skillDefs.acc *= multi
 					break
 				
 				case 'block':
@@ -974,6 +998,14 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 
 		// Weaknesses and shit
 		var dmgtype = getAffinity(oppDefs, skillDefs.type)
+
+		var isArray = false
+		var multi = null
+		if (Array.isArray(dmgType)) {
+			isArray = true
+			multi = dmgType[1]
+			dmgType = dmgType[0]
+		}
 
 		const skillPath = dataPath+'/skills.json'
 		const skillRead = fs.readFileSync(skillPath);
@@ -1076,6 +1108,14 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 		if (counterSkill) {
 			var dmgtype2 = getAffinity(userDefs, counterSkill.type)
 
+			var isArray2 = false
+			var multi2 = null
+			if (Array.isArray(dmgType2)) {
+				isArray2 = true
+				multi2 = dmgType2[1]
+				dmgType2 = dmgType2[0]
+			}
+
 			// Affinity Cutter & Slicer
 			for (const i in oppDefs.skills) {
 				var oppSkill = skillFile[oppDefs.skills[i]]
@@ -1148,7 +1188,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 				}
 			}
 
-			var dmg = genDmg(oppDefs, userDefs, counterSkill, server);
+			var dmg = genDmg(oppDefs, userDefs, counterSkill, server, multi2);
 			
 			var finaltext = `${oppName}'s ${counterSkill.name} allowed them to evade & counter! `
 			var rand = -7 + Math.round(Math.random() * 14)
@@ -1372,7 +1412,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 				mpSteal = skillDefs.takemp*skillDefs.hits;
 
 			if (!skillDefs.hits || skillDefs.hits == 1) {
-				var dmg = genDmg(userDefs, oppDefs, skillDefs, server, forceDmgType)
+				var dmg = genDmg(userDefs, oppDefs, skillDefs, server, multi, forceDmgType)
 				var finaltext = ``
 				
 				var rand = -7 + Math.round(Math.random() * 14)
@@ -1414,7 +1454,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 					fieldMod(repelDmg, weather, terrain, skillDefs)
 
 					skillDefs.acc = 999
-					var repelDmg = genDmg(userDefs, userDefs, skillDefs, server)
+					var repelDmg = genDmg(userDefs, userDefs, skillDefs, server, multi)
 					
 					var rand = -7 + Math.round(Math.random() * 14)
 					repelDmg[0] += rand;
@@ -1447,7 +1487,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 					finaltext += `${oppName}'s ${repelSkill.name} repels the attack!\n`;
 
 					skillDefs.acc = 999
-					var repelDmg = genDmg(userDefs, userDefs, skillDefs, server)
+					var repelDmg = genDmg(userDefs, userDefs, skillDefs, server, multi)
 					
 					var rand = -7 + Math.round(Math.random() * 14)
 					repelDmg[0] += rand;
@@ -1488,7 +1528,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 
 					skillDefs.acc = 999
 
-					var repelDmg = genDmg(userDefs, userDefs, skillDefs, server)
+					var repelDmg = genDmg(userDefs, userDefs, skillDefs, server, multi)
 					var rand = -7 + Math.round(Math.random() * 14)
 					repelDmg[0] += rand;
 					
@@ -1773,7 +1813,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 			} else {
 				var finaltext = ``;
 				
-				var dmgCheck = genDmg(userDefs, oppDefs, skillDefs, server);
+				var dmgCheck = genDmg(userDefs, oppDefs, skillDefs, server, multi);
 				if (dmgCheck[1] == "miss") {
 					finaltext = `${oppName} dodged it!`;
 					trapped = false;
@@ -1796,7 +1836,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 				} else if (dmgCheck[1] == "repel") {
 					finaltext = `${oppName} repelled it! `;
 
-					var repelDmg = genDmg(userDefs, userDefs, skillDefs, server)
+					var repelDmg = genDmg(userDefs, userDefs, skillDefs, server, multi)
 					if (repelDmg[1] === "block" || repelDmg[1] === "repel") {
 						finaltext += `${userName} blocked it!`;
 						dmgCheck[1] = "block"
@@ -1813,7 +1853,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 				} else if (repelSkill) {
 					finaltext = `${oppName}'s ${repelSkill.name} repels the attack! `;
 
-					var repelDmg = genDmg(userDefs, userDefs, skillDefs, server)
+					var repelDmg = genDmg(userDefs, userDefs, skillDefs, server, multi)
 					if (repelDmg[1] === "block" || repelDmg[1] === "repel") {
 						finaltext += `${userName} blocked it!`;
 						dmgCheck[1] = "block"
@@ -1838,7 +1878,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 						delete oppDefs.tetrakarn
 					}
 
-					var repelDmg = genDmg(userDefs, userDefs, skillDefs, server)
+					var repelDmg = genDmg(userDefs, userDefs, skillDefs, server, multi)
 					if (repelDmg[1] === "block" || repelDmg[1] === "repel") {
 						finaltext += `${userName} blocked it!`;
 						dmgCheck[1] = "block"
@@ -1891,7 +1931,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 					for (let i = 1; i <= hitCount; i++) {
 						skillDefs.acc = 999
 
-						var dmg = genDmg(userDefs, oppDefs, skillDefs, server, forceDmgType)
+						var dmg = genDmg(userDefs, oppDefs, skillDefs, server, multi, forceDmgType)
 
 						var rand = -7 + Math.round(Math.random() * 14)
 						dmg[0] += +rand;
@@ -1906,7 +1946,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 							result = Math.round(dmg[0]/2);
 
 						if (dmgCheck[1] == "repel" || repelSkill || (oppDefs.makarakarn && skillDefs.atktype === "magic" || oppDefs.tetrakarn && skillDefs.atktype === "physical") && !skillDefs.feint) {
-							var repelDmg = genDmg(userDefs, userDefs, skillDefs, server)
+							var repelDmg = genDmg(userDefs, userDefs, skillDefs, server, multi)
 							var rand = -7 + Math.round(Math.random() * 14)
 							repelDmg[0] += rand;
 							fieldMod(repelDmg, weather, terrain, skillDefs)
@@ -2293,6 +2333,12 @@ function meleeAttack(userDefs, enmDefs, server, rage, btl) {
 
 	// Weaknesses and shit
 	var dmgtype = getAffinity(enmDefs, userDefs.melee[1])
+	var multi = null
+	if (Array.isArray(dmgType)) {
+		isArray = true
+		multi = dmgType[1]
+		dmgType = dmgType[0]
+	}
 	
 	const skillPath = dataPath+'/skills.json'
 	const skillRead = fs.readFileSync(skillPath);
@@ -2335,7 +2381,7 @@ function meleeAttack(userDefs, enmDefs, server, rage, btl) {
 		melee: true
 	};
 
-	var dmg = genDmg(userDefs, enmDefs, skillDefs, server)
+	var dmg = genDmg(userDefs, enmDefs, skillDefs, server, multi)
 	var finaltext = ``
 	var rand = -7 + Math.round(Math.random() * 14)
 	dmg[0] = +dmg[0] + +rand;
@@ -2930,8 +2976,8 @@ module.exports = {
 		return isTech(userDefs, element)
 	},
 	
-	generateDmg: function(userDefs, targDefs, skillDefs, server, forceDmgType) {
-		return genDmg(userDefs, targDefs, skillDefs, server, forceDmgType);
+	generateDmg: function(userDefs, targDefs, skillDefs, server, multiplier, forceDmgType) {
+		return genDmg(userDefs, targDefs, skillDefs, server, multiplier, forceDmgType);
 	},
 	
 	attackFoe: function(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy, server, btl) {

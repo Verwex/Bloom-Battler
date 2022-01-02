@@ -890,22 +890,49 @@ async function playThemeType(server, themeType) {
 /////////////////////
 
 // Gives a character an affinity.
-function writeAffinity(charDefs, type, affinity) {
-	if (affinity === 'normal' || affinity === 'none') {
-		const affinities = ['weak', 'resist', 'block', 'repel', 'drain']
+function writeAffinity(charDefs, type, affinity, multiplier, message, name) {
+	const affinities = ['weak', 'resist', 'block', 'repel', 'drain']
+
+	if (!charDefs[affinity])
+		charDefs[affinity] = []
+
+	if (charDefs[affinity]) {
+		if (affinity.toLowerCase() != 'normal' && affinity.toLowerCase() != 'none') {
+			for (const i in charDefs[affinity]) {
+				if (Array.isArray(charDefs[affinity][i]) && charDefs[affinity][i][0] === type.toLowerCase() && charDefs[affinity][i][1] === multiplier) {
+					return message.channel.send(`<:warning:878094052208296007> This affinity with the multiplier of ${multiplier}x already exists.`)
+				}
+			}
+		}
+	
+		var hasChanged = false
+
 		for (const i in affinities) {
 			if (affinities[i] && charDefs[affinities[i]]) {
 				for (const k in charDefs[affinities[i]]) {
-					if (charDefs[affinities[i]][k].toLowerCase() === type.toLowerCase()) {
-						charDefs[affinities[i]].splice(k, 1);
-						break
+					if (Array.isArray(charDefs[affinities[i]][k])) {
+						if (charDefs[affinities[i]][k][0].toLowerCase() === type.toLowerCase()) {
+							charDefs[affinities[i]].splice(k, 1);
+							hasChanged = true
+						}
+					} else {
+						if (charDefs[affinities[i]][k].toLowerCase() === type.toLowerCase()) {
+							charDefs[affinities[i]].splice(k, 1);
+							hasChanged = true
+						}
 					}
 				}
 			}
 		}
-	} else {
-		if (charDefs[affinity])
-			charDefs[affinity].push(type);
+
+		if ((affinity.toLowerCase() == 'normal' || affinity.toLowerCase() == 'none') && !hasChanged) {
+			return message.channel.send("<:warning:878094052208296007> This affinity is already treated as normal.")
+		}
+
+		if (affinity.toLowerCase() != 'normal' && affinity.toLowerCase() != 'none')
+			charDefs[affinity].push((affinity.toLowerCase() != 'block' ? [type, multiplier] : type));
+		
+		return message.channel.send(`👍 ${name}'s affinity towards **${type}** ${affinity.toLowerCase() != 'normal' && affinity.toLowerCase() != 'none'  ? `is now **${affinity}** with a multiplier of **${multiplier}x**.` : `will now be treated **as normal**.`}`);
 	}
 }
 
@@ -6086,7 +6113,7 @@ client.on('messageCreate', async message => {
 						{ name: `${prefix}setmelee`, value: '(Args <CharName> <Skill Name> <Type>)\nGives your character a new Melee Skill.', inline: true },
 						{ name: `${prefix}learnskill`, value: '(Args <CharName> <Skill Name> <Skill Name> <...>)\nGives your character a new Skill.', inline: true },
 						{ name: `${prefix}setleaderskill`, value: '(Args <CharName> <Skill Name> <Type>)\nGives your character a Leader Skill - A passive skill that activates when you are the leader..', inline: true },
-						{ name: `${prefix}setaffinity`, value: '(Args <CharName> <Type> <Affinity>)\nGives your character a new Affinity.', inline: true },
+						{ name: `${prefix}setaffinity`, value: '(Args <CharName> <Type> <Affinity> <Optional: Affinity Multiplier>)\nGives your character a new Affinity.', inline: true },
 						{ name: `${prefix}setquote`, value: '(Args <CharName> <Action> "<Quote>")\nGives your character a flashy quote to say whenever an action is done!', inline: true },
 						{ name: `${prefix}clearquotes`, value: "(Args <CharName> <Action>)\nClears the quotes for a specific action.", inline: true },
 						{ name: `${prefix}showquotes`, value: "(Args <CharName> <Optional: Action>)\nShows the quotes for all or a specific action.", inline: true },
@@ -12790,6 +12817,32 @@ client.on('messageCreate', async message => {
 
 				newCharDefs.xp = charFile[i].xp
 				charFile[i] = utilityFuncs.cloneObj(newCharDefs)
+
+				// Affinities (in case they aren't converted to regulars)
+				if (charFile[i].weak.length > 0 && !Array.isArray(charFile[i].weak[0])) {
+					for (const element in charFile[i].weak) {
+						console.log(`Changing ${charFile[i].name}'s ${charFile[i].weak[element]} weakness to the default of 2.0`)
+						charFile[i].weak[element] = [charFile[i].weak[element], 2.0]
+					}
+				}
+				if (charFile[i].resist.length > 0 && !Array.isArray(charFile[i].resist[0])) {
+					for (const element in charFile[i].resist) {
+						console.log(`Changing ${charFile[i].name}'s ${charFile[i].resist[element]} resistance to the default of 0.5`)
+						charFile[i].resist[element] = [charFile[i].resist[element], 0.5]
+					}
+				}
+				if (charFile[i].repel.length > 0 && !Array.isArray(charFile[i].repel[0])) {
+					for (const element in charFile[i].repel) {
+						console.log(`Changing ${charFile[i].name}'s ${charFile[i].repel[element]} repel to the default of 1`)
+						charFile[i].repel[element] = [charFile[i].repel[element], 1]
+					}
+				}
+				if (charFile[i].drain.length > 0 && !Array.isArray(charFile[i].drain[0])) {
+					for (const element in charFile[i].drain) {
+						console.log(`Changing ${charFile[i].name}'s ${charFile[i].drain[element]} drain to the default of 1`)
+						charFile[i].drain[element] = [charFile[i].drain[element], 1]
+					}
+				}
 				
 				// Trust
 				if (!charFile[i].trust)
@@ -13105,8 +13158,56 @@ client.on('messageCreate', async message => {
 				return message.channel.send('Specify the affinity.\nTry one of the following:```diff\n- Weak\n- Resist\n- Block\n- Repel\n- Drain\n- None```');
 
             if (arg[3].toLowerCase() == "normal" || arg[3].toLowerCase() == "weak" || arg[3].toLowerCase() == "resist" || arg[3].toLowerCase() == "block" || arg[3].toLowerCase() == "repel" || arg[3].toLowerCase() == "drain") {
-                writeAffinity(charDefs, arg[2].toLowerCase(), arg[3].toLowerCase())
-                message.channel.send(`👍 ${arg[1]}'s affinity towards ${arg[2]} is now ${arg[3]}`);
+                
+				let modifier = arg[4]
+				let alertText = ""
+
+				switch (arg[3].toLowerCase()) {
+					case "weak":
+						if (!arg[4] || !isFinite(parseFloat(arg[4]))) {
+							modifier = 1.5
+						}
+						if (parseFloat(arg[4]) < 1.5) {
+							modifier = 1.5
+							alertText = "<:warning:878094052208296007> The affinity multiplier is considered too low. It will be set to 1.5x."
+						}
+						if (parseFloat(arg[4]) > 4.0) {
+							modifier = 4.0
+							alertText = "<:warning:878094052208296007> The affinity multiplier is considered too high. It will be set to 4x."
+						}
+						break;
+					case "resist":
+						if (!arg[4] || !isFinite(parseFloat(arg[4]))) {
+							modifier = 0.5
+						}
+						if (parseFloat(arg[4]) < 0.25) {
+							modifier = 0.25
+							alertText = "<:warning:878094052208296007> The affinity multiplier is considered too low. It will be set to 0.25x."
+						}
+						if (parseFloat(arg[4]) > 0.75) {
+							modifier = 0.75
+							alertText = "<:warning:878094052208296007> The affinity multiplier is considered too high. It will be set to 0.75x."
+						}
+						break;
+					case "drain"|"repel":
+						if (!arg[4] || !isFinite(parseFloat(arg[4]))) {
+							modifier = 1
+						}
+						if (parseFloat(arg[4]) < 0.5) {
+							modifier = 0.5
+							alertText = "<:warning:878094052208296007> The affinity multiplier is considered too low. It will be set to 0.5x."
+						}
+						if (parseFloat(arg[4]) > 2) {
+							modifier = 2
+							alertText = "<:warning:878094052208296007> The affinity multiplier is considered too high. It will be set to 2x."
+						}
+						break;
+				}
+
+				if (alertText.length > 0)
+					message.channel.send(alertText)
+
+				writeAffinity(charDefs, arg[2].toLowerCase(), arg[3].toLowerCase(), Math.round(modifier * 100) / 100, message, arg[1])
 				
 				fs.writeFileSync(charPath, JSON.stringify(charFile, null, '    '));
 				fs.writeFileSync(enmPath, JSON.stringify(enmFile, null, '    '));
@@ -15029,11 +15130,32 @@ client.on('messageCreate', async message => {
 				charLBs = "None.";
 
             var charAffs = "";
-            for (const i in charDefs.weak) {charAffs += `${elementEmoji[charDefs.weak[i]]} <:effective:876899270731628584>\n`}
-            for (const i in charDefs.resist) {charAffs += `${elementEmoji[charDefs.resist[i]]} <:resist:877132670784647238>\n`}
+            for (const i in charDefs.weak) { 
+				if (!Array.isArray(charDefs.weak[i])) 
+					charAffs += `${elementEmoji[charDefs.weak[i]]} <:effective:876899270731628584>\n` 
+				else
+					charAffs += `${elementEmoji[charDefs.weak[i][0]]} <:weak:876899270731628586> ${charDefs.weak[i][1] == 1.5 ? '' : charDefs.weak[i][1] + 'x'}\n`
+			}
+            for (const i in charDefs.resist) { 
+				if (!Array.isArray(charDefs.resist[i])) 
+					charAffs += `${elementEmoji[charDefs.resist[i]]} <:resist:877132670784647238>\n` 
+				else
+					charAffs += `${elementEmoji[charDefs.resist[i][0]]} <:resist:877132670784647238> ${charDefs.resist[i][1] == 0.5 ? '' : charDefs.resist[i][1] + 'x'}\n`
+			}
             for (const i in charDefs.block) {charAffs += `${elementEmoji[charDefs.block[i]]} <:block:879801928282939452>\n`}
-            for (const i in charDefs.repel) {charAffs += `${elementEmoji[charDefs.repel[i]]} <:repel:879801953725595649>\n`}
-            for (const i in charDefs.drain) {charAffs += `${elementEmoji[charDefs.drain[i]]} <:drain:879801979138895904>\n`}
+            for (const i in charDefs.repel) { 
+				if (!Array.isArray(charDefs.repel[i])) 
+					charAffs += `${elementEmoji[charDefs.repel[i]]} <:repel:879801953725595649>\n` 
+				else
+					charAffs += `${elementEmoji[charDefs.repel[i][0]]} <:repel:879801953725595649> ${charDefs.repel[i][1] == 1 ? '' : charDefs.repel[i][1] + 'x'}\n`
+			}
+            for (const i in charDefs.drain) { 
+				if (!Array.isArray(charDefs.drain[i])) 
+					charAffs += `${elementEmoji[charDefs.drain[i]]} <:drain:879801979138895904>\n` 
+				else
+					charAffs += `${elementEmoji[charDefs.drain[i][0]]} <:drain:879801979138895904> ${charDefs.drain[i][1] == 1 ? '' : charDefs.drain[i][1] + 'x'}\n`
+			}
+
             if (charAffs === ``) {charAffs = "None."}
 			
 			var leaderSkill = 'None.';
@@ -15419,11 +15541,31 @@ client.on('messageCreate', async message => {
 				enmLB = "No Limit Break Skill.";
 
 			var charAffs = "";
-			for (const i in enmDefs.weak) {charAffs += `${elementEmoji[enmDefs.weak[i]]} <:effective:876899270731628584>\n`}
-			for (const i in enmDefs.resist) {charAffs += `${elementEmoji[enmDefs.resist[i]]} <:resist:877132670784647238>\n`}
-			for (const i in enmDefs.block) {charAffs += `${elementEmoji[enmDefs.block[i]]} <:block:879801928282939452>\n`}
-			for (const i in enmDefs.repel) {charAffs += `${elementEmoji[enmDefs.repel[i]]} <:repel:879801953725595649>\n`}
-			for (const i in enmDefs.drain) {charAffs += `${elementEmoji[enmDefs.drain[i]]} <:drain:879801979138895904>\n`}
+			for (const i in enmDefs.weak) { 
+				if (!Array.isArray(enmDefs.weak[i])) 
+					charAffs += `${elementEmoji[enmDefs.weak[i]]} <:effective:876899270731628584>\n` 
+				else
+					charAffs += `${elementEmoji[enmDefs.weak[i][0]]} <:weak:876899270731628586> ${enmDefs.weak[i][1] == 1.5 ? '' : enmDefs.weak[i][1] + 'x'}\n`
+			}
+            for (const i in enmDefs.resist) { 
+				if (!Array.isArray(enmDefs.resist[i])) 
+					charAffs += `${elementEmoji[enmDefs.resist[i]]} <:resist:877132670784647238>\n` 
+				else
+					charAffs += `${elementEmoji[enmDefs.resist[i][0]]} <:resist:877132670784647238> ${enmDefs.resist[i][1] == 0.5 ? '' : enmDefs.resist[i][1] + 'x'}\n`
+			}
+            for (const i in enmDefs.block) {charAffs += `${elementEmoji[enmDefs.block[i]]} <:block:879801928282939452>\n`}
+            for (const i in enmDefs.repel) { 
+				if (!Array.isArray(enmDefs.repel[i])) 
+					charAffs += `${elementEmoji[enmDefs.repel[i]]} <:repel:879801953725595649>\n` 
+				else
+					charAffs += `${elementEmoji[enmDefs.repel[i][0]]} <:repel:879801953725595649> ${enmDefs.repel[i][1] == 1 ? '' : enmDefs.repel[i][1] + 'x'}\n`
+			}
+            for (const i in enmDefs.drain) { 
+				if (!Array.isArray(enmDefs.drain[i])) 
+					charAffs += `${elementEmoji[enmDefs.drain[i]]} <:drain:879801979138895904>\n` 
+				else
+					charAffs += `${elementEmoji[enmDefs.drain[i][0]]} <:drain:879801979138895904> ${enmDefs.drain[i][1] == 1 ? '' : enmDefs.drain[i][1] + 'x'}\n`
+			}
 			if (charAffs === ``) {charAffs = "None."}
 
 			var enmLoot = ``
@@ -20832,4 +20974,4 @@ client.on("guildCreate", guild => {
 });
 */
 
-client.login('bot-id');
+client.login(process.env.BOT_TOKEN);
