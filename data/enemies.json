@@ -5087,7 +5087,7 @@
                 "required": 5
             },
             "bigboss": true,
-			"boss": true
+            "boss": true
         },
         "Patella": {
             "name": "Patella",
