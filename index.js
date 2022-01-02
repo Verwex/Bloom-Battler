@@ -12821,8 +12821,8 @@ client.on('messageCreate', async message => {
 				// Affinities (in case they aren't converted to regulars)
 				if (charFile[i].weak.length > 0 && !Array.isArray(charFile[i].weak[0])) {
 					for (const element in charFile[i].weak) {
-						console.log(`Changing ${charFile[i].name}'s ${charFile[i].weak[element]} weakness to the default of 2.0`)
-						charFile[i].weak[element] = [charFile[i].weak[element], 2.0]
+						console.log(`Changing ${charFile[i].name}'s ${charFile[i].weak[element]} weakness to the default of 1.5`)
+						charFile[i].weak[element] = [charFile[i].weak[element], 1.5]
 					}
 				}
 				if (charFile[i].resist.length > 0 && !Array.isArray(charFile[i].resist[0])) {
