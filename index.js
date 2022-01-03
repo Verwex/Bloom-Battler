@@ -901,6 +901,8 @@ function writeAffinity(charDefs, type, affinity, multiplier, message, name) {
 			for (const i in charDefs[affinity]) {
 				if (Array.isArray(charDefs[affinity][i]) && charDefs[affinity][i][0] === type.toLowerCase() && charDefs[affinity][i][1] === multiplier) {
 					return message.channel.send(`<:warning:878094052208296007> This affinity with the multiplier of ${multiplier}x already exists.`)
+				} else if (affinity == "block" && charDefs[affinity][i] === type.toLowerCase()) {
+					return message.channel.send(`<:warning:878094052208296007> This affinity already exists.`)
 				}
 			}
 		}
@@ -932,7 +934,7 @@ function writeAffinity(charDefs, type, affinity, multiplier, message, name) {
 		if (affinity.toLowerCase() != 'normal' && affinity.toLowerCase() != 'none')
 			charDefs[affinity].push((affinity.toLowerCase() != 'block' ? [type, multiplier] : type));
 		
-		return message.channel.send(`👍 ${name}'s affinity towards **${type}** ${affinity.toLowerCase() != 'normal' && affinity.toLowerCase() != 'none'  ? `is now **${affinity}** with a multiplier of **${multiplier}x**.` : `will now be treated **as normal**.`}`);
+		return message.channel.send(`👍 **${name}'s** affinity towards **${type}** ${affinity.toLowerCase() != 'normal' && affinity.toLowerCase() != 'none'  ? `is now **${affinity}**${affinity.toLowerCase() != 'block' ? ` with a multiplier of **${multiplier}x**.` : '.'}` : `will now be treated **as normal**.`}`);
 	}
 }
 
@@ -16570,13 +16572,13 @@ client.on('messageCreate', async message => {
 						var multiplier = 0
 						switch (affinities[statusNum]) {
 							case "weak":
-								multiplier = Math.random() < 0.4 ? utilityFuncs.randBetweenNums(150, 400) / 100 : 1.5
+								multiplier = Math.random() < 0.45 ? utilityFuncs.randBetweenNums(150, 400) / 100 : 1.5
 								break;
 							case "resist":
-								multiplier = Math.random() < 0.4 ? utilityFuncs.randBetweenNums(25, 75) / 100 : 0.5
+								multiplier = Math.random() < 0.45 ? utilityFuncs.randBetweenNums(25, 75) / 100 : 0.5
 								break;
 							default:
-								multiplier = Math.random() < 0.4 ? utilityFuncs.randBetweenNums(25, 125) / 100 : 1
+								multiplier = Math.random() < 0.45 ? utilityFuncs.randBetweenNums(25, 125) / 100 : 1
 								break;
 						}
 						if (affinities[statusNum] != "normal") {charDefs[affinities[statusNum]].push(affinities[statusNum] != "block" ? ([Elements[k], multiplier]) : Elements[k])}
@@ -16623,13 +16625,13 @@ client.on('messageCreate', async message => {
 						var multiplier = 0
 						switch (affinities[statusNum]) {
 							case "weak":
-								multiplier = Math.random() < 0.4 ? utilityFuncs.randBetweenNums(150, 400) / 100 : 1.5
+								multiplier = Math.random() < 0.45 ? utilityFuncs.randBetweenNums(150, 400) / 100 : 1.5
 								break;
 							case "resist":
-								multiplier = Math.random() < 0.4 ? utilityFuncs.randBetweenNums(25, 75) / 100 : 0.5
+								multiplier = Math.random() < 0.45 ? utilityFuncs.randBetweenNums(25, 75) / 100 : 0.5
 								break;
 							default:
-								multiplier = Math.random() < 0.4 ? utilityFuncs.randBetweenNums(25, 125) / 100 : 1
+								multiplier = Math.random() < 0.45 ? utilityFuncs.randBetweenNums(25, 125) / 100 : 1
 								break;
 						}
 						if (affinities[statusNum] != "normal") {charDefs[affinities[statusNum]].push(affinities[statusNum] != "block" ? ([Elements[k], multiplier]) : Elements[k])}

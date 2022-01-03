@@ -2787,10 +2787,6 @@
         ],
         "resist": [
             [
-                "curse",
-                0.75
-            ],
-            [
                 "wind",
                 0.5
             ]
@@ -3079,7 +3075,8 @@
         "mpMeter": [
             "SpiritFlow",
             "SF"
-        ]
+        ],
+        "normal": []
     },
     "Sky": {
         "name": "Sky",
