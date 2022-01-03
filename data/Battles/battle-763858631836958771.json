@@ -73,29 +73,29 @@
                         "strike"
                     ],
                     "level": 52,
-                    "hp": 999999426,
-                    "mp": 819999839,
-                    "maxhp": 999999999,
-                    "maxmp": 999999999,
+                    "hp": 999999,
+                    "mp": 999999,
+                    "maxhp": 999999,
+                    "maxmp": 999999,
                     "basehp": 27,
                     "basemp": 34,
                     "mpMeter": [
                         "SpiritFlow",
                         "SF"
                     ],
-                    "lb": 2930,
+                    "lb": 20,
                     "xp": 138014,
                     "maxxp": 147074,
                     "status": "none",
                     "statusturns": 0,
-                    "atk": 21,
-                    "mag": 58,
-                    "prc": 31,
-                    "end": 29,
-                    "chr": 59,
-                    "int": 58,
-                    "agl": 0,
-                    "luk": 20,
+                    "atk": 50,
+                    "mag": 39,
+                    "prc": 66,
+                    "end": 93,
+                    "chr": 51,
+                    "int": 11,
+                    "agl": 48,
+                    "luk": 33,
                     "baseatk": 4,
                     "basemag": 7,
                     "baseprc": 6,
@@ -108,7 +108,7 @@
                     "guard": false,
                     "buffs": {
                         "atk": 0,
-                        "mag": 1,
+                        "mag": 0,
                         "prc": 0,
                         "end": 0,
                         "agl": 0
@@ -285,27 +285,45 @@
                     },
                     "weak": [
                         [
-                            "pierce",
-                            2
+                            "wind",
+                            1.5
+                        ],
+                        [
+                            "psychic",
+                            3.28
                         ]
                     ],
                     "resist": [
                         [
-                            "curse",
-                            0.75
+                            "strike",
+                            0.5
                         ],
-                        "grass"
+                        [
+                            "nuclear",
+                            0.39
+                        ],
+                        [
+                            "metal",
+                            0.5
+                        ]
                     ],
                     "block": [],
-                    "repel": [],
+                    "repel": [
+                        [
+                            "bless",
+                            1.11
+                        ]
+                    ],
                     "drain": [],
                     "skills": [
-                        "Agilao",
-                        "WaterPulse",
-                        "Hanama",
-                        "AwayWithTheWave",
-                        "WayOfMirroringYourself",
-                        "FeedingOnYourDespair"
+                        "DragonAscent",
+                        "Maragion",
+                        "~~@~~Roleplayers",
+                        "LunaticRedEyes",
+                        "MagicalWhoosh",
+                        "MoltenBody",
+                        "LunaticRedEyes",
+                        "Baragi"
                     ],
                     "trust": {
                         "Flara": {
@@ -396,14 +414,7 @@
                         }
                     },
                     "charms": [],
-                    "owner": "441198920668938260",
-                    "leader": true,
-                    "leaderSkill": {
-                        "name": "PhantomSupport",
-                        "type": "buff",
-                        "target": "mag",
-                        "percent": 1
-                    }
+                    "owner": "441198920668938260"
                 }
             ],
             "backup": []
@@ -411,51 +422,49 @@
         "enemies": {
             "members": [
                 {
-                    "name": "Grassimp",
-                    "truename": "Grassimp",
+                    "name": "Patella",
+                    "truename": "Patella",
                     "team": "enemies",
-                    "enemy": true,
                     "id": 1,
-                    "maxhp": 999999999,
-                    "maxmp": 999999999,
-                    "hp": 99988354,
-                    "mp": 999999887,
-                    "lb": 885,
-                    "boss": false,
-                    "miniboss": false,
-                    "finalboss": false,
-                    "diety": false,
-                    "atk": 18,
-                    "mag": 18,
-                    "prc": 16,
-                    "end": 19,
-                    "chr": 11,
-                    "int": 12,
-                    "agl": 12,
-                    "luk": 17,
+                    "mainElement": "slash",
+                    "melee": [
+                        "ScytheSlice",
+                        "slash"
+                    ],
+                    "level": 54,
+                    "hp": 799926,
+                    "mp": 999999,
+                    "maxhp": 999999,
+                    "maxmp": 999999,
+                    "basehp": 42,
+                    "basemp": 23,
+                    "mpMeter": [
+                        "ForceEnergy",
+                        "FE"
+                    ],
+                    "lb": 88,
+                    "xp": 0,
+                    "maxxp": 195809,
+                    "status": "burn",
+                    "statusturns": 2,
+                    "atk": 56,
+                    "mag": 82,
+                    "prc": 20,
+                    "end": 79,
+                    "chr": 30,
+                    "int": 34,
+                    "agl": 23,
+                    "luk": 1,
+                    "baseatk": 8,
+                    "basemag": 5,
+                    "baseprc": 7,
+                    "baseend": 6,
+                    "basechr": 3,
+                    "baseint": 4,
+                    "baseagl": 5,
+                    "baseluk": 7,
                     "weapon": "none",
                     "guard": false,
-                    "status": "none",
-                    "statusturns": 0,
-                    "melee": [
-                        "Strike Attack",
-                        "strike"
-                    ],
-                    "skills": [
-                        "Hanama"
-                    ],
-                    "weak": [
-                        [
-                            "fire",
-                            20
-                        ]
-                    ],
-                    "resist": [],
-                    "block": [],
-                    "repel": [],
-                    "drain": [
-                        "water"
-                    ],
                     "buffs": {
                         "atk": 0,
                         "mag": 0,
@@ -463,15 +472,82 @@
                         "end": 0,
                         "agl": 0
                     },
-                    "limitbreak": null,
                     "meleequote": [],
-                    "physquote": [],
+                    "physquote": [
+                        "I ABSOLUTELY MUST FUCK AROUND, AND ADDITIONALLY FIND OUT!"
+                    ],
                     "magquote": [],
-                    "strongquote": [],
+                    "strongquote": [
+                        "AHA! TH' THING THAT YE WULL DIE FAE!",
+                        "Prepare tae be targeted.",
+                        "'N' this is whaur ye'll die.",
+                        "Weel done tae me! Time tae end this.",
+                        "Yer mistake wis tae shaw up, ye eejit!",
+                        "HAHAAAA! NA MAIR HIDING FAR DEATH!",
+                        "OooooOOOOoo! Death's comin' fur yer bahookie!",
+                        "Let me git ye, mah laddie!",
+                        "Keek guys! thir's th' weakness!",
+                        "Come 'ere! Mah scythe needs a slicin'!",
+                        "Och hehehe! A'm needin' a murder fix! Come 'ere!",
+                        "[diabolical laughing]",
+                        "Accept yer fate!",
+                        "Ah lik' whaur this is gaun.",
+                        "Howfur dae ye lik' that!?"
+                    ],
                     "critquote": [],
+                    "missquote": [
+                        "A'm aff tae greet... ",
+                        "Juist let me git ye awready! ",
+                        "Ye'v git tae be kidding me. ",
+                        "Awright ah ne'er lassy! That's unfair... ",
+                        "...",
+                        "💢",
+                        "Kin ye lik', stoap? ",
+                        "Ey! That didnae count. ",
+                        "Ah hate ye sae muckle... ",
+                        "Death ne'er misses, ye eejit!",
+                        "Hell's bells, this shouldn't even happen.",
+                        "Heheheheh.... Oopsies. ",
+                        "Awright cuid ye let me skelp ye neist time please?",
+                        "This cannae be real. ",
+                        "Whit's gaun oan wi' me jesus christ... ",
+                        "Ah will git ye neist time fur sure! ",
+                        "In the name of the wee man, na wey.",
+                        "Please, stoap embarrassing me, okay? ",
+                        "Dinnae even, huv a go, laughing at this.  ",
+                        "Kin ye stoap that!?",
+                        "Ye didnae see anythin'.",
+                        "Haud yer wheesht, ye...",
+                        "..God how come? ",
+                        "WHIT?!",
+                        "Time tae greet.",
+                        "Ye'r making me mad, ye ken?"
+                    ],
                     "weakquote": [],
-                    "missquote": [],
-                    "dodgequote": [],
+                    "dodgequote": [
+                        "Ye pumpin' stink, ye ken that?",
+                        "Hah, howfur dae ye even?!",
+                        "Even mah granny mak's jobby better! Hauld yer horses, dae ah hae yin?",
+                        "Sooks tae be ye, bruh!",
+                        "Ye dinnae git it, dae ye?",
+                        "[constant laughing]",
+                        "https://www.youtube.com/watch?v=zhKepn1ssSM&ab_channel=Maxfecteau",
+                        "Och howfur stoatin a'm!",
+                        "Howfur dae ye lik' that, sucker?!",
+                        "That's cringe bro",
+                        "Ye pure sook.",
+                        "'N' this is how come ye'll die neist caw.",
+                        "Neist time, gang grinding.",
+                        "Hahaaaah. Ye kin stoap noo, silly ye.",
+                        "Ye'r juist a laughing stock!",
+                        "L",
+                        "Time fur me tae strike ye up!",
+                        "[just spitting on the attacker]",
+                        "[sneeze] Ah bugger, ye made me sneeze fae laughter.",
+                        "[groaning]",
+                        "This insae howfur ye skelp, bud.",
+                        "Hello! Blind jimmy tae this planet!"
+                    ],
                     "resistquote": [],
                     "blockquote": [],
                     "repelquote": [],
@@ -481,33 +557,146 @@
                     "helpedquote": [],
                     "killquote": [],
                     "deathquote": [],
+                    "allydeathquote": [],
                     "lbquote": [],
-                    "trust": {},
-                    "negotiateOptions": [
-                        {
-                            "name": "Pet",
-                            "desc": "Pet the Grassimp.",
-                            "action": "%PLAYER% pets the Grassimp! It's satisfied.",
-                            "convince": 100
-                        }
+                    "lvlquote": [],
+                    "bio": {
+                        "info": "Patella Nerco's a 'representation of Death', he thinks. Can cheat death as a necromancer, with a cost of being full of himself, rash and reckless. Without fear of Death and showing it by killing 'because I'm Death.' Can easily do mistakes and will take a while to mellow.",
+                        "backstory": "...Something must've cut off his memories to death. Look for hints. A smashed skull and s star eye must mean something?",
+                        "voice": "[TBA]",
+                        "theme": "[TBA]",
+                        "species": "Tamandua",
+                        "age": 21,
+                        "likes": "Mind games, murder, weapons, capitalism, victory",
+                        "dislikes": "People, hunger, failing at his job, help",
+                        "fears": "__The Ascended__ (subconsciously, very faintly)",
+                        "name": "Patella Necrovi",
+                        "appearance": "https://cdn.discordapp.com/attachments/763858632319434792/882642391151046666/Patella_Canon.png",
+                        "\"it's": "It's unknown. Not sure how, but something must've cut off his memories to a certain moment. But maybe there are some hints lying around. After all, a skull smashed massively must mean something, right?",
+                        "height": "5'8",
+                        "weight": "105 lbs (Pounds)",
+                        "gender": "male"
+                    },
+                    "weak": [
+                        [
+                            "strike",
+                            1.5
+                        ],
+                        [
+                            "slash",
+                            2.42
+                        ],
+                        [
+                            "pierce",
+                            1.5
+                        ],
+                        [
+                            "fire",
+                            2.24
+                        ],
+                        [
+                            "metal",
+                            1.5
+                        ],
+                        [
+                            "gravity",
+                            2.71
+                        ]
                     ],
-                    "negotiateDefs": {
-                        "required": 4,
-                        "qualities": {
-                            "atk": 1,
-                            "mag": 7,
-                            "def": 1,
-                            "skill": "Hanama"
+                    "resist": [
+                        [
+                            "electric",
+                            0.66
+                        ],
+                        [
+                            "poison",
+                            0.68
+                        ],
+                        [
+                            "sound",
+                            0.38
+                        ]
+                    ],
+                    "block": [
+                        "wind",
+                        "earth",
+                        "grass",
+                        "curse"
+                    ],
+                    "repel": [],
+                    "drain": [],
+                    "skills": [
+                        "ProngedThrust",
+                        "Psy-Strike",
+                        "Diarama",
+                        "TwinkleStrike",
+                        "GiantSlice",
+                        "Tribeam",
+                        "HydroPump",
+                        "Bajino"
+                    ],
+                    "trust": {
+                        "Sutela": {
+                            "value": -100,
+                            "nextLevel": 100,
+                            "level": 1,
+                            "dislike": 10
+                        },
+                        "Karma": {
+                            "value": 25,
+                            "nextLevel": 100,
+                            "level": 1
+                        },
+                        "Euphorica": {
+                            "value": -100,
+                            "nextLevel": 100,
+                            "level": 1,
+                            "dislike": 130
+                        },
+                        "Permic": {
+                            "value": -50,
+                            "nextLevel": 100,
+                            "level": 1,
+                            "dislike": 10
+                        },
+                        "Harcvuk": {
+                            "value": -100,
+                            "nextLevel": 100,
+                            "level": 1,
+                            "dislike": 10
+                        },
+                        "Miles": {
+                            "value": -175,
+                            "nextLevel": 100,
+                            "level": 1,
+                            "dislike": 10
                         }
                     },
-                    "oppAff": {
-                        "0": {
-                            "weak": [],
-                            "resist": [],
-                            "block": [],
-                            "repel": [],
-                            "drain": []
-                        }
+                    "charms": [],
+                    "owner": "441198920668938260",
+                    "lb1": {
+                        "name": "BloodWithdrawal",
+                        "class": "atk",
+                        "pow": 250,
+                        "cost": 110,
+                        "status": "none",
+                        "statuschance": 0
+                    },
+                    "lb2": {
+                        "name": "EssenceGatheral",
+                        "class": "atk",
+                        "pow": 520,
+                        "cost": 220,
+                        "status": "none",
+                        "statuschance": 0
+                    },
+                    "lb3": {
+                        "name": "BodyRemoval",
+                        "class": "atk",
+                        "pow": 770,
+                        "cost": 330,
+                        "status": "none",
+                        "statuschance": 0
                     }
                 }
             ],
@@ -516,16 +705,16 @@
             "backup": []
         },
         "battleteam": "Sutela",
-        "battleteam2": "none",
+        "battleteam2": "Patella",
         "battlechannel": "763858632319434792",
-        "doturn": 1,
-        "turn": 24,
+        "doturn": 0,
+        "turn": 5,
         "turnorder": [],
-        "pvp": false,
-        "pvpmode": "none",
+        "pvp": true,
+        "pvpmode": "charfuck",
         "ranked": false,
         "weather": "clear",
-        "terrain": "none",
+        "terrain": "normal",
         "canshowtime": false,
         "canRun": true
     }

@@ -290,7 +290,7 @@ function knowsEnemy(oppDefs, server) {
 function genDmg(userDefs, targDefs, skillDefs, server, multiplier, forceDmgType) {
 	console.log("genDmg:")
 
-    var values = [0, "normal", false, false, false, false]; // Damage, Damagestate, Hit a Weakness?, Crit?, Inflict Status?, Technical?
+    var values = [0, "normal", false, false, false, false, 0]; // Damage, Damagestate, Hit a Weakness?, Crit?, Inflict Status?, Technical?, Affinity Multiplier
 
 	// Weaknesses and shit
 	var dmgtype = "normal"
@@ -317,7 +317,7 @@ function genDmg(userDefs, targDefs, skillDefs, server, multiplier, forceDmgType)
 	}
 
     if (dmgtype === "block")
-        return [0, dmgtype, false, false, false, false];
+        return [0, dmgtype, false, false, false, false, 0];
 
     values[0] = 1
 
@@ -378,10 +378,10 @@ function genDmg(userDefs, targDefs, skillDefs, server, multiplier, forceDmgType)
 	if (!forceDmgType) {
 		console.log("<<Accuracy Checks done in missCheck (line 149)>>")
 		if (!missCheck(statWithBuff(userDefs.prc, userDefs.buffs.prc), statWithBuff(targDefs.agl, targDefs.buffs.agl), skillAcc))
-			return [0, "miss", false, false, false, false];
+			return [0, "miss", false, false, false, false, 0];
 	} else {
 		if (dmgtype === "miss")
-			return [0, "miss", false, false, false, false];
+			return [0, "miss", false, false, false, false, 0];
 	}
 
     // Damage Generation    
@@ -440,7 +440,7 @@ function genDmg(userDefs, targDefs, skillDefs, server, multiplier, forceDmgType)
 		}
 
 		if (dmgtype === "repel" || dmgtype === "drain")
-			return [Math.round(values[0] * (multiplier != null ? multiplier : 1)), dmgtype, false, false, false, false];
+			return [Math.round(values[0] * (multiplier != null ? multiplier : 1)), dmgtype, false, false, false, false, multiplier];
 		
 		// Damage Types
 		if (dmgtype === "weak") {
@@ -484,6 +484,8 @@ function genDmg(userDefs, targDefs, skillDefs, server, multiplier, forceDmgType)
 		values[0] = Math.round(values[0]*1.25);
 		values[5] = true;
 	}
+
+	values[6] = multiplier;
 	return values
 }
 
@@ -1247,9 +1249,9 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 
 			if (dmg[1] !== "miss" && dmg[1] !== "block" && dmg[1] !== "drain") {
 				if (dmg[2] == true) {
-					finaltext = finaltext + "<:effective:876899270731628584>";
+					finaltext = finaltext + `<:effective:876899270731628584>${dmg[6] != 1.5 ?  `(${dmg[6]}x)` : ``}`;
 				} else if (dmgtype === "resist") {
-					finaltext = finaltext + "<:resist:877132670784647238>";
+					finaltext = finaltext + `<:resist:877132670784647238>${dmg[6] != 0.5 ?  `(${dmg[6]}x)` : ``}`;;
 				}
 
 				// Display Crits
@@ -1604,14 +1606,14 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 				// Display Weakness
 				if (dmg[1] !== "miss" && dmg[1] !== "block" && dmg[1] !== "drain") {
 					if (dmg[2] == true) {
-						finaltext += "<:effective:876899270731628584>";
+						finaltext += `<:effective:876899270731628584>${dmg[6] != 1.5 ?  `(${dmg[6]}x)` : ``}`;
 
 						if (doOneMores(server) && !oppDefs.down) {
 							oppDefs.down = true
 							embedText.oneMore = true
 						}
 					} else if (dmgtype === "resist")
-						finaltext += "<:resist:877132670784647238>";
+						finaltext += `<:resist:877132670784647238>${dmg[6] != 0.5 ?  `(${dmg[6]}x)` : ``}`;;
 
 					// Display Crits
 					if (dmg[3] == true) {
@@ -1975,8 +1977,8 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 						}
 
 						var effective = ""
-						if (dmgCheck[2]) {effective = "<:effective:876899270731628584>"}
-						if (dmgCheck[1] === "resist") {effective = "<:resist:877132670784647238>"}
+						if (dmgCheck[2]) {effective = `<:effective:876899270731628584>${dmg[6] != 1.5 ?  `(${dmg[6]}x)` : ``}`}
+						if (dmgCheck[1] === "resist") {effective = `<:resist:877132670784647238>${dmg[6] != 0.5 ?  `(${dmg[6]}x)` : ``}`;}
 
 						// Display Techs
 						if (dmgCheck[5] == true)
@@ -2465,14 +2467,14 @@ function meleeAttack(userDefs, enmDefs, server, rage, btl) {
 
 	// Display Weakness
 	if (dmg[2] == true) {
-		finaltext += "<:effective:876899270731628584>";
+		finaltext += `<:effective:876899270731628584>${dmg[6] != 1.5 ?  `(${dmg[6]}x)` : ``}`;
 
 		if (doOneMores(server) && !enmDefs.down) {
 			enmDefs.down = true
 			embedText.oneMore = true
 		}
 	} else if (dmgtype === "resist")
-		finaltext += "<:resist:877132670784647238>";
+		finaltext += `<:resist:877132670784647238>${dmg[6] != 0.5 ?  `(${dmg[6]}x)` : ``}`;
 
 	// Display Crits
 	if (dmg[3] == true) {

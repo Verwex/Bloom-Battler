@@ -3383,11 +3383,31 @@ function advanceTurn(btl, server, ignorePet) {
 
 function sendCharStats(user, charDefs) {
 	var charAffs = "";
-	for (const i in charDefs.weak) {charAffs += `${charDefs.weak[i]} weakness.\n`}
-	for (const i in charDefs.resist) {charAffs += `${charDefs.resist[i]} resist.\n`}
+	for (const i in charDefs.weak) { 
+		if (!Array.isArray(charDefs.weak[i])) 
+			charAffs += `${charDefs.weak[i]} weakness.\n` 
+		else
+			charAffs += `${charDefs.weak[i][0]} weakness${charDefs.weak[i][1] == 1.5 ? '.' : ' ' + charDefs.weak[i][1] + 'x.'}\n`
+	}
+	for (const i in charDefs.resist) { 
+		if (!Array.isArray(charDefs.resist[i])) 
+			charAffs += `${charDefs.resist[i]} resist.\n` 
+		else
+			charAffs += `${charDefs.resist[i][0]} resist${charDefs.resist[i][1] == 0.5 ? '.' : ' ' + charDefs.resist[i][1] + 'x.'}\n`
+	}
 	for (const i in charDefs.block) {charAffs += `${charDefs.block[i]} block.\n`}
-	for (const i in charDefs.repel) {charAffs += `${charDefs.repel[i]} repel.\n`}
-	for (const i in charDefs.drain) {charAffs += `${charDefs.drain[i]} drain.\n`}
+	for (const i in charDefs.repel) { 
+		if (!Array.isArray(charDefs.repel[i])) 
+			charAffs += `${charDefs.repel[i]} repel.\n` 
+		else
+			charAffs += `${charDefs.repel[i][0]} repel${charDefs.repel[i][1] == 1 ? '.' : ' ' + charDefs.repel[i][1] + 'x.'}\n`
+	}
+	for (const i in charDefs.drain) { 
+		if (!Array.isArray(charDefs.drain[i])) 
+			charAffs += `${charDefs.drain[i]} drain.\n` 
+		else
+			charAffs += `${charDefs.drain[i][0]} drain${charDefs.drain[i][1] == 1 ? '.' : ' ' + charDefs.drain[i][1] + 'x.'}\n`
+	}
 	if (charAffs === "") {charAffs = "No Affinities that battle."}
 	
 	var charPassives = ''
@@ -5518,7 +5538,19 @@ function enemyMove(enmID, btl, channel) {
 			for (const k in Elements) {
 				if (Elements[k].type != "heal" && Elements[k].type != "status" && Elements[k].type != "passive" && Elements[k].type != "almighty"){
 					var statusNum = Math.floor(Math.random() * (affinities.length-1))
-					if (affinities[statusNum] != "normal") {newChar[affinities[statusNum]].push(Elements[k])}
+					var multiplier = 0
+					switch (affinities[statusNum]) {
+						case "weak":
+							multiplier = utilityFuncs.randBetweenNums(150, 400) / 100
+							break;
+						case "resist":
+							multiplier = utilityFuncs.randBetweenNums(50, 75) / 100
+							break;
+						default:
+							multiplier = utilityFuncs.randBetweenNums(25, 100) / 100
+							break;
+					}
+					if (affinities[statusNum] != "normal") {newChar[affinities[statusNum]].push(affinities[statusNum] != "block" ? ([Elements[k], multiplier]) : Elements[k])}
 				}
 			}
 
@@ -13193,13 +13225,13 @@ client.on('messageCreate', async message => {
 						if (!arg[4] || !isFinite(parseFloat(arg[4]))) {
 							modifier = 1
 						}
-						if (parseFloat(arg[4]) < 0.5) {
-							modifier = 0.5
-							alertText = "<:warning:878094052208296007> The affinity multiplier is considered too low. It will be set to 0.5x."
+						if (parseFloat(arg[4]) < 0.25) {
+							modifier = 0.25
+							alertText = "<:warning:878094052208296007> The affinity multiplier is considered too low. It will be set to 0.25x."
 						}
-						if (parseFloat(arg[4]) > 2) {
-							modifier = 2
-							alertText = "<:warning:878094052208296007> The affinity multiplier is considered too high. It will be set to 2x."
+						if (parseFloat(arg[4]) > 1.25) {
+							modifier = 1.25
+							alertText = "<:warning:878094052208296007> The affinity multiplier is considered too high. It will be set to 1.25x."
 						}
 						break;
 				}
@@ -16535,9 +16567,19 @@ client.on('messageCreate', async message => {
 					const affinities = ["weak", "weak", "weak", "normal", "normal", "normal", "normal", "resist", "resist", "block", "repel", "drain"]
 					for (const k in Elements) {
 						var statusNum = Math.floor(Math.random() * (affinities.length-1))
-
-						if (affinities[statusNum] != "normal") 
-							charDefs[affinities[statusNum]].push(Elements[k]);
+						var multiplier = 0
+						switch (affinities[statusNum]) {
+							case "weak":
+								multiplier = Math.random() < 0.4 ? utilityFuncs.randBetweenNums(150, 400) / 100 : 1.5
+								break;
+							case "resist":
+								multiplier = Math.random() < 0.4 ? utilityFuncs.randBetweenNums(25, 75) / 100 : 0.5
+								break;
+							default:
+								multiplier = Math.random() < 0.4 ? utilityFuncs.randBetweenNums(25, 125) / 100 : 1
+								break;
+						}
+						if (affinities[statusNum] != "normal") {charDefs[affinities[statusNum]].push(affinities[statusNum] != "block" ? ([Elements[k], multiplier]) : Elements[k])}
 					}
 					
 					btl[message.guild.id].pvpmode = "randstats"
@@ -16578,9 +16620,19 @@ client.on('messageCreate', async message => {
 							continue;
 		
 						var statusNum = Math.floor(Math.random() * (affinities.length-1))
-
-						if (affinities[statusNum] != "normal") 
-							charDefs[affinities[statusNum]].push(Elements[k]);
+						var multiplier = 0
+						switch (affinities[statusNum]) {
+							case "weak":
+								multiplier = Math.random() < 0.4 ? utilityFuncs.randBetweenNums(150, 400) / 100 : 1.5
+								break;
+							case "resist":
+								multiplier = Math.random() < 0.4 ? utilityFuncs.randBetweenNums(25, 75) / 100 : 0.5
+								break;
+							default:
+								multiplier = Math.random() < 0.4 ? utilityFuncs.randBetweenNums(25, 125) / 100 : 1
+								break;
+						}
+						if (affinities[statusNum] != "normal") {charDefs[affinities[statusNum]].push(affinities[statusNum] != "block" ? ([Elements[k], multiplier]) : Elements[k])}
 					}
 
 					btl[message.guild.id].pvpmode = "charfuck"
@@ -18022,7 +18074,19 @@ client.on('messageCreate', async message => {
 					for (const k in Elements) {
 						if (Elements[k].type != "heal" && Elements[k].type != "status" && Elements[k].type != "passive" && Elements[k].type != "almighty"){
 							var statusNum = Math.floor(Math.random() * (affinities.length-1))
-							if (affinities[statusNum] != "normal") {newChar[affinities[statusNum]].push(Elements[k])}
+							var multiplier = 0
+							switch (affinities[statusNum]) {
+								case "weak":
+									multiplier = utilityFuncs.randBetweenNums(150, 400) / 100
+									break;
+								case "resist":
+									multiplier = utilityFuncs.randBetweenNums(50, 75) / 100
+									break;
+								default:
+									multiplier = utilityFuncs.randBetweenNums(25, 100) / 100
+									break;
+							}
+							if (affinities[statusNum] != "normal") {newChar[affinities[statusNum]].push(affinities[statusNum] != "block" ? ([Elements[k], multiplier]) : Elements[k])}
 						}
 					}
 
