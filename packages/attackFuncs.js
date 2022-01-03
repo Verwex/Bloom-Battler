@@ -1249,9 +1249,9 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 
 			if (dmg[1] !== "miss" && dmg[1] !== "block" && dmg[1] !== "drain") {
 				if (dmg[2] == true) {
-					finaltext = finaltext + `<:effective:876899270731628584>${dmg[6] != 1.5 ?  `(${dmg[6]}x)` : ``}`;
+					finaltext = finaltext + `<:effective:876899270731628584>${dmg[6] && dmg[6] != null != 1.5 ?  `(${dmg[6]}x)` : ``}`;
 				} else if (dmgtype === "resist") {
-					finaltext = finaltext + `<:resist:877132670784647238>${dmg[6] != 0.5 ?  `(${dmg[6]}x)` : ``}`;;
+					finaltext = finaltext + `<:resist:877132670784647238>${dmg[6] && dmg[6] != null != 0.5 ?  `(${dmg[6]}x)` : ``}`;;
 				}
 
 				// Display Crits
@@ -1606,14 +1606,14 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 				// Display Weakness
 				if (dmg[1] !== "miss" && dmg[1] !== "block" && dmg[1] !== "drain") {
 					if (dmg[2] == true) {
-						finaltext += `<:effective:876899270731628584>${dmg[6] != 1.5 ?  `(${dmg[6]}x)` : ``}`;
+						finaltext += `<:effective:876899270731628584>${dmg[6] != 1.5 && dmg[6] != null ?  `(${dmg[6]}x)` : ``}`;
 
 						if (doOneMores(server) && !oppDefs.down) {
 							oppDefs.down = true
 							embedText.oneMore = true
 						}
 					} else if (dmgtype === "resist")
-						finaltext += `<:resist:877132670784647238>${dmg[6] != 0.5 ?  `(${dmg[6]}x)` : ``}`;;
+						finaltext += `<:resist:877132670784647238>${dmg[6] != 0.5 && dmg[6] != null ?  `(${dmg[6]}x)` : ``}`;;
 
 					// Display Crits
 					if (dmg[3] == true) {
@@ -1977,8 +1977,8 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 						}
 
 						var effective = ""
-						if (dmgCheck[2]) {effective = `<:effective:876899270731628584>${dmg[6] != 1.5 ?  `(${dmg[6]}x)` : ``}`}
-						if (dmgCheck[1] === "resist") {effective = `<:resist:877132670784647238>${dmg[6] != 0.5 ?  `(${dmg[6]}x)` : ``}`;}
+						if (dmgCheck[2]) {effective = `<:effective:876899270731628584>${dmg[6] != 1.5 && dmg[6] != null ?  `(${dmg[6]}x)` : ``}`}
+						if (dmgCheck[1] === "resist") {effective = `<:resist:877132670784647238>${dmg[6] != 0.5 && dmg[6] != null ?  `(${dmg[6]}x)` : ``}`;}
 
 						// Display Techs
 						if (dmgCheck[5] == true)
@@ -2467,14 +2467,14 @@ function meleeAttack(userDefs, enmDefs, server, rage, btl) {
 
 	// Display Weakness
 	if (dmg[2] == true) {
-		finaltext += `<:effective:876899270731628584>${dmg[6] != 1.5 ?  `(${dmg[6]}x)` : ``}`;
+		finaltext += `<:effective:876899270731628584>${dmg[6] != 1.5 && dmg[6] != null ?  `(${dmg[6]}x)` : ``}`;
 
 		if (doOneMores(server) && !enmDefs.down) {
 			enmDefs.down = true
 			embedText.oneMore = true
 		}
 	} else if (dmgtype === "resist")
-		finaltext += `<:resist:877132670784647238>${dmg[6] != 0.5 ?  `(${dmg[6]}x)` : ``}`;
+		finaltext += `<:resist:877132670784647238>${dmg[6] != 0.5 && dmg[6] != null ?  `(${dmg[6]}x)` : ``}`;
 
 	// Display Crits
 	if (dmg[3] == true) {
