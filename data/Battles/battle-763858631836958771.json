@@ -48,9 +48,36 @@
                 "negotiates": {},
                 "negotiateAllies": {}
             },
+            "Trinity": {
+                "members": [],
+                "items": {},
+                "rings": 0,
+                "backup": [
+                    "Sutela",
+                    "Patella",
+                    "Lacrimal",
+                    "Nighthug"
+                ],
+                "subs": [],
+                "negotiates": {},
+                "negotiateAllies": {}
+            },
             "Sutela": {
                 "members": [
                     "Sutela"
+                ],
+                "backup": [],
+                "subs": [],
+                "negotiates": {
+                    "Patella(Enemy)": 1
+                },
+                "negotiateAllies": {},
+                "items": {},
+                "rings": 0
+            },
+            "Terrly": {
+                "members": [
+                    "Terrly"
                 ],
                 "backup": [],
                 "subs": [],
@@ -75,7 +102,6 @@
         "battlechannel": "none",
         "doturn": 0,
         "turn": 0,
-        "turnorder": [],
         "pvp": false,
         "pvpmode": "none",
         "ranked": false,
