@@ -20832,4 +20832,4 @@ client.on("guildCreate", guild => {
 });
 */
 
-client.login(process.env.BOT_TOKEN);
+client.login('bot-id');
