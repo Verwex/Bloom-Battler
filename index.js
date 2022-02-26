@@ -13729,7 +13729,7 @@ client.on('messageCreate', async message => {
 			sacrificial: '(Args <Percent>) Boost the power of sacrifice skills by <Percent>%.',
 			SEPARATOR: '======Extras Below Are Ideas From Verwex======',
 			overheal: '(Args <Percent> <Degradation Percent>) Heal skills heal HP up to <Percent>% more of max HP. Degrades by <Degradation Percent>% of max overheal true max difference (max HP with overheal - max HP), should HP be higher than max.',
-			elementstore: `(Args <Element> <Damage Percent>) Stores <Damage Percent>% of damage from <Element> type attacks to use for the next attack.`,
+			elementstore: `(Args <Element> <Damage Percent>) Stores <Damage Percent>% of damage when hit from <Element> attacks to add up for the next attack. Stackable.`,
 		}
 
 		for (const i in passiveDesc)
