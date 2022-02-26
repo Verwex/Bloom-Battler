@@ -535,24 +535,6 @@
         "desc": "The user strikes the foes 3 times to deal damage.",
         "originalAuthor": "516359709779820544"
     },
-    "AngerHit": {
-        "name": "Anger Hit",
-        "cost": 5,
-        "costtype": "hppercent",
-        "pow": 75,
-        "acc": 50,
-        "crit": 100,
-        "type": "strike",
-        "atktype": "physical",
-        "target": "one",
-        "desc": "Guaranteed critical hit to one enemy, but 50% accuracy.",
-        "originalAuthor": "363363984390356993",
-        "levelLock": 10,
-        "evoSkill": [
-            "MightyHit",
-            17
-        ]
-    },
     "MightyHit": {
         "name": "Mighty Hit",
         "cost": 15,
@@ -569,6 +551,24 @@
         "preSkill": [
             "AngerHit",
             16
+        ]
+    },
+    "AngerHit": {
+        "name": "Anger Hit",
+        "cost": 5,
+        "costtype": "hppercent",
+        "pow": 75,
+        "acc": 50,
+        "crit": 100,
+        "type": "strike",
+        "atktype": "physical",
+        "target": "one",
+        "desc": "Guaranteed critical hit to one enemy, but 50% accuracy.",
+        "originalAuthor": "363363984390356993",
+        "levelLock": 10,
+        "evoSkill": [
+            "MightyHit",
+            17
         ]
     },
     "WindmillKick": {
@@ -1298,6 +1298,23 @@
         "atktype": "physical",
         "target": "one",
         "originalAuthor": "Default"
+    },
+    "LonelyKick": {
+        "name": "LonelyKick",
+        "cost": 20,
+        "costtype": "hppercent",
+        "pow": 300,
+        "acc": 70,
+        "crit": 10,
+        "type": "strike",
+        "status": "dizzy",
+        "statuschance": 5,
+        "atktype": "physical",
+        "target": "one",
+        "desc": "The user jumps and quickly kicks the foe with enough strength to confuse the foe's senses, sometimes enough to inflict dizziness on the foe. Due to the amount of space this skill requires it's more effective when the user is alone or the last one standing.",
+        "originalAuthor": "621307633718132746",
+        "levelLock": 20,
+        "lonewolf": true
     },
     "DesolateDive": {
         "name": "Desolate Dive",
@@ -2617,6 +2634,20 @@
         "desc": "Please stop.",
         "originalAuthor": "544290248734015488",
         "levelLock": 99
+    },
+    "SpreadWings": {
+        "name": "SpreadWings",
+        "cost": 55,
+        "costtype": "mp",
+        "pow": 500,
+        "acc": 85,
+        "crit": 3,
+        "type": "slash",
+        "atktype": "physical",
+        "target": "allopposing",
+        "desc": "The user spreads their wings and slashes the foes with them to deal Heavy Slashing damage.",
+        "originalAuthor": "516359709779820544",
+        "levelLock": 50
     },
     "BraveBlade": {
         "name": "Brave Blade",
@@ -4069,6 +4100,41 @@
             35
         ]
     },
+    "DarkMeteor": {
+        "name": "Dark Meteor",
+        "cost": 50,
+        "costtype": "mp",
+        "pow": 100,
+        "acc": 85,
+        "hits": 15,
+        "type": "fire",
+        "status": "burn",
+        "statuschance": 10,
+        "atktype": "magic",
+        "target": "randomopposing",
+        "desc": "DARK SKILL CREATED BY DESIRE",
+        "originalAuthor": "363363984390356993",
+        "debuffuser": "mag",
+        "buffchance": {},
+        "levelLock": 10
+    },
+    "Maragiverse": {
+        "name": "Maragiverse",
+        "cost": 60,
+        "costtype": "mp",
+        "pow": 100,
+        "acc": 95,
+        "type": "fire",
+        "atktype": "magic",
+        "target": "everyone",
+        "desc": "The user employs a bright orange aura on the battlefield to triple LB% gained for both allies and enemies.",
+        "originalAuthor": "363363984390356993",
+        "levelLock": 20,
+        "verse": [
+            "power",
+            200
+        ]
+    },
     "FireTriangle": {
         "name": "FireTriangle",
         "cost": 25,
@@ -4130,41 +4196,6 @@
         "atktype": "magic",
         "target": "one",
         "name": "Fireball"
-    },
-    "DarkMeteor": {
-        "name": "Dark Meteor",
-        "cost": 50,
-        "costtype": "mp",
-        "pow": 100,
-        "acc": 85,
-        "hits": 15,
-        "type": "fire",
-        "status": "burn",
-        "statuschance": 10,
-        "atktype": "magic",
-        "target": "randomopposing",
-        "desc": "DARK SKILL CREATED BY DESIRE",
-        "originalAuthor": "363363984390356993",
-        "debuffuser": "mag",
-        "buffchance": {},
-        "levelLock": 10
-    },
-    "Maragiverse": {
-        "name": "Maragiverse",
-        "cost": 60,
-        "costtype": "mp",
-        "pow": 100,
-        "acc": 95,
-        "type": "fire",
-        "atktype": "magic",
-        "target": "everyone",
-        "desc": "The user employs a bright orange aura on the battlefield to triple LB% gained for both allies and enemies.",
-        "originalAuthor": "363363984390356993",
-        "levelLock": 20,
-        "verse": [
-            "power",
-            200
-        ]
     },
     "FirePledge": {
         "name": "Fire Pledge",
@@ -5328,6 +5359,22 @@
         "target": "one",
         "desc": "The user, having mastered the Water style, strikes the target with a flowing motion three times in a row. This attack always results in a critical hit."
     },
+    "EAqua": {
+        "name": "EAqua",
+        "cost": 100,
+        "costtype": "money",
+        "pow": 30,
+        "acc": 90,
+        "type": "water",
+        "atktype": "magic",
+        "target": "random",
+        "originalAuthor": "363363984390356993",
+        "desc": "Purchase this DLC to deal light Water damage",
+        "evoSkill": [
+            "EAques",
+            10
+        ]
+    },
     "MalEAqua": {
         "name": "MalEAqua",
         "cost": 200,
@@ -5347,22 +5394,6 @@
         "evoSkill": [
             "MalEAques",
             18
-        ]
-    },
-    "EAqua": {
-        "name": "EAqua",
-        "cost": 100,
-        "costtype": "money",
-        "pow": 30,
-        "acc": 90,
-        "type": "water",
-        "atktype": "magic",
-        "target": "random",
-        "originalAuthor": "363363984390356993",
-        "desc": "Purchase this DLC to deal light Water damage",
-        "evoSkill": [
-            "EAques",
-            10
         ]
     },
     "AquEA(DeviKids)": {
@@ -6521,6 +6552,36 @@
         "levelLock": 92,
         "debuff": "end",
         "buffchance": 10
+    },
+    "Flowendla": {
+        "name": "Flowendla",
+        "cost": 66,
+        "costtype": "mp",
+        "pow": 1100,
+        "acc": 80,
+        "type": "water",
+        "atktype": "magic",
+        "target": "one",
+        "desc": "A more powerful version of Hydrouken, but more costly and no added bonuses.",
+        "originalAuthor": "532291526634635285",
+        "levelLock": 90,
+        "preSkill": [
+            "Flowadan",
+            89
+        ]
+    },
+    "Wavendla": {
+        "name": "Wavendla",
+        "cost": 78,
+        "costtype": "mp",
+        "pow": 1100,
+        "acc": 75,
+        "type": "water",
+        "atktype": "magic",
+        "target": "one",
+        "desc": "A more powerful version of Flood Field, but more costly and no added bonuses.",
+        "originalAuthor": "532291526634635285",
+        "levelLock": 90
     },
     "SnowRifle": {
         "name": "SnowRifle",
@@ -8962,6 +9023,32 @@
         "atktype": "magic",
         "target": "allopposing",
         "desc": "A colossal electric skill. A bundle of lightning strikes the opposing side with a 15% chance to inflict paralysis.",
+        "originalAuthor": "532291526634635285",
+        "levelLock": 65
+    },
+    "Shockolda": {
+        "name": "Shockolda",
+        "cost": 42,
+        "costtype": "mp",
+        "pow": 700,
+        "acc": 90,
+        "type": "electric",
+        "atktype": "magic",
+        "target": "one",
+        "desc": "A more powerful version of Ziolonda, but more costly and no paralyze chance.",
+        "originalAuthor": "532291526634635285",
+        "levelLock": 65
+    },
+    "Zabsolda": {
+        "name": "Zabsolda",
+        "cost": 54,
+        "costtype": "mp",
+        "pow": 700,
+        "acc": 85,
+        "type": "electric",
+        "atktype": "magic",
+        "target": "allopposing",
+        "desc": "A more powerful version of Maziolonda, but more costly and no paralyze chance.",
         "originalAuthor": "532291526634635285",
         "levelLock": 65
     },
@@ -12484,6 +12571,27 @@
         "originalAuthor": "621307633718132746",
         "levelLock": 10
     },
+    "Psioverse": {
+        "name": "Psioverse",
+        "cost": 36,
+        "costtype": "mp",
+        "pow": 100,
+        "acc": 101,
+        "type": "psychic",
+        "atktype": "magic",
+        "target": "allopposing",
+        "desc": "The user deploys a psychic field in which foes within are trapped in a healing aura for 3 turns. All non-melee attacks from the user or their allies will heal them for 60% of the damage they deal.",
+        "originalAuthor": "516359709779820544",
+        "levelLock": 67,
+        "verse": [
+            "heal",
+            60
+        ],
+        "preSkill": [
+            "Psionize",
+            66
+        ]
+    },
     "AuraScythe": {
         "name": "Aura Scythe",
         "cost": 20,
@@ -12987,6 +13095,22 @@
         "desc": "A more powerful version of Psiodyne, but more costly.",
         "originalAuthor": "532291526634635285",
         "levelLock": 50
+    },
+    "Intelligence": {
+        "name": "Intelligence",
+        "cost": 40,
+        "costtype": "mp",
+        "pow": 450,
+        "acc": 87,
+        "type": "psychic",
+        "status": "dizzy",
+        "statuschance": 10,
+        "atktype": "magic",
+        "target": "one",
+        "desc": "The user uses their intelligence to strike the foe hard psychokinetically. This skill uses the user's intelligence stat to deal damage.",
+        "originalAuthor": "516359709779820544",
+        "levelLock": 50,
+        "statCalc": "int"
     },
     "Bralienzed": {
         "name": "Bralienzed",
@@ -15789,6 +15913,20 @@
         "levelLock": 99,
         "hits": 15
     },
+    "Bamudoon": {
+        "name": "Bamudoon",
+        "cost": 40,
+        "costtype": "mp",
+        "pow": 1,
+        "acc": 25,
+        "type": "curse",
+        "atktype": "magic",
+        "target": "everyone",
+        "desc": "The user casts an unstable demonic spell with the power to instantly down fighters 25% of the time.",
+        "originalAuthor": "441198920668938260",
+        "ohko": true,
+        "levelLock": 100
+    },
     "HEAxblast": {
         "name": "HEAxblast",
         "cost": 400,
@@ -15878,6 +16016,20 @@
         "desc": "A more powerful version of Maeiha, but more costly.",
         "originalAuthor": "532291526634635285",
         "levelLock": 10
+    },
+    "DespairsFood": {
+        "costtype": "mp",
+        "cost": 15,
+        "pow": 90,
+        "acc": 95,
+        "type": "curse",
+        "status": "fear",
+        "statuschance": 10,
+        "atktype": "magic",
+        "drain": 2,
+        "target": "one",
+        "originalAuthor": "441198920668938260",
+        "name": "Despair's Food"
     },
     "Mamudo": {
         "name": "Mamudo",
@@ -17117,185 +17269,6 @@
         "originalAuthor": "532291526634635285",
         "levelLock": 85
     },
-    "Bamudoon": {
-        "name": "Bamudoon",
-        "cost": 40,
-        "costtype": "mp",
-        "pow": 1,
-        "acc": 25,
-        "type": "curse",
-        "atktype": "magic",
-        "target": "everyone",
-        "desc": "The user casts an unstable demonic spell with the power to instantly down fighters 25% of the time.",
-        "originalAuthor": "441198920668938260",
-        "ohko": true,
-        "levelLock": 100
-    },
-    "MaEAiha": {
-        "name": "MaEAiha",
-        "cost": 200,
-        "costtype": "money",
-        "pow": 30,
-        "acc": 85,
-        "hits": 4,
-        "type": "curse",
-        "atktype": "magic",
-        "target": "random",
-        "desc": "Purchase this DLC to deal multiple light Curse damage",
-        "originalAuthor": "363363984390356993",
-        "preSkill": [
-            "remove",
-            7
-        ],
-        "evoSkill": [
-            "MaEAiga",
-            18
-        ]
-    },
-    "EndlessDarkness": {
-        "name": "Endless Darkness",
-        "cost": 100,
-        "costtype": "mp",
-        "pow": 30,
-        "acc": 37,
-        "crit": 40,
-        "hits": 15,
-        "type": "curse",
-        "atktype": "magic",
-        "target": "one",
-        "desc": "The user endlessly barrages the foe with dark until they miss.",
-        "originalAuthor": "441198920668938260"
-    },
-    "Terror": {
-        "name": "Terror",
-        "cost": 8,
-        "costtype": "mp",
-        "pow": 30,
-        "acc": 90,
-        "type": "curse",
-        "status": "fear",
-        "statuschance": 15,
-        "atktype": "physical",
-        "target": "allopposing",
-        "originalAuthor": "363363984390356993",
-        "levelLock": 8,
-        "evoSkill": [
-            "Anxiety",
-            30
-        ],
-        "desc": "Darkness shall envelop everything and cause fear..."
-    },
-    "EAiha": {
-        "name": "EAiha",
-        "cost": 100,
-        "costtype": "money",
-        "pow": 30,
-        "acc": 90,
-        "type": "curse",
-        "atktype": "magic",
-        "target": "random",
-        "originalAuthor": "363363984390356993",
-        "desc": "Purchase this DLC to deal light Curse damage",
-        "evoSkill": [
-            "EAiga",
-            10
-        ]
-    },
-    "HEAxdeus": {
-        "name": "HEAxdeus",
-        "cost": 200,
-        "costtype": "money",
-        "pow": 35,
-        "acc": 90,
-        "hits": 2,
-        "type": "curse",
-        "atktype": "magic",
-        "target": "random",
-        "originalAuthor": "441198920668938260"
-    },
-    "HEAx": {
-        "name": "HEAx",
-        "cost": 100,
-        "costtype": "money",
-        "pow": 35,
-        "acc": 90,
-        "type": "curse",
-        "atktype": "magic",
-        "target": "random",
-        "originalAuthor": "441198920668938260"
-    },
-    "HollowMind": {
-        "name": "Hollow Mind",
-        "cost": 5,
-        "costtype": "mp",
-        "pow": 45,
-        "acc": 90,
-        "type": "curse",
-        "status": "despair",
-        "statuschance": 100,
-        "atktype": "magic",
-        "target": "one",
-        "originalAuthor": "363363984390356993",
-        "evoSkill": [
-            "LostMeaning",
-            25
-        ],
-        "desc": "As your mind falls into darkness, you find only emptiness inside..."
-    },
-    "CursedBlast": {
-        "costtype": "mp",
-        "cost": 4,
-        "pow": 50,
-        "acc": 90,
-        "type": "curse",
-        "atktype": "magic",
-        "status": "fear",
-        "statuschance": 10,
-        "target": "one",
-        "name": "Cursed Blast"
-    },
-    "DespairScatter": {
-        "name": "Despair Scatter",
-        "cost": 35,
-        "costtype": "mp",
-        "pow": 50,
-        "acc": 78,
-        "type": "curse",
-        "status": "despair",
-        "statuschance": 20,
-        "atktype": "magic",
-        "target": "allopposing",
-        "desc": "The user fires smaller beams towards all foes with their scythe, the beams may inflict despair on the user.",
-        "originalAuthor": "621307633718132746"
-    },
-    "PKDemonicNova-Alpha": {
-        "name": "PK DemonicNova α",
-        "cost": 15,
-        "costtype": "mp",
-        "pow": 55,
-        "acc": 100,
-        "crit": 5,
-        "type": "curse",
-        "atktype": "magic",
-        "target": "allopposing",
-        "desc": "Only demons know what this PSI really does, but it sure hurts.",
-        "originalAuthor": "621307633718132746",
-        "levelLock": 20
-    },
-    "DespairsFood": {
-        "costtype": "mp",
-        "cost": 15,
-        "pow": 90,
-        "acc": 95,
-        "type": "curse",
-        "status": "fear",
-        "statuschance": 10,
-        "atktype": "magic",
-        "drain": 2,
-        "target": "one",
-        "originalAuthor": "441198920668938260",
-        "name": "Despair's Food"
-    },
     "EndlessLight": {
         "name": "EndlessLight",
         "cost": 99,
@@ -17342,116 +17315,65 @@
             12
         ]
     },
-    "KouhEA": {
-        "name": "KouhEA",
-        "cost": 100,
+    "MakougEA": {
+        "name": "MakougEA",
+        "cost": 400,
         "costtype": "money",
-        "pow": 30,
-        "acc": 90,
-        "type": "bless",
-        "atktype": "magic",
-        "target": "random",
-        "originalAuthor": "363363984390356993",
-        "desc": "Purchase this DLC to deal light Bless damage",
-        "evoSkill": [
-            "KougEA",
-            10
-        ]
-    },
-    "MakouhEA": {
-        "name": "MakouhEA",
-        "cost": 200,
-        "costtype": "money",
-        "pow": 30,
+        "pow": 70,
         "acc": 85,
         "hits": 4,
         "type": "bless",
         "atktype": "magic",
         "target": "random",
-        "desc": "Purchase this DLC to deal multiple light Bless damage",
+        "desc": "Purchase this DLC to deal multiple medium Bless damage",
         "originalAuthor": "363363984390356993",
+        "levelLock": 10,
         "preSkill": [
-            "remove",
-            7
+            "MakouhEA",
+            17
         ],
         "evoSkill": [
-            "MakougEA",
-            18
+            "MakougEAon",
+            48
         ]
     },
-    "GlEAwdeus": {
-        "name": "GlEAwdeus",
-        "cost": 200,
-        "costtype": "money",
-        "pow": 35,
-        "acc": 90,
-        "hits": 2,
-        "type": "bless",
-        "atktype": "magic",
-        "target": "random",
-        "originalAuthor": "441198920668938260"
-    },
-    "GlEAw": {
-        "name": "GlEAw",
-        "cost": 100,
-        "costtype": "money",
-        "pow": 35,
-        "acc": 90,
-        "type": "bless",
-        "atktype": "magic",
-        "target": "random",
-        "originalAuthor": "441198920668938260"
-    },
-    "PSIFlash-Alpha": {
-        "name": "PSIFlash-Alpha",
-        "cost": 16,
+    "Glow": {
+        "name": "Glow",
+        "cost": 5,
         "costtype": "mp",
-        "pow": 40,
-        "acc": 90,
-        "crit": 1,
+        "pow": 70,
+        "acc": 95,
         "type": "bless",
-        "status": "fear",
-        "statuschance": 20,
         "atktype": "magic",
-        "target": "allopposing",
-        "desc": "It generates a strong flash and can make all enemies start fearing the user (simulation of crying uncontrollably).",
+        "target": "one",
         "originalAuthor": "441198920668938260",
         "levelLock": 10
     },
-    "KiSlash[2]": {
-        "name": "KiSlash[2]",
-        "cost": 16,
-        "costtype": "mp",
-        "pow": 50,
-        "acc": 95,
-        "crit": 5,
-        "hits": 2,
-        "type": "bless",
-        "atktype": "physical",
-        "target": "allopposing",
-        "originalAuthor": "138315499162435584",
-        "levelLock": 20,
-        "preSkill": [
-            "KiSlash",
-            20
-        ]
-    },
-    "KiSlash": {
-        "name": "KiSlash",
+    "Glowdeus": {
+        "name": "Glowdeus",
         "cost": 8,
         "costtype": "mp",
-        "pow": 50,
+        "pow": 70,
         "acc": 95,
-        "crit": 5,
+        "hits": 2,
         "type": "bless",
-        "atktype": "physical",
+        "atktype": "magic",
+        "target": "randomopposing",
+        "originalAuthor": "441198920668938260",
+        "levelLock": 10
+    },
+    "RaysOfHope!": {
+        "name": "Rays of Hope!",
+        "cost": 60,
+        "costtype": "mp",
+        "pow": 75,
+        "acc": 80,
+        "type": "bless",
+        "atktype": "magic",
         "target": "allopposing",
-        "originalAuthor": "138315499162435584",
-        "levelLock": 8,
-        "evoSkill": [
-            "KiSlash[2]",
-            21
-        ]
+        "desc": "Fires rays of hope that purify all sinners!\nIsn't that lovely!",
+        "originalAuthor": "621307633718132746",
+        "levelLock": 10
     },
     "GlEAwburst": {
         "name": "GlEAwburst",
@@ -18676,11 +18598,34 @@
         "desc": "Usage of a Microphone is required to amplify the energy of the heated emotions blazing within the User, Launching a Vocalized blast at the Enemy. This way the User's Passion is weaponized for this attack, it will deal damage to the target with a Chance to Silence the Enemy Target. This variation of the move however takes alot out of the User.",
         "originalAuthor": "494699050550165515"
     },
-    "MavocEA": {
-        "name": "MavocEA",
+    "VocEAlao": {
+        "name": "VocEAlao",
         "cost": 200,
         "costtype": "money",
-        "pow": 30,
+        "pow": 70,
+        "acc": 90,
+        "type": "sound",
+        "status": "rage",
+        "statuschance": 3,
+        "atktype": "magic",
+        "target": "random",
+        "originalAuthor": "363363984390356993",
+        "levelLock": 10,
+        "desc": "Purchase this DLC to deal medium Sound damage",
+        "preSkill": [
+            "VocEA",
+            9
+        ],
+        "evoSkill": [
+            "VocEAdyne",
+            23
+        ]
+    },
+    "MavocEAon": {
+        "name": "MavocEAon",
+        "cost": 400,
+        "costtype": "money",
+        "pow": 70,
         "acc": 85,
         "hits": 4,
         "type": "sound",
@@ -18688,57 +18633,42 @@
         "statuschance": 3,
         "atktype": "magic",
         "target": "random",
-        "desc": "Purchase this DLC to deal multiple light Sound damage",
+        "desc": "Purchase this DLC to deal multiple medium Sound damage",
         "originalAuthor": "363363984390356993",
+        "levelLock": 10,
         "preSkill": [
-            "remove",
-            7
+            "MavocEA",
+            17
         ],
         "evoSkill": [
-            "MavocEAon",
-            18
+            "MavocEAdyne",
+            48
         ]
     },
-    "VocEA": {
-        "name": "VocEA",
-        "cost": 100,
-        "costtype": "money",
-        "pow": 30,
-        "acc": 90,
-        "type": "sound",
-        "status": "rage",
-        "statuschance": 3,
-        "atktype": "magic",
-        "target": "random",
-        "originalAuthor": "363363984390356993",
-        "desc": "Purchase this DLC to deal light Sound damage",
-        "evoSkill": [
-            "VocEAlao",
-            10
-        ]
-    },
-    "VEAx": {
-        "name": "VEAx",
-        "cost": 100,
-        "costtype": "money",
-        "pow": 35,
-        "acc": 90,
-        "type": "sound",
-        "atktype": "magic",
-        "target": "random",
-        "originalAuthor": "441198920668938260"
-    },
-    "VEAxdeus": {
-        "name": "VEAxdeus",
-        "cost": 200,
-        "costtype": "money",
-        "pow": 35,
-        "acc": 90,
+    "Voxdeus": {
+        "name": "Voxdeus",
+        "cost": 8,
+        "costtype": "mp",
+        "pow": 70,
+        "acc": 95,
         "hits": 2,
         "type": "sound",
         "atktype": "magic",
-        "target": "random",
-        "originalAuthor": "441198920668938260"
+        "target": "randomopposing",
+        "originalAuthor": "441198920668938260",
+        "levelLock": 10
+    },
+    "Vox": {
+        "name": "Vox",
+        "cost": 5,
+        "costtype": "mp",
+        "pow": 70,
+        "acc": 95,
+        "type": "sound",
+        "atktype": "magic",
+        "target": "one",
+        "originalAuthor": "441198920668938260",
+        "levelLock": 10
     },
     "DarkSound": {
         "name": "Dark Sound",
@@ -19354,81 +19284,6 @@
         "buff": "mag",
         "buffchance": 20
     },
-    "MagrEA": {
-        "name": "MagrEA",
-        "cost": 200,
-        "costtype": "money",
-        "pow": 30,
-        "acc": 85,
-        "hits": 4,
-        "type": "gravity",
-        "atktype": "magic",
-        "target": "random",
-        "desc": "Purchase this DLC to deal multiple light Gravity damage",
-        "originalAuthor": "363363984390356993",
-        "preSkill": [
-            "remove",
-            7
-        ],
-        "evoSkill": [
-            "MagrEAva",
-            18
-        ]
-    },
-    "GrEA": {
-        "name": "GrEA",
-        "cost": 100,
-        "costtype": "money",
-        "pow": 30,
-        "acc": 90,
-        "type": "gravity",
-        "atktype": "magic",
-        "target": "random",
-        "originalAuthor": "363363984390356993",
-        "desc": "Purchase this DLC to deal light Gravity damage",
-        "evoSkill": [
-            "GrEAva",
-            10
-        ]
-    },
-    "LunEAdeus": {
-        "name": "LunEAdeus",
-        "cost": 200,
-        "costtype": "money",
-        "pow": 35,
-        "acc": 90,
-        "hits": 2,
-        "type": "gravity",
-        "atktype": "magic",
-        "target": "random",
-        "originalAuthor": "441198920668938260"
-    },
-    "LunEA": {
-        "name": "LunEA",
-        "cost": 100,
-        "costtype": "money",
-        "pow": 35,
-        "acc": 90,
-        "type": "gravity",
-        "atktype": "magic",
-        "target": "random",
-        "originalAuthor": "441198920668938260"
-    },
-    "WandOfBlastWave": {
-        "name": "Wand of Blast Wave",
-        "cost": 35,
-        "costtype": "mp",
-        "pow": 50,
-        "acc": 95,
-        "crit": 10,
-        "type": "gravity",
-        "status": "paralyze",
-        "statuschance": 50,
-        "atktype": "magic",
-        "target": "one",
-        "desc": "Fires a bolt that sends the foe flying away! If they are ever gonna hit the floor they are probably not gonna fight immediately after.",
-        "originalAuthor": "621307633718132746"
-    },
     "LunEAburst": {
         "name": "LunEAburst",
         "cost": 200,
@@ -19744,6 +19599,30 @@
         "originalAuthor": "544290248734015488",
         "levelLock": 43
     },
+    "Bagrydyne": {
+        "name": "Bagrydyne",
+        "cost": 32,
+        "costtype": "mp",
+        "pow": 350,
+        "acc": 90,
+        "type": "gravity",
+        "atktype": "magic",
+        "target": "everyone",
+        "originalAuthor": "441198920668938260",
+        "levelLock": 40
+    },
+    "Magrydyne": {
+        "name": "Magrydyne",
+        "cost": 32,
+        "costtype": "mp",
+        "pow": 350,
+        "acc": 90,
+        "type": "gravity",
+        "atktype": "magic",
+        "target": "allopposing",
+        "originalAuthor": "441198920668938260",
+        "levelLock": 40
+    },
     "Grydyne": {
         "name": "Grydyne",
         "cost": 16,
@@ -19770,30 +19649,6 @@
         "atktype": "magic",
         "target": "random",
         "desc": "Heavy gravity damage to one random target.",
-        "originalAuthor": "441198920668938260",
-        "levelLock": 40
-    },
-    "Bagrydyne": {
-        "name": "Bagrydyne",
-        "cost": 32,
-        "costtype": "mp",
-        "pow": 350,
-        "acc": 90,
-        "type": "gravity",
-        "atktype": "magic",
-        "target": "everyone",
-        "originalAuthor": "441198920668938260",
-        "levelLock": 40
-    },
-    "Magrydyne": {
-        "name": "Magrydyne",
-        "cost": 32,
-        "costtype": "mp",
-        "pow": 350,
-        "acc": 90,
-        "type": "gravity",
-        "atktype": "magic",
-        "target": "allopposing",
         "originalAuthor": "441198920668938260",
         "levelLock": 40
     },
@@ -19900,6 +19755,57 @@
         "target": "caster",
         "desc": "The user seals themselves into a magic mirror that protects them from magic damage, but is easy to break with physical attacks",
         "originalAuthor": "363363984390356993"
+    },
+    "MutualBloodContract": {
+        "name": "Mutual Blood Contract",
+        "cost": 35,
+        "costtype": "mp",
+        "pow": 1,
+        "acc": 100,
+        "type": "almighty",
+        "atktype": "magic",
+        "target": "allallies",
+        "desc": "The user performs a blood ritual to create a dark crimson aura around themselves. When hit, this aura returns 100% of damage to the attacker",
+        "originalAuthor": "363363984390356993",
+        "verse": [
+            "heal",
+            -100
+        ],
+        "levelLock": {}
+    },
+    "Transfusion": {
+        "name": "Transfusion",
+        "cost": 35,
+        "costtype": "mp",
+        "pow": 1,
+        "acc": 100,
+        "type": "almighty",
+        "atktype": "magic",
+        "target": "caster",
+        "desc": "The user performs a blood ritual to create a bright crimson aura around themselves. When hit with a single-target attack, this aura recovers other allies' HP equal to 33% of damage taken",
+        "originalAuthor": "363363984390356993",
+        "verse": [
+            "spread",
+            -33
+        ],
+        "levelLock": {}
+    },
+    "LimitCurse": {
+        "name": "Limit Curse",
+        "cost": 35,
+        "costtype": "mp",
+        "pow": 1,
+        "acc": 100,
+        "type": "almighty",
+        "atktype": "magic",
+        "target": "caster",
+        "desc": "The user performs a blood ritual to create a pale crimson aura around themselves. When hit, this aura depletes the attacker's LB% instead of refilling it",
+        "originalAuthor": "363363984390356993",
+        "verse": [
+            "power",
+            -200
+        ],
+        "levelLock": {}
     },
     "Hell'sFragrance": {
         "name": "Hell's Fragrance",
@@ -20027,89 +19933,6 @@
         "desc": "Believe it or not, this skill is just as powerful as the actual Megidola",
         "originalAuthor": "363363984390356993"
     },
-    "PowerDrain": {
-        "name": "PowerDrain",
-        "cost": 32,
-        "costtype": "mp",
-        "pow": 24,
-        "acc": 100,
-        "type": "almighty",
-        "atktype": "magic",
-        "target": "one",
-        "originalAuthor": "363363984390356993",
-        "levelLock": 24,
-        "debuff": "all",
-        "buffchance": 100,
-        "buff": "all",
-        "desc": "The user decreases all stats of one enemy and simultaneously increases their own"
-    },
-    "OmnEA": {
-        "name": "OmnEA",
-        "cost": 100,
-        "costtype": "money",
-        "pow": 35,
-        "acc": 90,
-        "type": "almighty",
-        "atktype": "magic",
-        "target": "random",
-        "originalAuthor": "441198920668938260"
-    },
-    "OmnEAdeus": {
-        "name": "OmnEAdeus",
-        "cost": 200,
-        "costtype": "money",
-        "pow": 35,
-        "acc": 90,
-        "hits": 2,
-        "type": "almighty",
-        "atktype": "magic",
-        "target": "random",
-        "originalAuthor": "441198920668938260"
-    },
-    "PhysicalMegidolaon": {
-        "name": "Physical Megidolaon",
-        "cost": 52,
-        "costtype": "hp",
-        "pow": 36,
-        "acc": 80,
-        "hits": 5,
-        "type": "almighty",
-        "atktype": "physical",
-        "target": "allopposing",
-        "desc": "Believe it or not, this skill is just as powerful as the actual Megidolaon",
-        "originalAuthor": "363363984390356993",
-        "levelLock": 90
-    },
-    "LifeLeak": {
-        "name": "LifeLeak",
-        "cost": 15,
-        "costtype": "mppercent",
-        "pow": 45,
-        "acc": 95,
-        "hits": 2,
-        "type": "almighty",
-        "atktype": "magic",
-        "target": "allopposing",
-        "desc": "This Almighty skill destabilises the life force of one enemy. Attack the enemy with unstable life force to recover your HP!",
-        "originalAuthor": "363363984390356993",
-        "verse": [
-            "heal",
-            75
-        ],
-        "levelLock": {}
-    },
-    "SpiritLeech": {
-        "name": "Spirit Leech",
-        "stealmp": true,
-        "cost": 6,
-        "costtype": "mp",
-        "pow": 50,
-        "acc": 100,
-        "type": "almighty",
-        "atktype": "magic",
-        "target": "one",
-        "desc": "The user drains 50 MP from the target by any means necessary. They will gain all MP stolen."
-    },
     "FantasySeal": {
         "name": "Fantasy Seal",
         "cost": 25,
@@ -20121,6 +19944,21 @@
         "atktype": "magic",
         "target": "one",
         "originalAuthor": "412328234198237189"
+    },
+    "SpiritAssault": {
+        "name": "Spirit Assault",
+        "cost": 20,
+        "costtype": "mp",
+        "pow": 75,
+        "acc": 999,
+        "type": "almighty",
+        "atktype": "magic",
+        "target": "one",
+        "desc": "Steal 75 MP from an enemy. Twice",
+        "originalAuthor": "363363984390356993",
+        "stealmp": true,
+        "takemp": 75,
+        "hits": 2
     },
     "OmnEAblast": {
         "name": "OmnEAblast",
@@ -21321,79 +21159,6 @@
         "ohko": true,
         "sacrifice": true
     },
-    "YouDefinitelyLose": {
-        "name": "YouDefinitelyLose",
-        "cost": 100,
-        "costtype": "mppercent",
-        "pow": 3.838389995499939e+187,
-        "acc": 999,
-        "crit": 999,
-        "type": "almighty",
-        "atktype": "magic",
-        "target": "allallies",
-        "desc": "Yep your team is definitely gone once this move is used.",
-        "originalAuthor": "441198920668938260",
-        "levelLock": 100,
-        "preSkill": [
-            "YouLose",
-            99
-        ],
-        "evoSkill": [
-            "YouDefinitelyLose",
-            500
-        ]
-    },
-    "MutualBloodContract": {
-        "name": "Mutual Blood Contract",
-        "cost": 35,
-        "costtype": "mp",
-        "pow": 1,
-        "acc": 100,
-        "type": "almighty",
-        "atktype": "magic",
-        "target": "allallies",
-        "desc": "The user performs a blood ritual to create a dark crimson aura around themselves. When hit, this aura returns 100% of damage to the attacker",
-        "originalAuthor": "363363984390356993",
-        "verse": [
-            "heal",
-            -100
-        ],
-        "levelLock": {}
-    },
-    "Transfusion": {
-        "name": "Transfusion",
-        "cost": 35,
-        "costtype": "mp",
-        "pow": 1,
-        "acc": 100,
-        "type": "almighty",
-        "atktype": "magic",
-        "target": "caster",
-        "desc": "The user performs a blood ritual to create a bright crimson aura around themselves. When hit with a single-target attack, this aura recovers other allies' HP equal to 33% of damage taken",
-        "originalAuthor": "363363984390356993",
-        "verse": [
-            "spread",
-            -33
-        ],
-        "levelLock": {}
-    },
-    "LimitCurse": {
-        "name": "Limit Curse",
-        "cost": 35,
-        "costtype": "mp",
-        "pow": 1,
-        "acc": 100,
-        "type": "almighty",
-        "atktype": "magic",
-        "target": "caster",
-        "desc": "The user performs a blood ritual to create a pale crimson aura around themselves. When hit, this aura depletes the attacker's LB% instead of refilling it",
-        "originalAuthor": "363363984390356993",
-        "verse": [
-            "power",
-            -200
-        ],
-        "levelLock": {}
-    },
     "TreacherousKiss": {
         "name": "Treacherous Kiss",
         "cost": 30,
@@ -21568,6 +21333,1225 @@
             16
         ],
         "levelLock": 11
+    },
+    "PSIMagnet-Alpha": {
+        "name": "PSI Magnet α",
+        "costtype": "mp",
+        "pow": 1,
+        "acc": 100,
+        "type": "status",
+        "atktype": "magic",
+        "target": "one",
+        "desc": "Drains the mana of a foe.",
+        "originalAuthor": "621307633718132746",
+        "stealmp": true,
+        "levelLock": {}
+    },
+    "Deband[Ver.S]": {
+        "name": "Deband [Ver.S]",
+        "type": "status",
+        "cost": 24,
+        "costtype": "mp",
+        "originalAuthor": "138315499162435584",
+        "buff": "end",
+        "target": "allallies",
+        "levelLock": 3,
+        "desc": "Buffs the allies that surrounds the user's endurance once.",
+        "pow": 15,
+        "hits": 1
+    },
+    "Vulnerability": {
+        "name": "Vulnerability",
+        "type": "passive",
+        "desc": "When guarding, the user takes triple damage",
+        "originalAuthor": "363363984390356993",
+        "pow": -260,
+        "guardboost": true,
+        "passive": "guardboost"
+    },
+    "RegenContact": {
+        "name": "Regenerative Contact",
+        "type": "passive",
+        "desc": "A passive skill that heals the attacker if they use a physical skill.",
+        "originalAuthor": "441198920668938260",
+        "passive": "damagephys",
+        "pow": -30
+    },
+    "Armageddon": {
+        "name": "Armageddon",
+        "cost": 1,
+        "costtype": "hp",
+        "pow": 1,
+        "acc": 999,
+        "hits": 15,
+        "type": "undefined",
+        "atktype": "magic",
+        "target": "everyone",
+        "desc": "In the end... Everything was blown away...",
+        "originalAuthor": "363363984390356993",
+        "ohko": true,
+        "levelLock": {}
+    },
+    "MaEAiha": {
+        "name": "MaEAiha",
+        "cost": 200,
+        "costtype": "money",
+        "pow": 30,
+        "acc": 85,
+        "hits": 4,
+        "type": "curse",
+        "atktype": "magic",
+        "target": "random",
+        "desc": "Purchase this DLC to deal multiple light Curse damage",
+        "originalAuthor": "363363984390356993",
+        "preSkill": [
+            "remove",
+            7
+        ],
+        "evoSkill": [
+            "MaEAiga",
+            18
+        ]
+    },
+    "EndlessDarkness": {
+        "name": "Endless Darkness",
+        "cost": 100,
+        "costtype": "mp",
+        "pow": 30,
+        "acc": 37,
+        "crit": 40,
+        "hits": 15,
+        "type": "curse",
+        "atktype": "magic",
+        "target": "one",
+        "desc": "The user endlessly barrages the foe with dark until they miss.",
+        "originalAuthor": "441198920668938260"
+    },
+    "Terror": {
+        "name": "Terror",
+        "cost": 8,
+        "costtype": "mp",
+        "pow": 30,
+        "acc": 90,
+        "type": "curse",
+        "status": "fear",
+        "statuschance": 15,
+        "atktype": "physical",
+        "target": "allopposing",
+        "originalAuthor": "363363984390356993",
+        "levelLock": 8,
+        "evoSkill": [
+            "Anxiety",
+            30
+        ],
+        "desc": "Darkness shall envelop everything and cause fear..."
+    },
+    "EAiha": {
+        "name": "EAiha",
+        "cost": 100,
+        "costtype": "money",
+        "pow": 30,
+        "acc": 90,
+        "type": "curse",
+        "atktype": "magic",
+        "target": "random",
+        "originalAuthor": "363363984390356993",
+        "desc": "Purchase this DLC to deal light Curse damage",
+        "evoSkill": [
+            "EAiga",
+            10
+        ]
+    },
+    "HEAxdeus": {
+        "name": "HEAxdeus",
+        "cost": 200,
+        "costtype": "money",
+        "pow": 35,
+        "acc": 90,
+        "hits": 2,
+        "type": "curse",
+        "atktype": "magic",
+        "target": "random",
+        "originalAuthor": "441198920668938260"
+    },
+    "HEAx": {
+        "name": "HEAx",
+        "cost": 100,
+        "costtype": "money",
+        "pow": 35,
+        "acc": 90,
+        "type": "curse",
+        "atktype": "magic",
+        "target": "random",
+        "originalAuthor": "441198920668938260"
+    },
+    "HollowMind": {
+        "name": "Hollow Mind",
+        "cost": 5,
+        "costtype": "mp",
+        "pow": 45,
+        "acc": 90,
+        "type": "curse",
+        "status": "despair",
+        "statuschance": 100,
+        "atktype": "magic",
+        "target": "one",
+        "originalAuthor": "363363984390356993",
+        "evoSkill": [
+            "LostMeaning",
+            25
+        ],
+        "desc": "As your mind falls into darkness, you find only emptiness inside..."
+    },
+    "CursedBlast": {
+        "costtype": "mp",
+        "cost": 4,
+        "pow": 50,
+        "acc": 90,
+        "type": "curse",
+        "atktype": "magic",
+        "status": "fear",
+        "statuschance": 10,
+        "target": "one",
+        "name": "Cursed Blast"
+    },
+    "DespairScatter": {
+        "name": "Despair Scatter",
+        "cost": 35,
+        "costtype": "mp",
+        "pow": 50,
+        "acc": 78,
+        "type": "curse",
+        "status": "despair",
+        "statuschance": 20,
+        "atktype": "magic",
+        "target": "allopposing",
+        "desc": "The user fires smaller beams towards all foes with their scythe, the beams may inflict despair on the user.",
+        "originalAuthor": "621307633718132746"
+    },
+    "PKDemonicNova-Alpha": {
+        "name": "PK DemonicNova α",
+        "cost": 15,
+        "costtype": "mp",
+        "pow": 55,
+        "acc": 100,
+        "crit": 5,
+        "type": "curse",
+        "atktype": "magic",
+        "target": "allopposing",
+        "desc": "Only demons know what this PSI really does, but it sure hurts.",
+        "originalAuthor": "621307633718132746",
+        "levelLock": 20
+    },
+    "Eiha": {
+        "costtype": "mp",
+        "cost": 4,
+        "pow": 60,
+        "acc": 95,
+        "type": "curse",
+        "atktype": "magic",
+        "target": "one",
+        "name": "Eiha"
+    },
+    "Maeiha": {
+        "costtype": "mp",
+        "cost": 8,
+        "pow": 60,
+        "acc": 90,
+        "type": "curse",
+        "atktype": "magic",
+        "target": "allopposing",
+        "name": "Maeiha",
+        "preSkill": [
+            "remove",
+            13
+        ]
+    },
+    "Baeiha": {
+        "name": "Baeiha",
+        "cost": 8,
+        "costtype": "mp",
+        "pow": 60,
+        "acc": 90,
+        "type": "curse",
+        "atktype": "magic",
+        "target": "everyone",
+        "desc": "The user damages everyone on the battlefield with mild darkness.",
+        "originalAuthor": "544290248734015488"
+    },
+    "Raeiha": {
+        "name": "Raeiha",
+        "cost": 4,
+        "costtype": "mp",
+        "pow": 60,
+        "acc": 95,
+        "type": "curse",
+        "atktype": "magic",
+        "target": "random",
+        "desc": "Light curse damage to one random target.",
+        "originalAuthor": "441198920668938260"
+    },
+    "DarkGrab": {
+        "name": "DarkGrab",
+        "cost": 7,
+        "costtype": "hppercent",
+        "pow": 60,
+        "acc": 95,
+        "crit": 5,
+        "type": "curse",
+        "atktype": "physical",
+        "target": "one",
+        "desc": "The user envelops their fist in darkness to strike the foe at high speeds with a 10% chance to steal an item from the foe.",
+        "originalAuthor": "516359709779820544",
+        "steal": 10,
+        "levelLock": 20,
+        "evoSkill": [
+            "UnseenGrab",
+            20
+        ]
+    },
+    "DarkBeam": {
+        "name": "DarkBeam",
+        "cost": 35,
+        "costtype": "mp",
+        "pow": 60,
+        "acc": 80,
+        "hits": 3,
+        "type": "curse",
+        "atktype": "magic",
+        "target": "one",
+        "desc": "The user fires a beam of darkness at the foe.",
+        "originalAuthor": "621307633718132746"
+    },
+    "EvilCharm": {
+        "name": "Evil Charm",
+        "cost": 5,
+        "costtype": "mp",
+        "pow": 60,
+        "acc": 95,
+        "type": "curse",
+        "atktype": "magic",
+        "target": "one",
+        "desc": "The user uses shadows from the darkness to magnetize to the target and harm them. This uses the user's charisma stat to do damage.",
+        "originalAuthor": "544290248734015488",
+        "statCalc": "chr",
+        "evoSkill": [
+            "SinfulCharisma",
+            20
+        ]
+    },
+    "GasterBlaster": {
+        "costtype": "mp",
+        "cost": 25,
+        "pow": 66,
+        "acc": 90,
+        "type": "curse",
+        "atktype": "magic",
+        "target": "one",
+        "name": "Gaster Blaster",
+        "desc": "The user summons a creature able to fire a powerful laser at the foe.",
+        "hits": 3
+    },
+    "MaEAiga": {
+        "name": "MaEAiga",
+        "cost": 400,
+        "costtype": "money",
+        "pow": 70,
+        "acc": 85,
+        "hits": 4,
+        "type": "curse",
+        "atktype": "magic",
+        "target": "random",
+        "desc": "Purchase this DLC to deal multiple medium Curse damage",
+        "originalAuthor": "363363984390356993",
+        "levelLock": 10,
+        "preSkill": [
+            "MaEAiha",
+            17
+        ],
+        "evoSkill": [
+            "MaEAigaon",
+            48
+        ]
+    },
+    "Hex": {
+        "name": "Hex",
+        "cost": 5,
+        "costtype": "mp",
+        "pow": 70,
+        "acc": 95,
+        "type": "curse",
+        "atktype": "magic",
+        "target": "one",
+        "originalAuthor": "441198920668938260",
+        "levelLock": 10
+    },
+    "Hexdeus": {
+        "name": "Hexdeus",
+        "cost": 8,
+        "costtype": "mp",
+        "pow": 70,
+        "acc": 95,
+        "hits": 2,
+        "type": "curse",
+        "atktype": "magic",
+        "target": "randomopposing",
+        "originalAuthor": "441198920668938260",
+        "levelLock": 10
+    },
+    "EAiga": {
+        "name": "EAiga",
+        "cost": 200,
+        "costtype": "money",
+        "pow": 70,
+        "acc": 90,
+        "type": "curse",
+        "atktype": "magic",
+        "target": "random",
+        "originalAuthor": "363363984390356993",
+        "levelLock": 10,
+        "desc": "Purchase this DLC to deal medium Curse damage",
+        "preSkill": [
+            "EAiha",
+            9
+        ],
+        "evoSkill": [
+            "EAigaon",
+            23
+        ]
+    },
+    "KouhEA": {
+        "name": "KouhEA",
+        "cost": 100,
+        "costtype": "money",
+        "pow": 30,
+        "acc": 90,
+        "type": "bless",
+        "atktype": "magic",
+        "target": "random",
+        "originalAuthor": "363363984390356993",
+        "desc": "Purchase this DLC to deal light Bless damage",
+        "evoSkill": [
+            "KougEA",
+            10
+        ]
+    },
+    "MakouhEA": {
+        "name": "MakouhEA",
+        "cost": 200,
+        "costtype": "money",
+        "pow": 30,
+        "acc": 85,
+        "hits": 4,
+        "type": "bless",
+        "atktype": "magic",
+        "target": "random",
+        "desc": "Purchase this DLC to deal multiple light Bless damage",
+        "originalAuthor": "363363984390356993",
+        "preSkill": [
+            "remove",
+            7
+        ],
+        "evoSkill": [
+            "MakougEA",
+            18
+        ]
+    },
+    "GlEAwdeus": {
+        "name": "GlEAwdeus",
+        "cost": 200,
+        "costtype": "money",
+        "pow": 35,
+        "acc": 90,
+        "hits": 2,
+        "type": "bless",
+        "atktype": "magic",
+        "target": "random",
+        "originalAuthor": "441198920668938260"
+    },
+    "GlEAw": {
+        "name": "GlEAw",
+        "cost": 100,
+        "costtype": "money",
+        "pow": 35,
+        "acc": 90,
+        "type": "bless",
+        "atktype": "magic",
+        "target": "random",
+        "originalAuthor": "441198920668938260"
+    },
+    "PSIFlash-Alpha": {
+        "name": "PSIFlash-Alpha",
+        "cost": 16,
+        "costtype": "mp",
+        "pow": 40,
+        "acc": 90,
+        "crit": 1,
+        "type": "bless",
+        "status": "fear",
+        "statuschance": 20,
+        "atktype": "magic",
+        "target": "allopposing",
+        "desc": "It generates a strong flash and can make all enemies start fearing the user (simulation of crying uncontrollably).",
+        "originalAuthor": "441198920668938260",
+        "levelLock": 10
+    },
+    "KiSlash[2]": {
+        "name": "KiSlash[2]",
+        "cost": 16,
+        "costtype": "mp",
+        "pow": 50,
+        "acc": 95,
+        "crit": 5,
+        "hits": 2,
+        "type": "bless",
+        "atktype": "physical",
+        "target": "allopposing",
+        "originalAuthor": "138315499162435584",
+        "levelLock": 20,
+        "preSkill": [
+            "KiSlash",
+            20
+        ]
+    },
+    "KiSlash": {
+        "name": "KiSlash",
+        "cost": 8,
+        "costtype": "mp",
+        "pow": 50,
+        "acc": 95,
+        "crit": 5,
+        "type": "bless",
+        "atktype": "physical",
+        "target": "allopposing",
+        "originalAuthor": "138315499162435584",
+        "levelLock": 8,
+        "evoSkill": [
+            "KiSlash[2]",
+            21
+        ]
+    },
+    "Makouha": {
+        "costtype": "mp",
+        "cost": 8,
+        "pow": 60,
+        "acc": 90,
+        "type": "bless",
+        "atktype": "magic",
+        "target": "allopposing",
+        "name": "Makouha",
+        "desc": "The user damages the opposing side with light.",
+        "evoSkill": [
+            "Makouga",
+            30
+        ],
+        "preSkill": [
+            "remove",
+            13
+        ]
+    },
+    "Rakouha": {
+        "name": "Rakouha",
+        "cost": 4,
+        "costtype": "mp",
+        "pow": 60,
+        "acc": 95,
+        "type": "bless",
+        "atktype": "magic",
+        "target": "random",
+        "desc": "Light bless damage to one random target.",
+        "originalAuthor": "441198920668938260"
+    },
+    "Baikouha": {
+        "name": "Baikouha",
+        "cost": 8,
+        "costtype": "mp",
+        "pow": 60,
+        "acc": 90,
+        "type": "bless",
+        "atktype": "magic",
+        "target": "everyone",
+        "desc": "The user damages everyone on the battlefield with mild light.",
+        "originalAuthor": "544290248734015488"
+    },
+    "KiBlast": {
+        "name": "KiBlast",
+        "cost": 5,
+        "costtype": "mppercent",
+        "pow": 60,
+        "acc": 95,
+        "crit": 3,
+        "type": "bless",
+        "atktype": "magic",
+        "target": "one",
+        "originalAuthor": "138315499162435584",
+        "evoSkill": [
+            "KiBlast[2]",
+            19
+        ]
+    },
+    "KiBlast[2]": {
+        "name": "Ki-Blast [2]",
+        "cost": 5,
+        "costtype": "mppercent",
+        "pow": 60,
+        "acc": 95,
+        "crit": 3,
+        "hits": 2,
+        "type": "bless",
+        "atktype": "magic",
+        "target": "one",
+        "originalAuthor": "138315499162435584",
+        "levelLock": 18
+    },
+    "Kouha": {
+        "costtype": "mp",
+        "cost": 4,
+        "pow": 60,
+        "acc": 95,
+        "type": "bless",
+        "atktype": "magic",
+        "target": "one",
+        "name": "Kouha",
+        "desc": "The user damages their foe with light.",
+        "evoSkill": [
+            "Kouga",
+            20
+        ]
+    },
+    "LuckyLight": {
+        "name": "Lucky Light",
+        "cost": 5,
+        "costtype": "mp",
+        "pow": 60,
+        "acc": 95,
+        "type": "bless",
+        "atktype": "magic",
+        "target": "one",
+        "desc": "The user fires a beam of light at the target. This uses the user's luck stat to do damage.",
+        "originalAuthor": "544290248734015488",
+        "statCalc": "luk",
+        "evoSkill": [
+            "ShineOfLuck",
+            20
+        ]
+    },
+    "KougEA": {
+        "name": "KougEA",
+        "cost": 200,
+        "costtype": "money",
+        "pow": 70,
+        "acc": 90,
+        "type": "bless",
+        "atktype": "magic",
+        "target": "random",
+        "originalAuthor": "363363984390356993",
+        "levelLock": 10,
+        "desc": "Purchase this DLC to deal medium Bless damage",
+        "preSkill": [
+            "KouhEA",
+            9
+        ],
+        "evoSkill": [
+            "KougEAon",
+            23
+        ]
+    },
+    "MavocEA": {
+        "name": "MavocEA",
+        "cost": 200,
+        "costtype": "money",
+        "pow": 30,
+        "acc": 85,
+        "hits": 4,
+        "type": "sound",
+        "status": "rage",
+        "statuschance": 3,
+        "atktype": "magic",
+        "target": "random",
+        "desc": "Purchase this DLC to deal multiple light Sound damage",
+        "originalAuthor": "363363984390356993",
+        "preSkill": [
+            "remove",
+            7
+        ],
+        "evoSkill": [
+            "MavocEAon",
+            18
+        ]
+    },
+    "VocEA": {
+        "name": "VocEA",
+        "cost": 100,
+        "costtype": "money",
+        "pow": 30,
+        "acc": 90,
+        "type": "sound",
+        "status": "rage",
+        "statuschance": 3,
+        "atktype": "magic",
+        "target": "random",
+        "originalAuthor": "363363984390356993",
+        "desc": "Purchase this DLC to deal light Sound damage",
+        "evoSkill": [
+            "VocEAlao",
+            10
+        ]
+    },
+    "VEAx": {
+        "name": "VEAx",
+        "cost": 100,
+        "costtype": "money",
+        "pow": 35,
+        "acc": 90,
+        "type": "sound",
+        "atktype": "magic",
+        "target": "random",
+        "originalAuthor": "441198920668938260"
+    },
+    "VEAxdeus": {
+        "name": "VEAxdeus",
+        "cost": 200,
+        "costtype": "money",
+        "pow": 35,
+        "acc": 90,
+        "hits": 2,
+        "type": "sound",
+        "atktype": "magic",
+        "target": "random",
+        "originalAuthor": "441198920668938260"
+    },
+    "HateCry": {
+        "name": "Hate Cry",
+        "cost": 4,
+        "costtype": "mp",
+        "pow": 54,
+        "acc": 95,
+        "type": "sound",
+        "status": "rage",
+        "statuschance": 15,
+        "atktype": "magic",
+        "target": "one",
+        "originalAuthor": "363363984390356993",
+        "evoSkill": [
+            "HeartCry",
+            20
+        ],
+        "desc": "The voices of outside shall condemn them to giving in to their anger."
+    },
+    "Bavoca": {
+        "name": "Bavoca",
+        "cost": 8,
+        "costtype": "mp",
+        "pow": 60,
+        "acc": 90,
+        "type": "sound",
+        "status": "rage",
+        "statuschance": 5,
+        "atktype": "magic",
+        "target": "everyone",
+        "originalAuthor": "441198920668938260"
+    },
+    "Accord": {
+        "name": "Accord",
+        "cost": 4,
+        "costtype": "mp",
+        "pow": 60,
+        "acc": 95,
+        "type": "sound",
+        "status": "silence",
+        "statuschance": 5,
+        "atktype": "magic",
+        "target": "one",
+        "desc": "The user yells loudly, with a low chance to muffle the enemy.",
+        "originalAuthor": "363363984390356993",
+        "evoSkill": [
+            "Accordion",
+            20
+        ]
+    },
+    "Maraccord": {
+        "name": "Maraccord",
+        "cost": 8,
+        "costtype": "mp",
+        "pow": 60,
+        "acc": 90,
+        "type": "sound",
+        "status": "silence",
+        "statuschance": 5,
+        "atktype": "magic",
+        "target": "one",
+        "desc": "The user yells loudly, with a low chance to muffle the enemies.",
+        "originalAuthor": "363363984390356993",
+        "evoSkill": [
+            "Maraccordion",
+            35
+        ],
+        "preSkill": [
+            "remove",
+            13
+        ]
+    },
+    "Ravoca": {
+        "name": "Ravoca",
+        "cost": 4,
+        "costtype": "mp",
+        "pow": 60,
+        "acc": 95,
+        "type": "sound",
+        "atktype": "magic",
+        "target": "random",
+        "desc": "Light sound damage to one random target.",
+        "originalAuthor": "441198920668938260"
+    },
+    "Voca": {
+        "name": "Voca",
+        "cost": 4,
+        "costtype": "mp",
+        "pow": 60,
+        "acc": 95,
+        "type": "sound",
+        "status": "rage",
+        "statuschance": 5,
+        "atktype": "magic",
+        "target": "one",
+        "desc": "The user screeches loudly, with a low chance to inflict rage.",
+        "originalAuthor": "516359709779820544",
+        "evoSkill": [
+            "Vocalao",
+            20
+        ]
+    },
+    "Mavoca": {
+        "name": "Mavoca",
+        "cost": 8,
+        "costtype": "mp",
+        "pow": 60,
+        "acc": 90,
+        "type": "sound",
+        "atktype": "magic",
+        "target": "allopposing",
+        "originalAuthor": "441198920668938260",
+        "status": "rage",
+        "statuschance": 5,
+        "preSkill": [
+            "remove",
+            13
+        ]
+    },
+    "MagrEA": {
+        "name": "MagrEA",
+        "cost": 200,
+        "costtype": "money",
+        "pow": 30,
+        "acc": 85,
+        "hits": 4,
+        "type": "gravity",
+        "atktype": "magic",
+        "target": "random",
+        "desc": "Purchase this DLC to deal multiple light Gravity damage",
+        "originalAuthor": "363363984390356993",
+        "preSkill": [
+            "remove",
+            7
+        ],
+        "evoSkill": [
+            "MagrEAva",
+            18
+        ]
+    },
+    "GrEA": {
+        "name": "GrEA",
+        "cost": 100,
+        "costtype": "money",
+        "pow": 30,
+        "acc": 90,
+        "type": "gravity",
+        "atktype": "magic",
+        "target": "random",
+        "originalAuthor": "363363984390356993",
+        "desc": "Purchase this DLC to deal light Gravity damage",
+        "evoSkill": [
+            "GrEAva",
+            10
+        ]
+    },
+    "LunEAdeus": {
+        "name": "LunEAdeus",
+        "cost": 200,
+        "costtype": "money",
+        "pow": 35,
+        "acc": 90,
+        "hits": 2,
+        "type": "gravity",
+        "atktype": "magic",
+        "target": "random",
+        "originalAuthor": "441198920668938260"
+    },
+    "LunEA": {
+        "name": "LunEA",
+        "cost": 100,
+        "costtype": "money",
+        "pow": 35,
+        "acc": 90,
+        "type": "gravity",
+        "atktype": "magic",
+        "target": "random",
+        "originalAuthor": "441198920668938260"
+    },
+    "WandOfBlastWave": {
+        "name": "Wand of Blast Wave",
+        "cost": 35,
+        "costtype": "mp",
+        "pow": 50,
+        "acc": 95,
+        "crit": 10,
+        "type": "gravity",
+        "status": "paralyze",
+        "statuschance": 50,
+        "atktype": "magic",
+        "target": "one",
+        "desc": "Fires a bolt that sends the foe flying away! If they are ever gonna hit the floor they are probably not gonna fight immediately after.",
+        "originalAuthor": "621307633718132746"
+    },
+    "Gry": {
+        "name": "Gry",
+        "cost": 4,
+        "costtype": "mp",
+        "pow": 60,
+        "acc": 95,
+        "type": "gravity",
+        "atktype": "magic",
+        "target": "one",
+        "originalAuthor": "441198920668938260"
+    },
+    "Magry": {
+        "name": "Magry",
+        "cost": 8,
+        "costtype": "mp",
+        "pow": 60,
+        "acc": 90,
+        "type": "gravity",
+        "atktype": "magic",
+        "target": "allopposing",
+        "originalAuthor": "441198920668938260",
+        "preSkill": [
+            "remove",
+            13
+        ]
+    },
+    "Bagry": {
+        "name": "Bagry",
+        "cost": 8,
+        "costtype": "mp",
+        "pow": 60,
+        "acc": 90,
+        "type": "gravity",
+        "atktype": "magic",
+        "target": "everyone",
+        "originalAuthor": "441198920668938260"
+    },
+    "Ragry": {
+        "name": "Ragry",
+        "cost": 4,
+        "costtype": "mp",
+        "pow": 60,
+        "acc": 95,
+        "type": "gravity",
+        "atktype": "magic",
+        "target": "random",
+        "desc": "Light gravity damage to one random target.",
+        "originalAuthor": "441198920668938260"
+    },
+    "GrEAva": {
+        "name": "GrEAva",
+        "cost": 200,
+        "costtype": "money",
+        "pow": 70,
+        "acc": 90,
+        "type": "gravity",
+        "atktype": "magic",
+        "target": "random",
+        "originalAuthor": "363363984390356993",
+        "levelLock": 10,
+        "desc": "Purchase this DLC to deal medium Gravity damage",
+        "preSkill": [
+            "GrEA",
+            9
+        ],
+        "evoSkill": [
+            "GrEAdyne",
+            23
+        ]
+    },
+    "MagrEAva": {
+        "name": "MagrEAva",
+        "cost": 400,
+        "costtype": "money",
+        "pow": 70,
+        "acc": 85,
+        "hits": 4,
+        "type": "gravity",
+        "atktype": "magic",
+        "target": "random",
+        "desc": "Purchase this DLC to deal multiple medium Gravity damage",
+        "originalAuthor": "363363984390356993",
+        "levelLock": 10,
+        "preSkill": [
+            "MagrEA",
+            17
+        ],
+        "evoSkill": [
+            "MagrEAdyne",
+            48
+        ]
+    },
+    "Lunadeus": {
+        "name": "Lunadeus",
+        "cost": 8,
+        "costtype": "mp",
+        "pow": 70,
+        "acc": 95,
+        "hits": 2,
+        "type": "gravity",
+        "atktype": "magic",
+        "target": "randomopposing",
+        "originalAuthor": "441198920668938260",
+        "levelLock": 10
+    },
+    "Luna": {
+        "name": "Luna",
+        "cost": 5,
+        "costtype": "mp",
+        "pow": 70,
+        "acc": 95,
+        "type": "gravity",
+        "atktype": "magic",
+        "target": "one",
+        "originalAuthor": "441198920668938260",
+        "levelLock": 10
+    },
+    "PowerDrain": {
+        "name": "PowerDrain",
+        "cost": 32,
+        "costtype": "mp",
+        "pow": 24,
+        "acc": 100,
+        "type": "almighty",
+        "atktype": "magic",
+        "target": "one",
+        "originalAuthor": "363363984390356993",
+        "levelLock": 24,
+        "debuff": "all",
+        "buffchance": 100,
+        "buff": "all",
+        "desc": "The user decreases all stats of one enemy and simultaneously increases their own"
+    },
+    "OmnEA": {
+        "name": "OmnEA",
+        "cost": 100,
+        "costtype": "money",
+        "pow": 35,
+        "acc": 90,
+        "type": "almighty",
+        "atktype": "magic",
+        "target": "random",
+        "originalAuthor": "441198920668938260"
+    },
+    "OmnEAdeus": {
+        "name": "OmnEAdeus",
+        "cost": 200,
+        "costtype": "money",
+        "pow": 35,
+        "acc": 90,
+        "hits": 2,
+        "type": "almighty",
+        "atktype": "magic",
+        "target": "random",
+        "originalAuthor": "441198920668938260"
+    },
+    "PhysicalMegidolaon": {
+        "name": "Physical Megidolaon",
+        "cost": 52,
+        "costtype": "hp",
+        "pow": 36,
+        "acc": 80,
+        "hits": 5,
+        "type": "almighty",
+        "atktype": "physical",
+        "target": "allopposing",
+        "desc": "Believe it or not, this skill is just as powerful as the actual Megidolaon",
+        "originalAuthor": "363363984390356993",
+        "levelLock": 90
+    },
+    "LifeLeak": {
+        "name": "LifeLeak",
+        "cost": 15,
+        "costtype": "mppercent",
+        "pow": 45,
+        "acc": 95,
+        "hits": 2,
+        "type": "almighty",
+        "atktype": "magic",
+        "target": "allopposing",
+        "desc": "This Almighty skill destabilises the life force of one enemy. Attack the enemy with unstable life force to recover your HP!",
+        "originalAuthor": "363363984390356993",
+        "verse": [
+            "heal",
+            75
+        ],
+        "levelLock": {}
+    },
+    "SpiritLeech": {
+        "name": "Spirit Leech",
+        "stealmp": true,
+        "cost": 6,
+        "costtype": "mp",
+        "pow": 50,
+        "acc": 100,
+        "type": "almighty",
+        "atktype": "magic",
+        "target": "one",
+        "desc": "The user drains 50 MP from the target by any means necessary. They will gain all MP stolen."
+    },
+    "FireofSinai": {
+        "name": "Fire of Sinai",
+        "cost": 37,
+        "costtype": "mp",
+        "pow": 55,
+        "acc": 95,
+        "hits": 8,
+        "type": "almighty",
+        "atktype": "magic",
+        "target": "randomopposing",
+        "desc": "The user casts eight holy flames upon their foes",
+        "originalAuthor": "363363984390356993",
+        "levelLock": 77
+    },
+    "Razan": {
+        "name": "Razan",
+        "cost": 4,
+        "costtype": "mp",
+        "pow": 60,
+        "acc": 95,
+        "type": "almighty",
+        "atktype": "magic",
+        "target": "random",
+        "desc": "Light almighty damage to one random target.",
+        "originalAuthor": "441198920668938260"
+    },
+    "Zan": {
+        "name": "Zan",
+        "cost": 4,
+        "costtype": "mp",
+        "pow": 60,
+        "acc": 95,
+        "type": "almighty",
+        "atktype": "magic",
+        "target": "one",
+        "desc": "The user blasts their target with a strong gale."
+    },
+    "Mazan": {
+        "name": "Mazan",
+        "cost": 8,
+        "costtype": "mp",
+        "pow": 60,
+        "acc": 90,
+        "type": "almighty",
+        "atktype": "magic",
+        "target": "allopposing",
+        "desc": "The user blasts the targets with a strong gale."
+    },
+    "MasterSpark": {
+        "name": "Master Spark",
+        "cost": 100,
+        "costtype": "mppercent",
+        "pow": 60,
+        "acc": 100,
+        "hits": 15,
+        "type": "almighty",
+        "atktype": "magic",
+        "target": "one",
+        "desc": "Burn all of your MP to unleash a gigantic beam of destructive energy at the opponent.",
+        "originalAuthor": "412328234198237189"
+    },
+    "TriAttack": {
+        "name": "TriAttack",
+        "cost": 16,
+        "costtype": "mp",
+        "pow": 60,
+        "acc": 95,
+        "type": "almighty",
+        "status": [
+            "burn",
+            "freeze",
+            "paralyze"
+        ],
+        "statuschance": 10,
+        "atktype": "magic",
+        "target": "one",
+        "desc": "The user fires 3 beams of varying element to strike the foe. This skill has a low chance of either burning, freezing, or paralyzing the foe.",
+        "originalAuthor": "516359709779820544"
+    },
+    "PKLove-Alpha": {
+        "name": "PK Love α",
+        "cost": 16,
+        "costtype": "mp",
+        "pow": 60,
+        "acc": 95,
+        "type": "almighty",
+        "atktype": "magic",
+        "target": "allopposing",
+        "desc": "Light Almighty damage to all foes.",
+        "originalAuthor": "516359709779820544",
+        "levelLock": 62
+    },
+    "Omni": {
+        "name": "Omni",
+        "cost": 5,
+        "costtype": "mp",
+        "pow": 70,
+        "acc": 95,
+        "type": "almighty",
+        "atktype": "magic",
+        "target": "one",
+        "originalAuthor": "441198920668938260",
+        "levelLock": 10
+    },
+    "Omnideus": {
+        "name": "Omnideus",
+        "cost": 8,
+        "costtype": "mp",
+        "pow": 70,
+        "acc": 95,
+        "hits": 2,
+        "type": "almighty",
+        "atktype": "magic",
+        "target": "randomopposing",
+        "originalAuthor": "441198920668938260",
+        "levelLock": 10
+    },
+    "YouDefinitelyLose": {
+        "name": "YouDefinitelyLose",
+        "cost": 100,
+        "costtype": "mppercent",
+        "pow": 3.838389995499939e+187,
+        "acc": 999,
+        "crit": 999,
+        "type": "almighty",
+        "atktype": "magic",
+        "target": "allallies",
+        "desc": "Yep your team is definitely gone once this move is used.",
+        "originalAuthor": "441198920668938260",
+        "levelLock": 100,
+        "preSkill": [
+            "YouLose",
+            99
+        ],
+        "evoSkill": [
+            "YouDefinitelyLose",
+            500
+        ]
     },
     "DarkBloodWine": {
         "name": "Dark Blood Wine",
@@ -21788,843 +22772,6 @@
         "desc": "The user restores all allies' MP by 50 MP.",
         "originalAuthor": "441198920668938260"
     },
-    "PSIMagnet-Alpha": {
-        "name": "PSI Magnet α",
-        "costtype": "mp",
-        "pow": 1,
-        "acc": 100,
-        "type": "status",
-        "atktype": "magic",
-        "target": "one",
-        "desc": "Drains the mana of a foe.",
-        "originalAuthor": "621307633718132746",
-        "stealmp": true,
-        "levelLock": {}
-    },
-    "Deband[Ver.S]": {
-        "name": "Deband [Ver.S]",
-        "type": "status",
-        "cost": 24,
-        "costtype": "mp",
-        "originalAuthor": "138315499162435584",
-        "buff": "end",
-        "target": "allallies",
-        "levelLock": 3,
-        "desc": "Buffs the allies that surrounds the user's endurance once.",
-        "pow": 15,
-        "hits": 1
-    },
-    "Vulnerability": {
-        "name": "Vulnerability",
-        "type": "passive",
-        "desc": "When guarding, the user takes triple damage",
-        "originalAuthor": "363363984390356993",
-        "pow": -260,
-        "guardboost": true,
-        "passive": "guardboost"
-    },
-    "Armageddon": {
-        "name": "Armageddon",
-        "cost": 1,
-        "costtype": "hp",
-        "pow": 1,
-        "acc": 999,
-        "hits": 15,
-        "type": "undefined",
-        "atktype": "magic",
-        "target": "everyone",
-        "desc": "In the end... Everything was blown away...",
-        "originalAuthor": "363363984390356993",
-        "ohko": true,
-        "levelLock": {}
-    },
-    "Eiha": {
-        "costtype": "mp",
-        "cost": 4,
-        "pow": 60,
-        "acc": 95,
-        "type": "curse",
-        "atktype": "magic",
-        "target": "one",
-        "name": "Eiha"
-    },
-    "Maeiha": {
-        "costtype": "mp",
-        "cost": 8,
-        "pow": 60,
-        "acc": 90,
-        "type": "curse",
-        "atktype": "magic",
-        "target": "allopposing",
-        "name": "Maeiha",
-        "preSkill": [
-            "remove",
-            13
-        ]
-    },
-    "Baeiha": {
-        "name": "Baeiha",
-        "cost": 8,
-        "costtype": "mp",
-        "pow": 60,
-        "acc": 90,
-        "type": "curse",
-        "atktype": "magic",
-        "target": "everyone",
-        "desc": "The user damages everyone on the battlefield with mild darkness.",
-        "originalAuthor": "544290248734015488"
-    },
-    "Raeiha": {
-        "name": "Raeiha",
-        "cost": 4,
-        "costtype": "mp",
-        "pow": 60,
-        "acc": 95,
-        "type": "curse",
-        "atktype": "magic",
-        "target": "random",
-        "desc": "Light curse damage to one random target.",
-        "originalAuthor": "441198920668938260"
-    },
-    "DarkGrab": {
-        "name": "DarkGrab",
-        "cost": 7,
-        "costtype": "hppercent",
-        "pow": 60,
-        "acc": 95,
-        "crit": 5,
-        "type": "curse",
-        "atktype": "physical",
-        "target": "one",
-        "desc": "The user envelops their fist in darkness to strike the foe at high speeds with a 10% chance to steal an item from the foe.",
-        "originalAuthor": "516359709779820544",
-        "steal": 10,
-        "levelLock": 20,
-        "evoSkill": [
-            "UnseenGrab",
-            20
-        ]
-    },
-    "DarkBeam": {
-        "name": "DarkBeam",
-        "cost": 35,
-        "costtype": "mp",
-        "pow": 60,
-        "acc": 80,
-        "hits": 3,
-        "type": "curse",
-        "atktype": "magic",
-        "target": "one",
-        "desc": "The user fires a beam of darkness at the foe.",
-        "originalAuthor": "621307633718132746"
-    },
-    "EvilCharm": {
-        "name": "Evil Charm",
-        "cost": 5,
-        "costtype": "mp",
-        "pow": 60,
-        "acc": 95,
-        "type": "curse",
-        "atktype": "magic",
-        "target": "one",
-        "desc": "The user uses shadows from the darkness to magnetize to the target and harm them. This uses the user's charisma stat to do damage.",
-        "originalAuthor": "544290248734015488",
-        "statCalc": "chr",
-        "evoSkill": [
-            "SinfulCharisma",
-            20
-        ]
-    },
-    "GasterBlaster": {
-        "costtype": "mp",
-        "cost": 25,
-        "pow": 66,
-        "acc": 90,
-        "type": "curse",
-        "atktype": "magic",
-        "target": "one",
-        "name": "Gaster Blaster",
-        "desc": "The user summons a creature able to fire a powerful laser at the foe.",
-        "hits": 3
-    },
-    "MaEAiga": {
-        "name": "MaEAiga",
-        "cost": 400,
-        "costtype": "money",
-        "pow": 70,
-        "acc": 85,
-        "hits": 4,
-        "type": "curse",
-        "atktype": "magic",
-        "target": "random",
-        "desc": "Purchase this DLC to deal multiple medium Curse damage",
-        "originalAuthor": "363363984390356993",
-        "levelLock": 10,
-        "preSkill": [
-            "MaEAiha",
-            17
-        ],
-        "evoSkill": [
-            "MaEAigaon",
-            48
-        ]
-    },
-    "Hex": {
-        "name": "Hex",
-        "cost": 5,
-        "costtype": "mp",
-        "pow": 70,
-        "acc": 95,
-        "type": "curse",
-        "atktype": "magic",
-        "target": "one",
-        "originalAuthor": "441198920668938260",
-        "levelLock": 10
-    },
-    "Hexdeus": {
-        "name": "Hexdeus",
-        "cost": 8,
-        "costtype": "mp",
-        "pow": 70,
-        "acc": 95,
-        "hits": 2,
-        "type": "curse",
-        "atktype": "magic",
-        "target": "randomopposing",
-        "originalAuthor": "441198920668938260",
-        "levelLock": 10
-    },
-    "EAiga": {
-        "name": "EAiga",
-        "cost": 200,
-        "costtype": "money",
-        "pow": 70,
-        "acc": 90,
-        "type": "curse",
-        "atktype": "magic",
-        "target": "random",
-        "originalAuthor": "363363984390356993",
-        "levelLock": 10,
-        "desc": "Purchase this DLC to deal medium Curse damage",
-        "preSkill": [
-            "EAiha",
-            9
-        ],
-        "evoSkill": [
-            "EAigaon",
-            23
-        ]
-    },
-    "Makouha": {
-        "costtype": "mp",
-        "cost": 8,
-        "pow": 60,
-        "acc": 90,
-        "type": "bless",
-        "atktype": "magic",
-        "target": "allopposing",
-        "name": "Makouha",
-        "desc": "The user damages the opposing side with light.",
-        "evoSkill": [
-            "Makouga",
-            30
-        ],
-        "preSkill": [
-            "remove",
-            13
-        ]
-    },
-    "Rakouha": {
-        "name": "Rakouha",
-        "cost": 4,
-        "costtype": "mp",
-        "pow": 60,
-        "acc": 95,
-        "type": "bless",
-        "atktype": "magic",
-        "target": "random",
-        "desc": "Light bless damage to one random target.",
-        "originalAuthor": "441198920668938260"
-    },
-    "Baikouha": {
-        "name": "Baikouha",
-        "cost": 8,
-        "costtype": "mp",
-        "pow": 60,
-        "acc": 90,
-        "type": "bless",
-        "atktype": "magic",
-        "target": "everyone",
-        "desc": "The user damages everyone on the battlefield with mild light.",
-        "originalAuthor": "544290248734015488"
-    },
-    "KiBlast": {
-        "name": "KiBlast",
-        "cost": 5,
-        "costtype": "mppercent",
-        "pow": 60,
-        "acc": 95,
-        "crit": 3,
-        "type": "bless",
-        "atktype": "magic",
-        "target": "one",
-        "originalAuthor": "138315499162435584",
-        "evoSkill": [
-            "KiBlast[2]",
-            19
-        ]
-    },
-    "KiBlast[2]": {
-        "name": "Ki-Blast [2]",
-        "cost": 5,
-        "costtype": "mppercent",
-        "pow": 60,
-        "acc": 95,
-        "crit": 3,
-        "hits": 2,
-        "type": "bless",
-        "atktype": "magic",
-        "target": "one",
-        "originalAuthor": "138315499162435584",
-        "levelLock": 18
-    },
-    "Kouha": {
-        "costtype": "mp",
-        "cost": 4,
-        "pow": 60,
-        "acc": 95,
-        "type": "bless",
-        "atktype": "magic",
-        "target": "one",
-        "name": "Kouha",
-        "desc": "The user damages their foe with light.",
-        "evoSkill": [
-            "Kouga",
-            20
-        ]
-    },
-    "LuckyLight": {
-        "name": "Lucky Light",
-        "cost": 5,
-        "costtype": "mp",
-        "pow": 60,
-        "acc": 95,
-        "type": "bless",
-        "atktype": "magic",
-        "target": "one",
-        "desc": "The user fires a beam of light at the target. This uses the user's luck stat to do damage.",
-        "originalAuthor": "544290248734015488",
-        "statCalc": "luk",
-        "evoSkill": [
-            "ShineOfLuck",
-            20
-        ]
-    },
-    "KougEA": {
-        "name": "KougEA",
-        "cost": 200,
-        "costtype": "money",
-        "pow": 70,
-        "acc": 90,
-        "type": "bless",
-        "atktype": "magic",
-        "target": "random",
-        "originalAuthor": "363363984390356993",
-        "levelLock": 10,
-        "desc": "Purchase this DLC to deal medium Bless damage",
-        "preSkill": [
-            "KouhEA",
-            9
-        ],
-        "evoSkill": [
-            "KougEAon",
-            23
-        ]
-    },
-    "MakougEA": {
-        "name": "MakougEA",
-        "cost": 400,
-        "costtype": "money",
-        "pow": 70,
-        "acc": 85,
-        "hits": 4,
-        "type": "bless",
-        "atktype": "magic",
-        "target": "random",
-        "desc": "Purchase this DLC to deal multiple medium Bless damage",
-        "originalAuthor": "363363984390356993",
-        "levelLock": 10,
-        "preSkill": [
-            "MakouhEA",
-            17
-        ],
-        "evoSkill": [
-            "MakougEAon",
-            48
-        ]
-    },
-    "Glow": {
-        "name": "Glow",
-        "cost": 5,
-        "costtype": "mp",
-        "pow": 70,
-        "acc": 95,
-        "type": "bless",
-        "atktype": "magic",
-        "target": "one",
-        "originalAuthor": "441198920668938260",
-        "levelLock": 10
-    },
-    "Glowdeus": {
-        "name": "Glowdeus",
-        "cost": 8,
-        "costtype": "mp",
-        "pow": 70,
-        "acc": 95,
-        "hits": 2,
-        "type": "bless",
-        "atktype": "magic",
-        "target": "randomopposing",
-        "originalAuthor": "441198920668938260",
-        "levelLock": 10
-    },
-    "RaysOfHope!": {
-        "name": "Rays of Hope!",
-        "cost": 60,
-        "costtype": "mp",
-        "pow": 75,
-        "acc": 80,
-        "type": "bless",
-        "atktype": "magic",
-        "target": "allopposing",
-        "desc": "Fires rays of hope that purify all sinners!\nIsn't that lovely!",
-        "originalAuthor": "621307633718132746",
-        "levelLock": 10
-    },
-    "HateCry": {
-        "name": "Hate Cry",
-        "cost": 4,
-        "costtype": "mp",
-        "pow": 54,
-        "acc": 95,
-        "type": "sound",
-        "status": "rage",
-        "statuschance": 15,
-        "atktype": "magic",
-        "target": "one",
-        "originalAuthor": "363363984390356993",
-        "evoSkill": [
-            "HeartCry",
-            20
-        ],
-        "desc": "The voices of outside shall condemn them to giving in to their anger."
-    },
-    "Bavoca": {
-        "name": "Bavoca",
-        "cost": 8,
-        "costtype": "mp",
-        "pow": 60,
-        "acc": 90,
-        "type": "sound",
-        "status": "rage",
-        "statuschance": 5,
-        "atktype": "magic",
-        "target": "everyone",
-        "originalAuthor": "441198920668938260"
-    },
-    "Accord": {
-        "name": "Accord",
-        "cost": 4,
-        "costtype": "mp",
-        "pow": 60,
-        "acc": 95,
-        "type": "sound",
-        "status": "silence",
-        "statuschance": 5,
-        "atktype": "magic",
-        "target": "one",
-        "desc": "The user yells loudly, with a low chance to muffle the enemy.",
-        "originalAuthor": "363363984390356993",
-        "evoSkill": [
-            "Accordion",
-            20
-        ]
-    },
-    "Maraccord": {
-        "name": "Maraccord",
-        "cost": 8,
-        "costtype": "mp",
-        "pow": 60,
-        "acc": 90,
-        "type": "sound",
-        "status": "silence",
-        "statuschance": 5,
-        "atktype": "magic",
-        "target": "one",
-        "desc": "The user yells loudly, with a low chance to muffle the enemies.",
-        "originalAuthor": "363363984390356993",
-        "evoSkill": [
-            "Maraccordion",
-            35
-        ],
-        "preSkill": [
-            "remove",
-            13
-        ]
-    },
-    "Ravoca": {
-        "name": "Ravoca",
-        "cost": 4,
-        "costtype": "mp",
-        "pow": 60,
-        "acc": 95,
-        "type": "sound",
-        "atktype": "magic",
-        "target": "random",
-        "desc": "Light sound damage to one random target.",
-        "originalAuthor": "441198920668938260"
-    },
-    "Voca": {
-        "name": "Voca",
-        "cost": 4,
-        "costtype": "mp",
-        "pow": 60,
-        "acc": 95,
-        "type": "sound",
-        "status": "rage",
-        "statuschance": 5,
-        "atktype": "magic",
-        "target": "one",
-        "desc": "The user screeches loudly, with a low chance to inflict rage.",
-        "originalAuthor": "516359709779820544",
-        "evoSkill": [
-            "Vocalao",
-            20
-        ]
-    },
-    "Mavoca": {
-        "name": "Mavoca",
-        "cost": 8,
-        "costtype": "mp",
-        "pow": 60,
-        "acc": 90,
-        "type": "sound",
-        "atktype": "magic",
-        "target": "allopposing",
-        "originalAuthor": "441198920668938260",
-        "status": "rage",
-        "statuschance": 5,
-        "preSkill": [
-            "remove",
-            13
-        ]
-    },
-    "VocEAlao": {
-        "name": "VocEAlao",
-        "cost": 200,
-        "costtype": "money",
-        "pow": 70,
-        "acc": 90,
-        "type": "sound",
-        "status": "rage",
-        "statuschance": 3,
-        "atktype": "magic",
-        "target": "random",
-        "originalAuthor": "363363984390356993",
-        "levelLock": 10,
-        "desc": "Purchase this DLC to deal medium Sound damage",
-        "preSkill": [
-            "VocEA",
-            9
-        ],
-        "evoSkill": [
-            "VocEAdyne",
-            23
-        ]
-    },
-    "MavocEAon": {
-        "name": "MavocEAon",
-        "cost": 400,
-        "costtype": "money",
-        "pow": 70,
-        "acc": 85,
-        "hits": 4,
-        "type": "sound",
-        "status": "rage",
-        "statuschance": 3,
-        "atktype": "magic",
-        "target": "random",
-        "desc": "Purchase this DLC to deal multiple medium Sound damage",
-        "originalAuthor": "363363984390356993",
-        "levelLock": 10,
-        "preSkill": [
-            "MavocEA",
-            17
-        ],
-        "evoSkill": [
-            "MavocEAdyne",
-            48
-        ]
-    },
-    "Voxdeus": {
-        "name": "Voxdeus",
-        "cost": 8,
-        "costtype": "mp",
-        "pow": 70,
-        "acc": 95,
-        "hits": 2,
-        "type": "sound",
-        "atktype": "magic",
-        "target": "randomopposing",
-        "originalAuthor": "441198920668938260",
-        "levelLock": 10
-    },
-    "Vox": {
-        "name": "Vox",
-        "cost": 5,
-        "costtype": "mp",
-        "pow": 70,
-        "acc": 95,
-        "type": "sound",
-        "atktype": "magic",
-        "target": "one",
-        "originalAuthor": "441198920668938260",
-        "levelLock": 10
-    },
-    "Gry": {
-        "name": "Gry",
-        "cost": 4,
-        "costtype": "mp",
-        "pow": 60,
-        "acc": 95,
-        "type": "gravity",
-        "atktype": "magic",
-        "target": "one",
-        "originalAuthor": "441198920668938260"
-    },
-    "Magry": {
-        "name": "Magry",
-        "cost": 8,
-        "costtype": "mp",
-        "pow": 60,
-        "acc": 90,
-        "type": "gravity",
-        "atktype": "magic",
-        "target": "allopposing",
-        "originalAuthor": "441198920668938260",
-        "preSkill": [
-            "remove",
-            13
-        ]
-    },
-    "Bagry": {
-        "name": "Bagry",
-        "cost": 8,
-        "costtype": "mp",
-        "pow": 60,
-        "acc": 90,
-        "type": "gravity",
-        "atktype": "magic",
-        "target": "everyone",
-        "originalAuthor": "441198920668938260"
-    },
-    "Ragry": {
-        "name": "Ragry",
-        "cost": 4,
-        "costtype": "mp",
-        "pow": 60,
-        "acc": 95,
-        "type": "gravity",
-        "atktype": "magic",
-        "target": "random",
-        "desc": "Light gravity damage to one random target.",
-        "originalAuthor": "441198920668938260"
-    },
-    "GrEAva": {
-        "name": "GrEAva",
-        "cost": 200,
-        "costtype": "money",
-        "pow": 70,
-        "acc": 90,
-        "type": "gravity",
-        "atktype": "magic",
-        "target": "random",
-        "originalAuthor": "363363984390356993",
-        "levelLock": 10,
-        "desc": "Purchase this DLC to deal medium Gravity damage",
-        "preSkill": [
-            "GrEA",
-            9
-        ],
-        "evoSkill": [
-            "GrEAdyne",
-            23
-        ]
-    },
-    "MagrEAva": {
-        "name": "MagrEAva",
-        "cost": 400,
-        "costtype": "money",
-        "pow": 70,
-        "acc": 85,
-        "hits": 4,
-        "type": "gravity",
-        "atktype": "magic",
-        "target": "random",
-        "desc": "Purchase this DLC to deal multiple medium Gravity damage",
-        "originalAuthor": "363363984390356993",
-        "levelLock": 10,
-        "preSkill": [
-            "MagrEA",
-            17
-        ],
-        "evoSkill": [
-            "MagrEAdyne",
-            48
-        ]
-    },
-    "Lunadeus": {
-        "name": "Lunadeus",
-        "cost": 8,
-        "costtype": "mp",
-        "pow": 70,
-        "acc": 95,
-        "hits": 2,
-        "type": "gravity",
-        "atktype": "magic",
-        "target": "randomopposing",
-        "originalAuthor": "441198920668938260",
-        "levelLock": 10
-    },
-    "Luna": {
-        "name": "Luna",
-        "cost": 5,
-        "costtype": "mp",
-        "pow": 70,
-        "acc": 95,
-        "type": "gravity",
-        "atktype": "magic",
-        "target": "one",
-        "originalAuthor": "441198920668938260",
-        "levelLock": 10
-    },
-    "FireofSinai": {
-        "name": "Fire of Sinai",
-        "cost": 37,
-        "costtype": "mp",
-        "pow": 55,
-        "acc": 95,
-        "hits": 8,
-        "type": "almighty",
-        "atktype": "magic",
-        "target": "randomopposing",
-        "desc": "The user casts eight holy flames upon their foes",
-        "originalAuthor": "363363984390356993",
-        "levelLock": 77
-    },
-    "Razan": {
-        "name": "Razan",
-        "cost": 4,
-        "costtype": "mp",
-        "pow": 60,
-        "acc": 95,
-        "type": "almighty",
-        "atktype": "magic",
-        "target": "random",
-        "desc": "Light almighty damage to one random target.",
-        "originalAuthor": "441198920668938260"
-    },
-    "Zan": {
-        "name": "Zan",
-        "cost": 4,
-        "costtype": "mp",
-        "pow": 60,
-        "acc": 95,
-        "type": "almighty",
-        "atktype": "magic",
-        "target": "one",
-        "desc": "The user blasts their target with a strong gale."
-    },
-    "Mazan": {
-        "name": "Mazan",
-        "cost": 8,
-        "costtype": "mp",
-        "pow": 60,
-        "acc": 90,
-        "type": "almighty",
-        "atktype": "magic",
-        "target": "allopposing",
-        "desc": "The user blasts the targets with a strong gale."
-    },
-    "MasterSpark": {
-        "name": "Master Spark",
-        "cost": 100,
-        "costtype": "mppercent",
-        "pow": 60,
-        "acc": 100,
-        "hits": 15,
-        "type": "almighty",
-        "atktype": "magic",
-        "target": "one",
-        "desc": "Burn all of your MP to unleash a gigantic beam of destructive energy at the opponent.",
-        "originalAuthor": "412328234198237189"
-    },
-    "TriAttack": {
-        "name": "TriAttack",
-        "cost": 16,
-        "costtype": "mp",
-        "pow": 60,
-        "acc": 95,
-        "type": "almighty",
-        "status": [
-            "burn",
-            "freeze",
-            "paralyze"
-        ],
-        "statuschance": 10,
-        "atktype": "magic",
-        "target": "one",
-        "desc": "The user fires 3 beams of varying element to strike the foe. This skill has a low chance of either burning, freezing, or paralyzing the foe.",
-        "originalAuthor": "516359709779820544"
-    },
-    "PKLove-Alpha": {
-        "name": "PK Love α",
-        "cost": 16,
-        "costtype": "mp",
-        "pow": 60,
-        "acc": 95,
-        "type": "almighty",
-        "atktype": "magic",
-        "target": "allopposing",
-        "desc": "Light Almighty damage to all foes.",
-        "originalAuthor": "516359709779820544",
-        "levelLock": 62
-    },
-    "Omni": {
-        "name": "Omni",
-        "cost": 5,
-        "costtype": "mp",
-        "pow": 70,
-        "acc": 95,
-        "type": "almighty",
-        "atktype": "magic",
-        "target": "one",
-        "originalAuthor": "441198920668938260",
-        "levelLock": 10
-    },
-    "Omnideus": {
-        "name": "Omnideus",
-        "cost": 8,
-        "costtype": "mp",
-        "pow": 70,
-        "acc": 95,
-        "hits": 2,
-        "type": "almighty",
-        "atktype": "magic",
-        "target": "randomopposing",
-        "originalAuthor": "441198920668938260",
-        "levelLock": 10
-    },
     "DiEAra": {
         "name": "DiEAra",
         "cost": 150,
@@ -22723,6 +22870,18 @@
             35
         ]
     },
+    "MaxHPTest": {
+        "name": "MaxHPTest",
+        "type": "heal",
+        "cost": 60,
+        "costtype": "hp",
+        "pow": 60,
+        "atktype": "magic",
+        "target": "one",
+        "originalAuthor": "441198920668938260",
+        "levelLock": 6,
+        "increasemaxhp": true
+    },
     "ShadowStigma": {
         "name": "Shadow Stigma",
         "cost": 7,
@@ -22780,19 +22939,6 @@
             17
         ]
     },
-    "RegenSphere": {
-        "name": "Regen Sphere",
-        "costtype": "mp",
-        "cost": 42,
-        "pow": 75,
-        "crit": 3,
-        "type": "heal",
-        "target": "allallies",
-        "atktype": "magic",
-        "regenerate": true,
-        "desc": "The user plants a regenerating aura on their allies. It heals 75HP for 3 turns.",
-        "levelLock": 60
-    },
     "Sedia": {
         "name": "Sedia",
         "cost": 6,
@@ -22820,6 +22966,19 @@
         "atktype": "magic",
         "target": "one",
         "desc": "Smooch an ally to give them a refreshing recovery by 75 HP."
+    },
+    "RegenSphere": {
+        "name": "Regen Sphere",
+        "costtype": "mp",
+        "cost": 42,
+        "pow": 75,
+        "crit": 3,
+        "type": "heal",
+        "target": "allallies",
+        "atktype": "magic",
+        "regenerate": true,
+        "desc": "The user plants a regenerating aura on their allies. It heals 75HP for 3 turns.",
+        "levelLock": 60
     },
     "HealRing": {
         "name": "Heal Ring",
@@ -22900,6 +23059,18 @@
         "target": "caster",
         "desc": "Convert your MP into HP."
     },
+    "LifeUp-Alpha": {
+        "name": "LifeUp α",
+        "type": "heal",
+        "cost": 8,
+        "costtype": "mp",
+        "pow": 100,
+        "atktype": "magic",
+        "target": "ally",
+        "desc": "Restores 100 HP to one person.",
+        "originalAuthor": "621307633718132746",
+        "levelLock": 15
+    },
     "Overcharge": {
         "name": "Overcharge",
         "cost": 6,
@@ -22917,6 +23088,19 @@
             64
         ],
         "desc": "Sacrifice your life force to spread the dark essence that refills a large part of energy reserves of yourself and your allies."
+    },
+    "Undead-Like(T)": {
+        "name": "Undead-Like (Teammates)",
+        "cost": 30,
+        "costtype": "mppercent",
+        "pow": 110,
+        "acc": 80,
+        "type": "heal",
+        "atktype": "magic",
+        "target": "one",
+        "desc": "The user heals one ally with blood & mystical powers of necromancy by 110HP.",
+        "originalAuthor": "441198920668938260",
+        "levelLock": 15
     },
     "EnergyAria": {
         "name": "Energy Aria",
@@ -23104,6 +23288,19 @@
             59
         ]
     },
+    "MaxHeal": {
+        "name": "MaxHeal",
+        "type": "heal",
+        "cost": 20,
+        "costtype": "mp",
+        "pow": 200,
+        "atktype": "magic",
+        "target": "one",
+        "desc": "Increase the target's HP by around 10.",
+        "originalAuthor": "441198920668938260",
+        "levelLock": 1,
+        "increasemaxhp": true
+    },
     "HealMelody": {
         "name": "Heal Melody",
         "costtype": "mp",
@@ -23146,6 +23343,18 @@
         "target": "allallies",
         "desc": "Interesting healing power that restores 300 HP to all allies."
     },
+    "LifeUp-Beta": {
+        "name": "LifeUp β",
+        "type": "heal",
+        "cost": 20,
+        "costtype": "mp",
+        "pow": 300,
+        "atktype": "magic",
+        "target": "ally",
+        "desc": "Restores 300 HP to one person.",
+        "originalAuthor": "621307633718132746",
+        "levelLock": 30
+    },
     "HealSymphony": {
         "name": "Heal Symphony",
         "cost": 50,
@@ -23162,6 +23371,18 @@
             "HealMelody",
             54
         ]
+    },
+    "LifeUp-Omega": {
+        "name": "LifeUp Ω",
+        "type": "heal",
+        "cost": 24,
+        "costtype": "mp",
+        "pow": 400,
+        "atktype": "magic",
+        "target": "allallies",
+        "desc": "Restores 400 HP to everyone.",
+        "originalAuthor": "621307633718132746",
+        "levelLock": 40
     },
     "MegaDia": {
         "name": "Mega Dia",
@@ -23191,6 +23412,19 @@
         "buffchance": {},
         "levelLock": 90,
         "name": "Dark Recovery"
+    },
+    "LifeUp-Gamma": {
+        "name": "LifeUp γ",
+        "type": "heal",
+        "cost": 15,
+        "costtype": "hppercent",
+        "pow": 1030,
+        "atktype": "magic",
+        "target": "ally",
+        "desc": "Completely restores the HP of one person.",
+        "originalAuthor": "516359709779820544",
+        "levelLock": 65,
+        "fullheal": true
     },
     "Prayer": {
         "name": "Prayer",
@@ -23384,68 +23618,6 @@
         "originalAuthor": "621307633718132746",
         "statusheal": true,
         "levelLock": 25
-    },
-    "LifeUp-Alpha": {
-        "name": "LifeUp α",
-        "type": "heal",
-        "cost": 8,
-        "costtype": "mp",
-        "pow": 100,
-        "atktype": "magic",
-        "target": "ally",
-        "desc": "Restores 100 HP to one person.",
-        "originalAuthor": "621307633718132746",
-        "levelLock": 15
-    },
-    "LifeUp-Beta": {
-        "name": "LifeUp β",
-        "type": "heal",
-        "cost": 20,
-        "costtype": "mp",
-        "pow": 300,
-        "atktype": "magic",
-        "target": "ally",
-        "desc": "Restores 300 HP to one person.",
-        "originalAuthor": "621307633718132746",
-        "levelLock": 30
-    },
-    "LifeUp-Omega": {
-        "name": "LifeUp Ω",
-        "type": "heal",
-        "cost": 24,
-        "costtype": "mp",
-        "pow": 400,
-        "atktype": "magic",
-        "target": "allallies",
-        "desc": "Restores 400 HP to everyone.",
-        "originalAuthor": "621307633718132746",
-        "levelLock": 40
-    },
-    "LifeUp-Gamma": {
-        "name": "LifeUp γ",
-        "type": "heal",
-        "cost": 15,
-        "costtype": "hppercent",
-        "pow": 1030,
-        "atktype": "magic",
-        "target": "ally",
-        "desc": "Completely restores the HP of one person.",
-        "originalAuthor": "516359709779820544",
-        "levelLock": 65,
-        "fullheal": true
-    },
-    "Undead-Like(T)": {
-        "name": "Undead-Like (Teammates)",
-        "cost": 30,
-        "costtype": "mppercent",
-        "pow": 110,
-        "acc": 80,
-        "type": "heal",
-        "atktype": "magic",
-        "target": "one",
-        "desc": "The user heals one ally with blood & mystical powers of necromancy by 110HP.",
-        "originalAuthor": "441198920668938260",
-        "levelLock": 15
     },
     "WastrelBeam": {
         "name": "Wastrel Beam",
@@ -28555,6 +28727,14 @@
         "passive": "damagemag",
         "pow": -50
     },
+    "RegenRange": {
+        "name": "Regenerative Range",
+        "type": "passive",
+        "desc": "A passive skill that heals the attacker if they use a magical skill.",
+        "originalAuthor": "441198920668938260",
+        "passive": "damagemag",
+        "pow": -30
+    },
     "DiminishingLife": {
         "name": "Diminishing Life",
         "type": "passive",
@@ -28562,120 +28742,6 @@
         "originalAuthor": "363363984390356993",
         "passive": "regen",
         "pow": -13
-    },
-    "FlowSense": {
-        "name": "FlowSense",
-        "type": "passive",
-        "desc": "Allow the user to dodge magical attacks 10% of the time while moving with the flow.",
-        "originalAuthor": "441198920668938260",
-        "passive": "dodgemag",
-        "pow": 10
-    },
-    "PogoDodge": {
-        "name": "PogoDodge",
-        "type": "passive",
-        "desc": "With this passive you can pogo your way out of physical attacks 20% of the time.",
-        "originalAuthor": "441198920668938260",
-        "passive": "dodgephys",
-        "pow": 20
-    },
-    "Flowendla": {
-        "name": "Flowendla",
-        "cost": 66,
-        "costtype": "mp",
-        "pow": 1100,
-        "acc": 80,
-        "type": "water",
-        "atktype": "magic",
-        "target": "one",
-        "desc": "A more powerful version of Hydrouken, but more costly and no added bonuses.",
-        "originalAuthor": "532291526634635285",
-        "levelLock": 90,
-        "preSkill": [
-            "Flowadan",
-            89
-        ]
-    },
-    "Wavendla": {
-        "name": "Wavendla",
-        "cost": 78,
-        "costtype": "mp",
-        "pow": 1100,
-        "acc": 75,
-        "type": "water",
-        "atktype": "magic",
-        "target": "one",
-        "desc": "A more powerful version of Flood Field, but more costly and no added bonuses.",
-        "originalAuthor": "532291526634635285",
-        "levelLock": 90
-    },
-    "LonelyKick": {
-        "name": "LonelyKick",
-        "cost": 20,
-        "costtype": "hppercent",
-        "pow": 300,
-        "acc": 70,
-        "crit": 10,
-        "type": "strike",
-        "status": "dizzy",
-        "statuschance": 5,
-        "atktype": "physical",
-        "target": "one",
-        "desc": "The user jumps and quickly kicks the foe with enough strength to confuse the foe's senses, sometimes enough to inflict dizziness on the foe. Due to the amount of space this skill requires it's more effective when the user is alone or the last one standing.",
-        "originalAuthor": "621307633718132746",
-        "levelLock": 20,
-        "lonewolf": true
-    },
-    "SpreadWings": {
-        "name": "SpreadWings",
-        "cost": 55,
-        "costtype": "mp",
-        "pow": 500,
-        "acc": 85,
-        "crit": 3,
-        "type": "slash",
-        "atktype": "physical",
-        "target": "allopposing",
-        "desc": "The user spreads their wings and slashes the foes with them to deal Heavy Slashing damage.",
-        "originalAuthor": "516359709779820544",
-        "levelLock": 50
-    },
-    "Intelligence": {
-        "name": "Intelligence",
-        "cost": 40,
-        "costtype": "mp",
-        "pow": 450,
-        "acc": 87,
-        "type": "psychic",
-        "status": "dizzy",
-        "statuschance": 10,
-        "atktype": "magic",
-        "target": "one",
-        "desc": "The user uses their intelligence to strike the foe hard psychokinetically. This skill uses the user's intelligence stat to deal damage.",
-        "originalAuthor": "516359709779820544",
-        "levelLock": 50,
-        "statCalc": "int"
-    },
-    "Psioverse": {
-        "name": "Psioverse",
-        "cost": 36,
-        "costtype": "mp",
-        "pow": 100,
-        "acc": 101,
-        "type": "psychic",
-        "atktype": "magic",
-        "target": "allopposing",
-        "desc": "The user deploys a psychic field in which foes within are trapped in a healing aura for 3 turns. All non-melee attacks from the user or their allies will heal them for 60% of the damage they deal.",
-        "originalAuthor": "516359709779820544",
-        "levelLock": 67,
-        "verse": [
-            "heal",
-            60
-        ],
-        "preSkill": [
-            "Psionize",
-            66
-        ]
     },
     "FrailWill": {
         "name": "FrailWill",
@@ -28713,102 +28779,29 @@
         "pow": -1,
         "acc": 60
     },
-    "RegenContact": {
-        "name": "Regenerative Contact",
+    "FlowSense": {
+        "name": "FlowSense",
         "type": "passive",
-        "desc": "A passive skill that heals the attacker if they use a physical skill.",
+        "desc": "Allow the user to dodge magical attacks 10% of the time while moving with the flow.",
         "originalAuthor": "441198920668938260",
-        "passive": "damagephys",
-        "pow": -30
+        "passive": "dodgemag",
+        "pow": 10
     },
-    "RegenRange": {
-        "name": "Regenerative Range",
+    "PogoDodge": {
+        "name": "PogoDodge",
         "type": "passive",
-        "desc": "A passive skill that heals the attacker if they use a magical skill.",
+        "desc": "With this passive you can pogo your way out of physical attacks 20% of the time.",
         "originalAuthor": "441198920668938260",
-        "passive": "damagemag",
-        "pow": -30
+        "passive": "dodgephys",
+        "pow": 20
     },
-    "Shockolda": {
-        "name": "Shockolda",
-        "cost": 42,
-        "costtype": "mp",
-        "pow": 700,
-        "acc": 90,
-        "type": "electric",
-        "atktype": "magic",
-        "target": "one",
-        "desc": "A more powerful version of Ziolonda, but more costly and no paralyze chance.",
-        "originalAuthor": "532291526634635285",
-        "levelLock": 65
-    },
-    "Zabsolda": {
-        "name": "Zabsolda",
-        "cost": 54,
-        "costtype": "mp",
-        "pow": 700,
-        "acc": 85,
-        "type": "electric",
-        "atktype": "magic",
-        "target": "allopposing",
-        "desc": "A more powerful version of Maziolonda, but more costly and no paralyze chance.",
-        "originalAuthor": "532291526634635285",
-        "levelLock": 65
-    },
-    "SpiritAssault": {
-        "name": "Spirit Assault",
-        "cost": 20,
-        "costtype": "mp",
-        "pow": 75,
-        "acc": 999,
-        "type": "almighty",
-        "atktype": "magic",
-        "target": "one",
-        "desc": "Steal 75 MP from an enemy. Twice",
-        "originalAuthor": "363363984390356993",
-        "stealmp": true,
-        "takemp": 75,
-        "hits": 2
-    },
-    "MaxHeal": {
-        "name": "MaxHeal",
-        "type": "heal",
-        "cost": 20,
-        "costtype": "mp",
-        "pow": 200,
-        "atktype": "magic",
-        "target": "one",
-        "desc": "Increase the target's HP by around 10.",
+    "elementstore": {
+        "name": "elementstore",
+        "type": "passive",
         "originalAuthor": "441198920668938260",
-        "levelLock": 1,
-        "increasemaxhp": true
-    },
-    "MaxHPTest": {
-        "name": "MaxHPTest",
-        "type": "heal",
-        "cost": 60,
-        "costtype": "hp",
-        "pow": 60,
-        "atktype": "magic",
-        "target": "one",
-        "originalAuthor": "441198920668938260",
-        "levelLock": 6,
-        "increasemaxhp": true
-    },
-    "DualElement": {
-        "name": "DualElement",
-        "cost": 20,
-        "costtype": "mp",
-        "pow": 80,
-        "acc": 95,
-        "type": [
-            "gravity",
-            "almighty"
-        ],
-        "atktype": "magic",
-        "target": "one",
-        "originalAuthor": "441198920668938260",
-        "levelLock": 10
+        "element": "gravity",
+        "acc": 50,
+        "passive": "elementstore"
     },
     "DUALPOWERRRR": {
         "name": "DUALPOWERRRR",
@@ -28825,12 +28818,19 @@
         "desc": "Don’t get your hopes up. This is a test skill.",
         "originalAuthor": "544290248734015488"
     },
-    "elementstore": {
-        "name": "elementstore",
-        "type": "passive",
+    "DualElement": {
+        "name": "DualElement",
+        "cost": 20,
+        "costtype": "mp",
+        "pow": 80,
+        "acc": 95,
+        "type": [
+            "gravity",
+            "almighty"
+        ],
+        "atktype": "magic",
+        "target": "one",
         "originalAuthor": "441198920668938260",
-        "element": "gravity",
-        "acc": 50,
-        "passive": "elementstore"
+        "levelLock": 10
     }
 }

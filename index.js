@@ -307,7 +307,7 @@ const sendSkillArray = async(channel, theArray) => {
 			title: `Showing results ${start + 1}-${start + current.length} out of ${theArray.length}`,
 			fields: await Promise.all(
 				current.map(async arrayDefs => ({
-					name: `${arrayDefs.name} (${elementEmoji[arrayDefs.type]})`,
+					name: `${arrayDefs.name} (${typeof arrayDefs.type === 'string' ? `${elementEmoji[arrayDefs.type]}` : `${elementEmoji[arrayDefs.type[0]]}${elementEmoji[arrayDefs.type[1]]}`})`,
 					value: `${arrayDefs.pow} Power, ${arrayDefs.acc}% Accuracy`,
 				}))
 			)
@@ -13512,10 +13512,29 @@ client.on('messageCreate', async message => {
 			sendSkillArray(message.channel, skillArray);
         } else if (utilityFuncs.validType(arg[1].toLowerCase())) {
 			for (const i in skillFile) {
-				if (skillFile[i].type === arg[1].toLowerCase()) {
+				if ((skillFile[i].type === arg[1].toLowerCase() && typeof skillFile[i].type === 'string') || (typeof skillFile[i].type === 'object' && skillFile[i].type.includes(arg[1].toLowerCase())) ) {
 					if (arg[2] && (arg[2].toLowerCase() === 'physical' || arg[2].toLowerCase() === 'magic')) {
 						if (skillFile[i].atktype === arg[2].toLowerCase())
 							skillArray.push(skillFile[i]);
+					} else
+						skillArray.push(skillFile[i]);
+				}
+			}
+
+			setTimeout(function() {
+				sendSkillArray(message.channel, skillArray);
+			}, 200)
+		} else if (arg[1].toLowerCase() == 'dual') {
+			for (const i in skillFile) {
+				if (typeof skillFile[i].type === 'object') {
+					if (arg[2] && utilityFuncs.validType(arg[2].toLowerCase())) {
+						if (skillFile[i].type.includes(arg[2].toLowerCase())) {
+							if (arg[3] && (arg[3].toLowerCase() === 'physical' || arg[3].toLowerCase() === 'magic')) {
+								if (skillFile[i].atktype === arg[3].toLowerCase())
+									skillArray.push(skillFile[i]);
+							} else
+								skillArray.push(skillFile[i]);
+						}
 					} else
 						skillArray.push(skillFile[i]);
 				}

@@ -286,7 +286,9 @@ module.exports = {
 			status: 21,
 			passive: 22,
 			
-			invalid: 23
+			dual: 23,
+
+			invalid: 24,
 		}
 		
 		/*
@@ -301,7 +303,7 @@ module.exports = {
 		*/
 		
 		skillArray.sort(function(a, b) {return a[1].pow - b[1].pow});
-		skillArray.sort(function(a, b) {return elementOrder[a[1].type] - elementOrder[b[1].type]});
+		skillArray.sort(function(a, b) {return elementOrder[typeof a[1].type == 'string' ? a[1].type : 'dual'] - elementOrder[typeof b[1].type == 'string' ? b[1].type : 'dual']});
 		
 		skillFile = {}
 		for (const i in skillArray) {

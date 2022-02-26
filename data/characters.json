@@ -3155,8 +3155,8 @@
             "EtherealMirror",
             "Hexburst",
             "DespairsFood",
-            "HollowMind",
-            "DualElement"
+            "DualElement",
+            "HollowMind"
         ],
         "meleequote": [
             "**S:** Sorry, I am only doing this for the safety of my own energy.",
@@ -11834,11 +11834,11 @@
             "Jinodyne",
             "Majino",
             "Mediarama",
+            "MaxHPTest",
             "CuringAura",
             "Diarahan",
             "Makarakarn",
-            "Matarukaja",
-            "MaxHPTest"
+            "Matarukaja"
         ],
         "meleequote": [],
         "physquote": [],
@@ -15199,9 +15199,9 @@
         "skills": [
             "HollowMind",
             "HateCry",
+            "SpiritAssault",
             "DarkBloodWine",
-            "EntanglingFear",
-            "SpiritAssault"
+            "EntanglingFear"
         ],
         "meleequote": [],
         "physquote": [],
@@ -20187,8 +20187,8 @@
         ],
         "skills": [
             "GiganticFist",
-            "LonelyKick",
             "LonelyCrash",
+            "LonelyKick",
             "XSlash",
             "DarkBeam",
             "PKDemonicNova-Alpha",
