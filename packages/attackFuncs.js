@@ -390,6 +390,12 @@ function genDmg(userDefs, targDefs, skillDefs, server, forceDmgType, btl) {
 		}
 	}
 
+	// Element Store Passives
+	if (charFuncs.hasPassive(userDefs, "elementstore") && userDefs.storedDamage) {
+		skillPow += userDefs.storedDamage
+		delete userDefs.storedDamage
+	}
+
 	// Charms
 	if (charFuncs.equippedCharm(userDefs, "ShamanStone") && skillDefs.atktype === "magic")
 		skillPow *= 1.5
@@ -1625,6 +1631,17 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 					oppDefs.hp = Math.min(oppDefs.maxhp, oppDefs.hp - skillDefs2.pow)
 					finaltext += ` ${oppName} was damaged by ${userName}'s ${skillDefs2.name}, taking ${skillDefs2.pow} damage!`
 				}
+				if (charFuncs.hasPassive(userDefs, "elementstore")) {
+					var skillDefs2 = charFuncs.hasPassive(userDefs, "elementstore")
+
+					if ((typeof counterSkill.type === 'string' && skillDefs2.element === counterSkill.type)
+					|| (typeof counterSkill.type === 'object' && skillDefs2.element.includes(counterSkill.type))) {
+						if (!userDefs.storedDamage) userDefs.storedDamage = 0
+
+						userDefs.storedDamage += Math.floor((total ? total : dmg[0]) * (skillDefs2.acc/100))
+						finaltext += ` ${userName}'s ${skillDefs2.name} allowed them to store ${Math.floor((total ? total : dmg[0]) * (skillDefs2.acc/100))} damage for the next attack!`
+					}
+				}
 			}
 		} else {
 			var userQuote
@@ -2095,6 +2112,17 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 						userDefs.hp = Math.min(userDefs.maxhp, userDefs.hp - skillDefs2.pow)
 						finaltext += ` ${userName} was damaged by ${oppName}'s ${skillDefs2.name}, taking ${skillDefs2.pow} damage!`
 					}
+					if (charFuncs.hasPassive(targDefs, "elementstore")) {
+						var skillDefs2 = charFuncs.hasPassive(targDefs, "elementstore")
+	
+						if ((typeof skillDefs.type === 'string' && skillDefs2.element === skillDefs.type)
+						|| (typeof skillDefs.type === 'object' && skillDefs2.element.includes(skillDefs.type))) {
+							if (!targDefs.storedDamage) targDefs.storedDamage = 0
+	
+							targDefs.storedDamage += Math.floor((total ? total : dmg[0]) * (skillDefs2.acc/100))
+							finaltext += ` ${oppName}'s ${skillDefs2.name} allowed them to store ${Math.floor((total ? total : dmg[0]) * (skillDefs2.acc/100))} damage for the next attack!`
+						}
+					}
 
 					if (targDefs.shield && !skillDefs.feint) {
 						finaltext += `\n${oppName}'s protection was destroyed!`
@@ -2536,6 +2564,17 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 							var skillDefs2 = charFuncs.hasPassive(targDefs, "damagemag")
 							userDefs.hp = Math.min(userDefs.maxhp, userDefs.hp - skillDefs2.pow)
 							finaltext += ` ${userName} was damaged by ${oppName}'s ${skillDefs2.name}, taking ${skillDefs2.pow} damage!`
+						}
+						if (charFuncs.hasPassive(targDefs, "elementstore")) {
+							var skillDefs2 = charFuncs.hasPassive(targDefs, "elementstore")
+		
+							if ((typeof skillDefs.type === 'string' && skillDefs2.element === skillDefs.type)
+							|| (typeof skillDefs.type === 'object' && skillDefs2.element.includes(skillDefs.type))) {
+								if (!targDefs.storedDamage) targDefs.storedDamage = 0
+		
+								targDefs.storedDamage += Math.floor((total ? total : dmg[0]) * (skillDefs2.acc/100))
+								finaltext += ` ${oppName}'s ${skillDefs2.name} allowed them to store ${Math.floor((total ? total : dmg[0]) * (skillDefs2.acc/100))} damage for the next attack!`
+							}
 						}
 
 						if (targDefs.shield && !skillDefs.feint) {

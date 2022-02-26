@@ -1609,6 +1609,11 @@ function writePassive(msg, name, name2, passivetype, extra1, extra2, desc) {
 		skillFile[name].pow = parseInt(extra1)
 		skillFile[name].acc = parseInt(extra2)
 		skillFile[name].overheal = true
+	} else if (passiveType === 'elementstore') {
+		if (utilityFuncs.validType(extra1.toLowerCase()) && extra1.toLowerCase() != 'passive' && extra1.toLowerCase() != 'status' && extra1.toLowerCase() != 'heal' && extra1.toLowerCase() != 'almighty') {
+			skillFile[name].element = extra1.toLowerCase()
+			skillFile[name].acc = parseInt(extra2)
+		} else return msg.channel.send('You inputted an invalid element for this passive.')
 	} else
 		return msg.channel.send('You inputted an invalid passive type.');
 
@@ -13705,6 +13710,7 @@ client.on('messageCreate', async message => {
 			sacrificial: '(Args <Percent>) Boost the power of sacrifice skills by <Percent>%.',
 			SEPARATOR: '======Extras Below Are Ideas From Verwex======',
 			overheal: '(Args <Percent> <Degradation Percent>) Heal skills heal HP up to <Percent>% more of max HP. Degrades by <Degradation Percent>% of max overheal true max difference (max HP with overheal - max HP), should HP be higher than max.',
+			elementstore: `(Args <Element> <Damage Percent>) Stores <Damage Percent>% of damage from <Element> type attacks to use for the next attack.`,
 		}
 
 		for (const i in passiveDesc)
@@ -17630,7 +17636,13 @@ client.on('messageCreate', async message => {
             let charSkills = ``;
             for (const i in charDefs.skills) {
 				if (skillFile[charDefs.skills[i]]) {
-					charSkills += `${elementEmoji[skillFile[charDefs.skills[i]].type]}${skillFile[charDefs.skills[i]].name ? skillFile[charDefs.skills[i]].name : charDefs.skills[i]}`;
+					let type = ''
+					if (typeof skillFile[charDefs.skills[i]].type === 'string')
+						type = `${elementEmoji[skillFile[charDefs.skills[i]].type]}`
+					else if (typeof skillFile[charDefs.skills[i]].type === 'object')
+						type = `${elementEmoji[skillFile[charDefs.skills[i]].type[0]]}${elementEmoji[skillFile[charDefs.skills[i]].type[1]]}`
+
+					charSkills += `${type}${skillFile[charDefs.skills[i]].name ? skillFile[charDefs.skills[i]].name : charDefs.skills[i]}`;
 					if (charDefs.autoLearn && charDefs.autoLearn[i])
 						charSkills += '<:tick:918501752398020628>';
 					charSkills += '\n'
@@ -18141,7 +18153,14 @@ client.on('messageCreate', async message => {
             let enmSkills = ``;
             for (i = 0; i < enmDefs.skills.length; i++) {
 				const skillDefs = readSkill(enmDefs.skills[i])
-                enmSkills += `${elementEmoji[skillDefs.type]}${skillDefs.name}\n`
+
+				let type = ''
+				if (typeof skillDefs.type === 'string')
+					type = `${elementEmoji[skillDefs.type]}`
+				else if (typeof skillDefs.type === 'object')
+					type = `${elementEmoji[skillDefs.type[0]]}${elementEmoji[skillDefs.type[1]]}`
+
+                enmSkills += `${type}${skillDefs.name}\n`
             }
 
             if (enmSkills === ``)
@@ -18336,7 +18355,14 @@ client.on('messageCreate', async message => {
             let enmSkills = ``;
             for (i = 0; i < enmDefs.skills.length; i++) {
 				const skillDefs = readSkill(enmDefs.skills[i])
-                enmSkills += `${elementEmoji[skillDefs.type]}${skillDefs.name}\n`
+
+                let type = ''
+				if (typeof skillDefs.type === 'string')
+					type = `${elementEmoji[skillDefs.type]}`
+				else if (typeof skillDefs.type === 'object')
+					type = `${elementEmoji[skillDefs.type[0]]}${elementEmoji[skillDefs.type[1]]}`
+
+                enmSkills += `${type}${skillDefs.name}\n`
             }
 
             if (enmSkills === ``)

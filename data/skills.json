@@ -28824,5 +28824,13 @@
         "target": "one",
         "desc": "Don’t get your hopes up. This is a test skill.",
         "originalAuthor": "544290248734015488"
+    },
+    "elementstore": {
+        "name": "elementstore",
+        "type": "passive",
+        "originalAuthor": "441198920668938260",
+        "element": "gravity",
+        "acc": 50,
+        "passive": "elementstore"
     }
 }

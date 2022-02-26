@@ -16,8 +16,7 @@
         "parties": {
             "Miles": {
                 "members": [
-                    "Miles",
-                    "Harcvuk"
+                    "Miles"
                 ],
                 "backup": [],
                 "subs": [],
@@ -51,6 +50,17 @@
             "Ira": {
                 "members": [
                     "Ira"
+                ],
+                "backup": [],
+                "subs": [],
+                "negotiates": {},
+                "negotiateAllies": {},
+                "items": {},
+                "rings": 0
+            },
+            "Frylo": {
+                "members": [
+                    "Frylo"
                 ],
                 "backup": [],
                 "subs": [],

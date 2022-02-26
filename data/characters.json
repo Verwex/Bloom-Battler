@@ -8233,7 +8233,9 @@
         "weak": [
             "curse"
         ],
-        "resist": [],
+        "resist": [
+            "bless"
+        ],
         "block": [
             "psychic"
         ],
@@ -12376,7 +12378,8 @@
             "BodySlam",
             "FlamingFist",
             "Agidyne",
-            "AllOutShove"
+            "AllOutShove",
+            "DUALPOWERRRR"
         ],
         "meleequote": [
             "AAAAAAAAAAA"
