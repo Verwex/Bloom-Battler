@@ -249,6 +249,14 @@ function healPassives(charDefs) {
 			}
 		}
 	}
+
+	if (hasPassiveCopyLOL(charDefs, 'overheal')) {
+		skill = hasPassiveCopyLOL(charDefs, 'overheal')
+
+		passiveMsg += `\n${charDefs.name}'s ${skill.name} allowed them to get healed beyond.`
+		if (charDefs.hp >= charDefs.maxhp * skill.pow)
+		passiveMsg += `\n...But they can't be healed any further.`
+	}
 	
 	return passiveMsg
 }

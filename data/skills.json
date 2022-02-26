@@ -16202,7 +16202,7 @@
         "acc": 80,
         "type": "curse",
         "status": "blind",
-        "statuschance": 20,
+        "statuschance": 100,
         "atktype": "physical",
         "target": "one",
         "originalAuthor": "441198920668938260",
@@ -17232,7 +17232,7 @@
         "acc": 90,
         "type": "curse",
         "status": "despair",
-        "statuschance": 11,
+        "statuschance": 100,
         "atktype": "magic",
         "target": "one",
         "originalAuthor": "363363984390356993",
@@ -28769,5 +28769,60 @@
         "stealmp": true,
         "takemp": 75,
         "hits": 2
+    },
+    "MaxHeal": {
+        "name": "MaxHeal",
+        "type": "heal",
+        "cost": 20,
+        "costtype": "mp",
+        "pow": 200,
+        "atktype": "magic",
+        "target": "one",
+        "desc": "Increase the target's HP by around 10.",
+        "originalAuthor": "441198920668938260",
+        "levelLock": 1,
+        "increasemaxhp": true
+    },
+    "MaxHPTest": {
+        "name": "MaxHPTest",
+        "type": "heal",
+        "cost": 60,
+        "costtype": "hp",
+        "pow": 60,
+        "atktype": "magic",
+        "target": "one",
+        "originalAuthor": "441198920668938260",
+        "levelLock": 6,
+        "increasemaxhp": true
+    },
+    "DualElement": {
+        "name": "DualElement",
+        "cost": 20,
+        "costtype": "mp",
+        "pow": 80,
+        "acc": 95,
+        "type": [
+            "gravity",
+            "almighty"
+        ],
+        "atktype": "magic",
+        "target": "one",
+        "originalAuthor": "441198920668938260",
+        "levelLock": 10
+    },
+    "DUALPOWERRRR": {
+        "name": "DUALPOWERRRR",
+        "cost": 8,
+        "costtype": "mp",
+        "pow": 60,
+        "acc": 95,
+        "type": [
+            "bless",
+            "curse"
+        ],
+        "atktype": "magic",
+        "target": "one",
+        "desc": "Don’t get your hopes up. This is a test skill.",
+        "originalAuthor": "544290248734015488"
     }
 }

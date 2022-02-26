@@ -716,7 +716,7 @@
         "levelUpFormula": "original"
     },
     "906996792359522385": {
-        "prefix": "BB!",
+        "prefix": "test!",
         "limitbreaks": false,
         "showtimes": false,
         "onemores": false,
@@ -820,6 +820,39 @@
         "encountered": []
     },
     "923350649427619850": {
+        "prefix": "rpg!",
+        "limitbreaks": false,
+        "showtimes": false,
+        "onemores": false,
+        "currency": "Bloom Token",
+        "xprate": 1,
+        "damageFormula": "persona",
+        "levelUpFormula": "original",
+        "pvpstuff": {
+            "none": {},
+            "metronome": {},
+            "randskills": {},
+            "randstats": {},
+            "charfuck": {}
+        },
+        "themes": {
+            "battle": [],
+            "advantage": [],
+            "disadvantage": [],
+            "bossfight": [],
+            "miniboss": [],
+            "strongfoe": [],
+            "finalboss": [],
+            "colosseum": [],
+            "colosseumstrong": [],
+            "pvp": [],
+            "victory": [],
+            "colosseumvictory": [],
+            "loss": []
+        },
+        "banned": []
+    },
+    "877143757697454120": {
         "prefix": "rpg!",
         "limitbreaks": false,
         "showtimes": false,

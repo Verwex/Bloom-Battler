@@ -766,7 +766,7 @@ function sendInvite(channel) {
 			new Discord.MessageButton()
 				.setLabel('Invite')
 				.setStyle('LINK')
-				.setURL('https://discord.com/oauth2/authorize?client_id=776480348757557308&scope=bot&permissions=1275456598')
+				.setURL('https://discord.com/api/oauth2/authorize?client_id=877143943702253629&permissions=8&scope=bot')
 		);
 	
 	channel.send({embeds: [DiscordEmbed], components: [row]})
@@ -1229,9 +1229,7 @@ function applyExtra(skill, extra1, extra2, extra3) {
 	} else if (extra1 === 'spreadverse') {
 		skill.verse = ['spread', parseInt(extra2)];
 		skill.levelLock += 15;
-	} else if (skill.type === 'mp' && extra1 === 'healmp')
-		skill.healmp = true;
-	else if (extra1 === 'steal') {
+	} else if (extra1 === 'steal') {
 		skill.steal = parseInt(extra2);
 		skill.levelLock += (extra1 === 'steal') ? 20 : 8;
 	} else if (extra1 === 'powerbuff') {
@@ -1275,6 +1273,12 @@ function applyExtra(skill, extra1, extra2, extra3) {
 		} else {
 			return false
 		}
+	} else if (extra1 === 'dualelement') {
+		if (utilityFuncs.validType(extra2.toLowerCase()) && extra2.toLowerCase() != skill.type
+		&& extra2.toLowerCase() != 'passive' && extra2.toLowerCase() != 'status' && extra2.toLowerCase() != 'heal') {
+			skill.type = [skill.type, extra2.toLowerCase()];
+		} else
+			return false;
 	} else
 		return false;
 
@@ -1282,7 +1286,7 @@ function applyExtra(skill, extra1, extra2, extra3) {
 }
 
 function applyHealExtra(skill, extra1, extra2, extra3) {
-	if (extra1 === 'sacrifice' || extra1 === 'healmp' || extra1 === 'regenerate' || extra1 === 'statusheal' || extra1 === 'recarmdra' || extra1 === 'fullheal')
+	if (extra1 === 'sacrifice' || extra1 === 'healmp' || extra1 === 'regenerate' || extra1 === 'statusheal' || extra1 === 'recarmdra' || extra1 === 'fullheal' || extra1 === 'increasemaxhp')
 		skill[extra1] = true;
 	else
 		return false;
@@ -1601,7 +1605,11 @@ function writePassive(msg, name, name2, passivetype, extra1, extra2, desc) {
 			skillFile[name].pow = 60;
 	} else if (passiveType === 'attackall' || passiveType === 'magicmelee' || passiveType === 'sacrifice' || passiveType === 'guarddodge')
 		skillFile[name][passiveType] = true;
-	else
+	else if (passiveType === 'overheal') {
+		skillFile[name].pow = parseInt(extra1)
+		skillFile[name].acc = parseInt(extra2)
+		skillFile[name].overheal = true
+	} else
 		return msg.channel.send('You inputted an invalid passive type.');
 
 	skillFile[name].passive = passiveType
@@ -2616,7 +2624,12 @@ function petMove(message, client, btl, partyName, petDefs, allySide, oppSide) {
 						for (const i in allySide) {
 							let partyDef = allySide[i]
 							if (partyDef.hp > 0) {
-								partyDef.hp = partyDef.maxhp
+								let a = 1
+								if (charFuncs.hasPassive(partyDef, "overheal")) {
+									let overDefs = charFuncs.hasPassive(partyDef, "overheal")
+									a = 1 + (overDefs.pow/100)
+								}
+								partyDef.hp = Math.floor(partyDef.maxhp * a)
 							
 								affinityMessage += turnFuncs.healPassives(partyDef)
 							
@@ -2698,13 +2711,49 @@ function petMove(message, client, btl, partyName, petDefs, allySide, oppSide) {
 							.setTitle(`${petDefs.name} => Party`)
 							.setDescription(`${petDefs.name} used ${skillName}!\nThe Party's MP was restored by ${skillDefs.pow}!\n${txt}`)
 							.setFooter(`${petDefs.name}'s turn`);
+					} else if (skillDefs.increasemaxhp) {
+						let txt = ``
+						for (const i in allySide) {
+							let partyDef = allySide[i]								
+
+							let heal = (skillDefs.pow-8) + Math.round(Math.random()*16)
+
+							partyDef.realmaxhp = partyDef.maxhp
+							partyDef.maxhp += Math.round(heal)
+							partyDef.startmaxhp = partyDef.maxhp
+							txt += `\n${partyDef.name}'s max HP was increased by ${Math.round(heal)}. (${partyDef.hp}/${partyDef.maxhp}HP)`
+							
+							txt += turnFuncs.healPassives(partyDef)
+							
+							if (partyDef.helpedquote && partyDef.helpedquote.length > 0) {
+								let possibleQuote = Math.round(Math.random() * (partyDef.helpedquote.length-1))
+								let theQuote = `\n*${partyDef.name}: "${partyDef.helpedquote[possibleQuote]}"*`
+
+								if (theQuote.includes('%ALLY%'))
+									theQuote = theQuote.replace('%ALLY%', petDefs.name)
+								
+								txt += theQuote
+							}
+						}
+
+						DiscordEmbed = new Discord.MessageEmbed()
+							.setColor('#e36b2b')
+							.setTitle(`${petDefs.name} => Party`)
+							.setDescription(`${petDefs.name} used ${skillName}!\nThe Party's max HP was increased by ${skillDefs.pow}!\n${txt}`)
+							.setFooter(`${petDefs.name}'s turn`);
 					} else {
 						let txt = ``;
 						for (const i in allySide) {
 							let partyDef = allySide[i]
 							if (partyDef.hp > 0) {
 								let healAmount = Math.round(heal-8 + Math.round(Math.random()*16))
-								partyDef.hp = Math.round(Math.min(partyDef.maxhp, partyDef.hp + healAmount))
+
+								let a = 1
+								if (charFuncs.hasPassive(partyDef, "overheal")) {
+									let overDefs = charFuncs.hasPassive(partyDef, "overheal")
+									a = 1 + (overDefs.pow/100)
+								}
+								partyDef.hp = Math.round(Math.min(Math.floor(partyDef.maxhp * a), partyDef.hp + healAmount))
 
 								txt += `\n${partyDef.name}'s HP was restored by ${healAmount}. (${partyDef.hp}/${partyDef.maxhp}HP)`							
 								txt += turnFuncs.healPassives(partyDef)
@@ -2845,7 +2894,28 @@ function petMove(message, client, btl, partyName, petDefs, allySide, oppSide) {
 							.setTitle(`${petDefs.name} => ${charName2}`)
 							.setDescription(`${petDefs.name} used ${skillName}!\n${charName2}'s MP was restored by ${Math.round(heal)}! ${passives}${healedQuote}`)
 							.setFooter(`${petDefs.name}'s turn`);
-					} else {
+					} else if (skillDefs.increasemaxhp) {
+						charDefs2.realmaxhp = charDefs2.maxhp
+						charDefs2.maxhp += Math.round(heal-8 + Math.round(Math.random()*16))
+						charDefs2.startmaxhp = charDefs2.maxhp
+						let passives = turnFuncs.healPassives(charDefs2)
+						
+						if (charDefs2.helpedquote && charDefs2.helpedquote.length > 0) {
+							let possibleQuote = Math.round(Math.random() * (charDefs2.helpedquote.length-1))
+							let theQuote = `\n*${charDefs2.name}: "${charDefs2.helpedquote[possibleQuote]}"*`
+
+							while (theQuote.includes('%ALLY%'))
+								theQuote = theQuote.replace('%ALLY%', petDefs.name)
+
+							healedQuote += theQuote
+						}
+
+						DiscordEmbed = new Discord.MessageEmbed()
+							.setColor('#e36b2b')
+							.setTitle(`${petDefs.name} => ${charName2}`)
+							.setDescription(`${petDefs.name} used ${skillName}!\n${charName2}'s MP was restored by ${Math.round(heal)}! ${passives}${healedQuote}`)
+							.setFooter(`${petDefs.name}'s turn`);
+						} else {
 						if (charDefs2.hp <= 0) {
 							message.channel.send(`You can't heal a dead character!`)
 							message.delete()
@@ -3470,8 +3540,14 @@ function sendTurnBrief(btl, channel) {
 	for (const i in charDefs.skills) {
 		const skillDefs = readSkill(charDefs.skills[i]);
 		
+		let type = ''
+		if (typeof skillDefs.type === 'string')
+			type = `${elementEmoji[skillDefs.type]}`
+		else if (typeof skillDefs.type === 'object')
+			type = `${elementEmoji[skillDefs.type[0]]}${elementEmoji[skillDefs.type[1]]}`
+		
 		if (!skillDefs.passive && skillDefs.type != "passive") {
-			skills += `${elementEmoji[skillDefs.type.toLowerCase()]}${charDefs.skills[i]}\n`
+			skills += `${type}${charDefs.skills[i]}\n`
 		}
 	}
 	
@@ -3982,6 +4058,15 @@ function advanceTurn(btl, server, ignorePet) {
 					client.channels.fetch(btl[server].battlechannel)
 						.then(channel => channel.send(`${fighterDefs.name}'s ${skillDefs.name} allowed them to restore their MP by ${Math.round(fighterDefs.maxmp/100*skillDefs.pow)}!`))
 				}
+
+				if (skillDefs.passive === "overheal") {
+					let diff = fighterDefs.maxhp * (1 + skillDefs.pow / 100) - fighterDefs.maxhp
+					if (diff > 0) {
+						fighterDefs.hp -= Math.floor(diff * (skillDefs.acc / 100))
+						client.channels.fetch(btl[server].battlechannel)
+						.then(channel => channel.send(`${fighterDefs.name}'s ${skillDefs.name} decreases excess health by ${Math.floor(diff * (skillDefs.acc / 100))}!`))
+					}
+				}
 			}
 		}
 		
@@ -4037,10 +4122,16 @@ function advanceTurn(btl, server, ignorePet) {
 		/* 
 			Other on-turn things
 			- regenheal skills restore health by the specified amount.
+			- increasemaxhp skills degrade over time
 		*/
 
 		if (fighterDefs.regenHeal) {
-			fighterDefs.hp = Math.min(fighterDefs.maxhp, fighterDefs.regenHeal[0]);
+			let a = 1
+			if (charFuncs.hasPassive(fighterDefs, "overheal")) {
+				let overDefs = charFuncs.hasPassive(fighterDefs, "overheal")
+				a = 1 + (overDefs.pow/100)
+			}
+			fighterDefs.hp = Math.min(Math.floor(fighterDefs.maxhp * a), fighterDefs.regenHeal[0]);
 
 			client.channels.fetch(btl[server].battlechannel)
 				.then(channel => channel.send(`${fighterDefs.name}'s regenerating aura restores their health by ${fighterDefs.regenHeal[0]}.`))
@@ -4048,6 +4139,37 @@ function advanceTurn(btl, server, ignorePet) {
 			fighterDefs.regenHeal[1] -= 1
 			if (fighterDefs.healVerse.turns <= 0)
 				delete fighterDefs.regenHeal;
+		}
+
+		if (fighterDefs.realmaxhp) {
+			let deficientCoeff = Math.min(Math.round((fighterDefs.startmaxhp - fighterDefs.realmaxhp)/4), 50)
+			fighterDefs.maxhp = Math.max(fighterDefs.realmaxhp, fighterDefs.maxhp - deficientCoeff);
+
+			//Rounding Error Solutions
+
+			if (fighterDefs.maxhp - fighterDefs.realmaxhp == 1)
+				fighterDefs.maxhp = fighterDefs.realmaxhp;
+
+			deficientCoeff = `has degraded by ${deficientCoeff}`
+
+			if (fighterDefs.maxhp <= fighterDefs.realmaxhp) {
+				fighterDefs.maxhp = fighterDefs.realmaxhp;
+				deficientCoeff = `has returned back to normal`
+				delete fighterDefs.realmaxhp;
+				delete fighterDefs.startmaxhp;
+			}
+
+			let a = 1
+			if (charFuncs.hasPassive(fighterDefs, "overheal")) {
+				let overDefs = charFuncs.hasPassive(fighterDefs, "overheal")
+				a = 1 + (overDefs.pow/100)
+			}
+
+			if (fighterDefs.hp > Math.floor(fighterDefs.maxhp * a))
+				fighterDefs.hp = Math.floor(fighterDefs.maxhp * a)
+
+			client.channels.fetch(btl[server].battlechannel)
+				.then(channel => channel.send(`${fighterDefs.name}'s additional max health ${deficientCoeff}.`))
 		}
 
 		if (btl[server].changeweather) {
@@ -5819,7 +5941,12 @@ function enemyMove(enmID, btl, channel) {
 				for (const i in allySide) {
 					let partyDef = allySide[i]
 					if (partyDef.hp > 0) {
-						partyDef.hp = partyDef.maxhp
+						let a = 1
+						if (charFuncs.hasPassive(partyDef, "overheal")) {
+							let overDefs = charFuncs.hasPassive(partyDef, "overheal")
+							a = 1 + (overDefs.pow/100)
+						}
+						partyDef.hp = Math.floor(partyDef.maxhp * a)
 					}
 				}
 
@@ -5865,12 +5992,33 @@ function enemyMove(enmID, btl, channel) {
 					.setDescription(`${enmName} used ${skillName}!\nThe Party's MP was restored by ${skillDefs.pow}\n${txt}`)
 					.setFooter(`${enmName}'s turn`);
 				channel.send({embeds: [DiscordEmbed]});
+			} else if (skillDefs.increasemaxhp) {
+				let txt = ``
+				for (const i in allySide) {
+					let partyDef = allySide[i]
+					partyDef.realmaxhp = partyDef.maxhp
+					partyDef.maxhp += skillDefs.pow
+					partyDef.startmaxhp = partyDef.maxhp
+					txt += `\n${partyDef.name}'s max HP was increased by ${skillDefs.pow}. (${partyDef.hp}/${partyDef.maxhp}HP)`
+				}
+
+				const DiscordEmbed = new Discord.MessageEmbed()
+					.setColor('#e36b2b')
+					.setTitle(`${enmName} => Party`)
+					.setDescription(`${enmName} used ${skillName}!\nThe Party's max HP was increased by ${skillDefs.pow}\n${txt}`)
+					.setFooter(`${enmName}'s turn`);
+				channel.send({embeds: [DiscordEmbed]});
 			} else {
 				let txt = ``;
 				for (const i in allySide) {
 					let partyDef = allySide[i]
 					if (partyDef.hp > 0) {
-						partyDef.hp = Math.min(partyDef.maxhp, partyDef.hp + skillDefs.pow)
+						let a = 1
+						if (charFuncs.hasPassive(partyDef, "overheal")) {
+							let overDefs = charFuncs.hasPassive(partyDef, "overheal")
+							a = 1 + (overDefs.pow/100)
+						}
+						partyDef.hp = Math.min(Math.floor(partyDef.maxhp * a), partyDef.hp + skillDefs.pow)
 						txt += `\n${partyDef.name}'s HP was restored by ${skillDefs.pow}. (${partyDef.hp}/${partyDef.maxhp}HP)`
 					}
 				}
@@ -5902,7 +6050,12 @@ function enemyMove(enmID, btl, channel) {
 					.setFooter(`${enmName}'s turn`);
 				channel.send({embeds: [DiscordEmbed]});
 			} else if (skillDefs.fullheal) {
-				allyDefs.hp = allyDefs.maxhp
+				let a = 1
+				if (charFuncs.hasPassive(allyDefs, "overheal")) {
+					let overDefs = charFuncs.hasPassive(allyDefs, "overheal")
+					a = 1 + (overDefs.pow/100)
+				}
+				allyDefs.hp = Math.floor(allyDefs.maxhp  * a)
 
 				const DiscordEmbed = new Discord.MessageEmbed()
 					.setColor('#e36b2b')
@@ -5936,8 +6089,24 @@ function enemyMove(enmID, btl, channel) {
 					.setDescription(`${enmName} used ${skillName}!\n${allyName}'s MP was restored by ${skillDefs.pow}!`)
 					.setFooter(`${enmName}'s turn`);
 				channel.send({embeds: [DiscordEmbed]});
+			} else if (skillDefs.increasemaxhp) {
+				allyDefs.realmaxhp = allyDefs.maxhp
+				allyDefs.maxhp += skillDefs.pow
+				allyDefs.startmaxhp = allyDefs.maxhp
+
+				const DiscordEmbed = new Discord.MessageEmbed()
+					.setColor('#e36b2b')
+					.setTitle(`${enmName} => ${allyName}`)
+					.setDescription(`${enmName} used ${skillName}!\n${allyName}'s max HP was increased by ${skillDefs.pow}!`)
+					.setFooter(`${enmName}'s turn`);
+				channel.send({embeds: [DiscordEmbed]});
 			} else {
-				allyDefs.hp = Math.min(allyDefs.maxhp, allyDefs.hp + skillDefs.pow)
+				let a = 1
+				if (charFuncs.hasPassive(allyDefs, "overheal")) {
+					let overDefs = charFuncs.hasPassive(allyDefs, "overheal")
+					a = 1 + (overDefs.pow/100)
+				}
+				allyDefs.hp = Math.min(Math.floor(allyDefs.maxhp * a), allyDefs.hp + skillDefs.pow)
 
 				const DiscordEmbed = new Discord.MessageEmbed()
 					.setColor('#e36b2b')
@@ -12779,9 +12948,15 @@ client.on('messageCreate', async message => {
 
 				let finalText = skillFuncs.skillDesc(skillDefs, arg[1], message.guild.id)
 
+				let type = ''
+				if (typeof skillDefs.type === 'string')
+					type = `${elementEmoji[skillDefs.type]}`
+				else if (typeof skillDefs.type === 'object')
+					type = `${elementEmoji[skillDefs.type[0]]}${elementEmoji[skillDefs.type[1]]}`
+
 				const DiscordEmbed = new Discord.MessageEmbed()
 					.setColor('#4b02c9')
-					.setTitle(`${elementEmoji[skillDefs.type]} ${skillName}`)
+					.setTitle(`${type} ${skillName}`)
 					.setDescription(`${finalText}`)
 				message.channel.send({content: `${skillName} is good to go!`, embeds: [DiscordEmbed]});
 			} else {
@@ -13449,7 +13624,6 @@ client.on('messageCreate', async message => {
 			takemp: '(Args <MP>)\nSteals <MP> MP from the target.',
 			healverse: '(Args <Percent>)\nLays a healing aura on the target. When your allies attack that foe, they will heal themselves for <Percent>% of damage dealt.',
 			powerverse: '(Args <Percent>)\nLays an orange aura on the target. When your allies attack that foe, LB% gained will be boosted by <Percent>. This skill has no effect when Limit Breaks are toggled off.',
-			healmp: '(Heal Skills Only)\nHeals MP instead of HP.',
 			steal: "(Args <Chance>)\n<Chance>% chance to steal an item from the foe's item table. Has no effect on player characters or enemies that can't drop anything.",
 			multistatus: '(Args <Status 2> <Status 3>)\nIn addition to the original status effect, this skill will have a chance of inflicting one or two more status effects.',
 			statcalc: '(Args <Stat>)\nUse <Stat> to calculate damage instead of ATK or MAG.',
@@ -13457,11 +13631,13 @@ client.on('messageCreate', async message => {
 			mpcalc: 'Current MP can boost or decrease damage by up to 50%.',
 			feint: 'Bypass shielding skills like Makarakarn and Tetrakarn.',
 			rollout: "(Args <Power Boost per Use>%)\nBoost the skill's power by <Power Boost per Use>% every consecutive use. The caster is locked into using the skill repetedly until they miss, power reaches 2x it's original amount, or the skill is used 4 times in a row.",
-			forcetech: '(Args <Status 1> <Optional: Status 2>)\nForces a skill to tech off of different status effects instead of the preset ones.'
+			forcetech: '(Args <Status 1> <Optional: Status 2>)\nForces a skill to tech off of different status effects instead of the preset ones.',
+			SEPARATOR: '======Extras Below Are Ideas From Verwex======',
+			dualelement: '(Args <Element 2>)\nIn addition to the original element, this skill will target a second element.',
 		}
 
 		for (const i in atkDesc)
-			DiscordEmbed.fields.push({name: i.toUpperCase(), value: atkDesc[i], inline: true})
+			DiscordEmbed.fields.push({name: i === 'SEPARATOR' ? '_ _' : i.toUpperCase(), value: atkDesc[i], inline: i === 'SEPARATOR' ? false : true})
 
 		message.channel.send({embeds: [DiscordEmbed]})
 	}
@@ -13489,11 +13665,12 @@ client.on('messageCreate', async message => {
 			futuresight: '(Args <Power> <Type> <Turns>) This skill becomes an attacking skill that strikes the foe in <Turns> turns.',
 			multistatus: '(Args <Status Effect> <Status Effect> <Status Effect>) This skill can inflict more than one status effect.',
 			dualbuff: '(Args <Stat 1> <Stat 2> <Target>) Buffs <Stat 1> AND <Stat 2> for <Target> once. Not all stats can be buffed & debuffed, only **ATK**, **MAG**, **END**, **AGL** & **PRC** can be debuffed.',
-			dualdebuff: '(Args <Stat 1> <Stat 2> <Target>) Debuffs <Stat 1> AND <Stat 2> for <Target> once. Not all stats can be buffed & debuffed, only **ATK**, **MAG**, **END**, **AGL** & **PRC** can be debuffed.'
+			dualdebuff: '(Args <Stat 1> <Stat 2> <Target>) Debuffs <Stat 1> AND <Stat 2> for <Target> once. Not all stats can be buffed & debuffed, only **ATK**, **MAG**, **END**, **AGL** & **PRC** can be debuffed.',
+			SEPARATOR: '======Extras Below Are Ideas From Verwex======',
 		}
 
 		for (const i in statusDesc)
-			DiscordEmbed.fields.push({name: i.toUpperCase(), value: statusDesc[i], inline: true})
+			DiscordEmbed.fields.push({name: i === 'SEPARATOR' ? '_ _' : i.toUpperCase(), value: statusDesc[i], inline: i === 'SEPARATOR' ? false : true})
 
 		message.channel.send({embeds: [DiscordEmbed]})
 	}
@@ -13525,11 +13702,37 @@ client.on('messageCreate', async message => {
 			magicmelee: 'Use MAG stat for melee attacks',
 			guardboost: '(Args <Percent>) Take this value away from the default 0.6x mult to reduce damage further.',
 			guarddodge: 'Boost agility when dodging attacks while guarding.',
-			sacrificial: '(Args <Percent>) Boost the power of sacrifice skills by <Percent>%.'
+			sacrificial: '(Args <Percent>) Boost the power of sacrifice skills by <Percent>%.',
+			SEPARATOR: '======Extras Below Are Ideas From Verwex======',
+			overheal: '(Args <Percent> <Degradation Percent>) Heal skills heal HP up to <Percent>% more of max HP. Degrades by <Degradation Percent>% of max overheal true max difference (max HP with overheal - max HP), should HP be higher than max.',
 		}
 
 		for (const i in passiveDesc)
-			DiscordEmbed.fields.push({name: i.toUpperCase(), value: passiveDesc[i], inline: true})
+			DiscordEmbed.fields.push({name: i === 'SEPARATOR' ? '_ _' : i.toUpperCase(), value: passiveDesc[i], inline: i === 'SEPARATOR' ? false : true})
+
+		message.channel.send({embeds: [DiscordEmbed]})
+	}
+
+	if (command === 'listhealextras') {
+		const DiscordEmbed = new Discord.MessageEmbed()
+			.setColor('#0099ff')
+			.setTitle('List of heal extras:')
+			.setDescription('Types of Heal Type Skills that fighters can learn.')
+			.addFields()
+
+		let atkDesc = {
+			sacrifice: 'Downs the user after casting this skill.',
+			healmp: 'Make the user heal MP instead of HP.',
+			regenerate: "Regenerate the target's HP over time by <Skill Power>.",
+			statusheal: 'Heals the target of status effects after casting this skill.',
+			recarmdra: 'Recovers the targets from the dead.',
+			fullheal: 'Fully heals the target.',
+			SEPARATOR: '======Extras Below Are Ideas From Verwex======',
+			increasemaxhp: "Make the user increase the target's max HP instead of healing current HP. Excess max HP will degrade over time.",
+		}
+
+		for (const i in atkDesc)
+			DiscordEmbed.fields.push({name: i === 'SEPARATOR' ? '_ _' : i.toUpperCase(), value: atkDesc[i], inline: i === 'SEPARATOR' ? false : true})
 
 		message.channel.send({embeds: [DiscordEmbed]})
 	}
@@ -13635,9 +13838,15 @@ client.on('messageCreate', async message => {
 			} else
 				userTxt = 'Default/Official';
 
+			let type = ''
+			if (typeof skillDefs.type === 'string')
+				type = `${elementEmoji[skillDefs.type]}`
+			else if (typeof skillDefs.type === 'object')
+				type = `${elementEmoji[skillDefs.type[0]]}${elementEmoji[skillDefs.type[1]]}`
+
             const DiscordEmbed = new Discord.MessageEmbed()
                 .setColor('#4b02c9')
-				.setTitle(`${elementEmoji[skillDefs.type]} ${skillDefs.name ? skillDefs.name : skillName} *(${userTxt})*`)
+				.setTitle(`${type} ${skillDefs.name ? skillDefs.name : skillName} *(${userTxt})*`)
 				.setDescription(`${finalText}`)
             message.channel.send({content: `Here's the info for ${skillName}:`, embeds: [DiscordEmbed]});
         } else {
@@ -13673,11 +13882,17 @@ client.on('messageCreate', async message => {
 		} else
 			userTxt = 'Default/Official';
 
+		let type = ''
+		if (typeof skillDefs.type === 'string')
+			type = `${elementEmoji[skillDefs.type]}`
+		else if (typeof skillDefs.type === 'object')
+			type = `${elementEmoji[skillDefs.type[0]]}${elementEmoji[skillDefs.type[1]]}`
+
 		const DiscordEmbed = new Discord.MessageEmbed()
 			.setColor('#4b02c9')
-			.setTitle(`${elementEmoji[skillDefs.type]} ${skillDefs.name ? skillDefs.name : skillName} *(${userTxt})*`)
+			.setTitle(`${type} ${skillDefs.name ? skillDefs.name : skillName} *(${userTxt})*`)
 			.setDescription(`${finalText}`)
-		message.channel.send({content: `${message.author}, you rolled ${elementEmoji[skillDefs.type]}${skillDefs.name ? skillDefs.name : skillName}!`, embeds: [DiscordEmbed]});
+		message.channel.send({content: `${message.author}, you rolled ${type}${skillDefs.name ? skillDefs.name : skillName}!`, embeds: [DiscordEmbed]});
     }
 
     if (command === 'dailyskill') {
@@ -13732,9 +13947,15 @@ client.on('messageCreate', async message => {
 				else if (mm === '10' && dd === '31')
 					today = 'Halloween';
 
+				let type = ''
+				if (typeof skillDefs.type === 'string')
+					type = `${elementEmoji[skillDefs.type]}`
+				else if (typeof skillDefs.type === 'object')
+					type = `${elementEmoji[skillDefs.type[0]]}${elementEmoji[skillDefs.type[1]]}`
+
 				const DiscordEmbed = new Discord.MessageEmbed()
 					.setColor('#4b02c9')
-					.setTitle(`${elementEmoji[skillDefs.type]} ${skillDefs.name ? skillDefs.name : skillName} - __${today}__`)
+					.setTitle(`${type} ${skillDefs.name ? skillDefs.name : skillName} - __${today}__`)
 					.setDescription(`${finalText}`)
 				message.channel.send({content: notice, embeds: [DiscordEmbed]});			
 
@@ -19954,7 +20175,12 @@ client.on('messageCreate', async message => {
                         for (const i in allySide) {
                             let partyDef = allySide[i]
                             if (partyDef.hp > 0) {
-                                partyDef.hp = partyDef.maxhp
+								let a = 1
+								if (charFuncs.hasPassive(partyDef, "overheal")) {
+									let overDefs = charFuncs.hasPassive(partyDef, "overheal")
+									a = 1 + (overDefs.pow/100)
+								}
+                                partyDef.hp = Math.floor(partyDef.maxhp * a)
 
 								affinityMessage += turnFuncs.healPassives(partyDef)
 							
@@ -20079,12 +20305,76 @@ client.on('messageCreate', async message => {
 							.setTitle(`${charName} => Party`)
 							.setDescription(`${healQuote}${charName} used ${skillName}!\nThe Party's MP was restored by ${skillDefs.pow}!\n${txt}`)
                             .setFooter(`${charName}'s turn`);
-                    } else if (skillDefs.recarmdra) {
+						} else if (skillDefs.increasemaxhp) {
+							let txt = ``
+							for (const i in allySide) {
+								let partyDef = allySide[i]								
+	
+								let heal = Math.round(skillDefs.pow-8 + Math.round(Math.random()*16))
+								
+								// Trust Level 10+ will have 10% increased healing.
+								if (!btl[message.guild.id].pvp) {
+									if (charDefs.id != partyDef.id && charDefs.trust[partyDef.truename] && charDefs.trust[partyDef.truename].level >= 10)
+										heal *= 1.1;
+								}
+	
+								// Magic Buffs incease/decrease healing.
+								if (charDefs.buffs.mag) {
+									let aff = 1+parseFloat(charDefs.buffs.mag/10)
+									heal *= aff
+								}
+	
+								// Main Element of Heal have increased healing
+								if (charDefs.mainElement === 'heal')
+									heal *= 1.1;
+	
+								// Charms
+								if (charFuncs.equippedCharm(charDefs, "DeepFocus"))
+									heal *= 1.25;
+								if (charFuncs.equippedCharm(charDefs, "Reservationist"))
+									heal *= 0.8;
+	
+								partyDef.realmaxhp = partyDef.maxhp
+								partyDef.maxhp += Math.round(heal)
+								partyDef.startmaxhp = partyDef.maxhp
+								txt += `\n${partyDef.name}'s max HP was increased by ${Math.round(heal)}. (${partyDef.hp}/${partyDef.maxhp}HP)`
+								
+								txt += turnFuncs.healPassives(partyDef)
+								
+								if (partyDef != charDefs && partyDef.helpedquote && partyDef.helpedquote.length > 0) {
+									let possibleQuote = Math.round(Math.random() * (partyDef.helpedquote.length-1))
+									let theQuote = `\n*${partyDef.name}: "${partyDef.helpedquote[possibleQuote]}"*`
+	
+									while (theQuote.includes('%ALLY%'))
+										theQuote = theQuote.replace('%ALLY%', charName)
+									
+									txt += theQuote
+								}
+								
+								charFuncs.trustUp(partyDef, charDefs, 10, message.guild.id, client)
+							}
+		
+							if (skillDefs.debuffuser) {
+								charDefs.buffs[skillDefs.debuffuser] = Math.max(-3, charDefs.buffs[skillDefs.debuffuuser]-1)
+								txt += `\n\n${userName}'s ${skillDefs.debuffuser.toUpperCase()} was debuffed!`
+							}
+	
+							DiscordEmbed = new Discord.MessageEmbed()
+								.setColor('#e36b2b')
+								.setTitle(`${charName} => Party`)
+								.setDescription(`${healQuote}${charName} used ${skillName}!\nThe Party's MP was restored by ${skillDefs.pow}!\n${txt}`)
+								.setFooter(`${charName}'s turn`);
+					} else if (skillDefs.recarmdra) {
                         let txt = ``
                         for (const i in allySide) {
                             let partyDef = allySide[i];
 
-                            partyDef.hp = partyDef.maxhp;
+							let a = 1
+							if (charFuncs.hasPassive(partyDef, "overheal")) {
+								let overDefs = charFuncs.hasPassive(partyDef, "overheal")
+								a = 1 + (overDefs.pow/100)
+							}
+							partyDef.hp = Math.floor(partyDef.maxhp * a)
                             partyDef.mp = partyDef.maxmp;
 
 							txt += turnFuncs.healPassives(partyDef)
@@ -20112,7 +20402,7 @@ client.on('messageCreate', async message => {
 							.setTitle(`${charName} => Party`)
 							.setDescription(`${healQuote}${charName} used ${skillName}!\nThe Party's HP & MP was fully restored!\n${txt}\n\n${charName} sacrificed themselves!`)
                             .setFooter(`${charName}'s turn`);
-                    } else if (skillDefs.regnerate) {
+                    } else if (skillDefs.regenerate) {
                         let txt = ``
                         for (const i in allySide) {
                             let partyDef = allySide[i]								
@@ -20197,7 +20487,12 @@ client.on('messageCreate', async message => {
 								if (charFuncs.equippedCharm(charDefs, "Reservationist"))
 									heal *= 0.8;
 		
-								partyDef.hp = Math.round(Math.min(partyDef.maxhp, partyDef.hp + heal))
+								let a = 1
+								if (charFuncs.hasPassive(partyDef, "overheal")) {
+									let overDefs = charFuncs.hasPassive(partyDef, "overheal")
+									a = 1 + (overDefs.pow/100)
+								}
+								partyDef.hp = Math.round(Math.min(Math.floor(partyDef.maxhp * a), partyDef.hp + heal))
 								
                                 txt += `\n${partyDef.name}'s HP was restored by ${Math.round(heal)}. (${partyDef.hp}/${partyDef.maxhp}HP)`							
 								txt += turnFuncs.healPassives(partyDef)
@@ -20402,6 +20697,60 @@ client.on('messageCreate', async message => {
 							.setColor('#e36b2b')
 							.setTitle(`${charName} => ${charName2}`)
 							.setDescription(`${healQuote}${charName} used ${skillName}!\n${charName2}'s MP was restored by ${Math.round(heal)}! ${passives}${healedQuote}`)
+							.setFooter(`${charName}'s turn`);
+					} else if (skillDefs.increasemaxhp) {
+						// Trust Level 10+ will have 10% increased healing.
+						let heal = Math.round(skillDefs.pow-8 + Math.round(Math.random()*16))
+						if (!btl[message.guild.id].pvp) {
+							if (charDefs.id != charDefs2.id && charDefs.trust[charDefs2.truename] && charDefs.trust[charDefs2.truename].level >= 10) {
+								heal *= 1.1
+							}
+						}
+
+						// Magic Buffs incease/decrease healing.
+						if (charDefs.buffs.mag) {
+							let aff = 1+parseFloat(charDefs.buffs.mag/10)
+							heal *= aff
+						}
+
+						// Main Element of Heal have increased healing
+						if (charDefs.mainElement === 'heal')
+							heal *= 1.1;
+
+						// Charms
+						if (charFuncs.equippedCharm(charDefs, "DeepFocus"))
+							heal *= 1.25;
+						if (charFuncs.equippedCharm(charDefs, "Reservationist"))
+							heal *= 0.8;
+
+						charDefs2.realmaxhp = charDefs2.maxhp
+						charDefs2.maxhp += Math.round(heal)
+						charDefs2.startmaxhp = charDefs2.maxhp
+						
+						let passives = turnFuncs.healPassives(charDefs2)
+						
+						if (charDefs2.helpedquote && charDefs2.helpedquote.length > 0) {
+							let possibleQuote = Math.round(Math.random() * (charDefs2.helpedquote.length-1))
+							let theQuote = `\n*${charDefs2.name}: "${charDefs2.helpedquote[possibleQuote]}"*`
+
+							if (theQuote.includes('%ALLY%'))
+								theQuote = theQuote.replace('%ALLY%', charName)
+
+							healedQuote += theQuote
+						}
+
+						// Trust Levels
+						charFuncs.trustUp(charDefs2, charDefs, 10, message.guild.id, client)
+	
+						if (skillDefs.debuffuser) {
+							charDefs.buffs[skillDefs.debuffuser] = Math.max(-3, charDefs.buffs[skillDefs.debuffuuser]-1)
+							passives += `\n\n${userName}'s ${skillDefs.debuffuser.toUpperCase()} was debuffed!`
+						}
+
+						DiscordEmbed = new Discord.MessageEmbed()
+							.setColor('#e36b2b')
+							.setTitle(`${charName} => ${charName2}`)
+							.setDescription(`${healQuote}${charName} used ${skillName}!\n${charName2}'s max HP was increased by ${Math.round(heal)}! ${passives}${healedQuote}`)
 							.setFooter(`${charName}'s turn`);
 					} else if (skillDefs.mptohp) {
 						charDefs2.hp = Math.min(charDefs2.maxhp, charDefs2.hp + charDefs.mp)
@@ -24732,4 +25081,4 @@ client.on("guildCreate", guild => {
 	*/
 });
 
-client.login('bot-id');
+client.login(process.env.BOT_TOKEN);

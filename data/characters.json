@@ -3155,8 +3155,8 @@
             "EtherealMirror",
             "Hexburst",
             "DespairsFood",
-            "TriAttack",
-            "KindSoul"
+            "HollowMind",
+            "DualElement"
         ],
         "meleequote": [
             "**S:** Sorry, I am only doing this for the safety of my own energy.",
@@ -8233,9 +8233,7 @@
         "weak": [
             "curse"
         ],
-        "resist": [
-            "bless"
-        ],
+        "resist": [],
         "block": [
             "psychic"
         ],
@@ -11831,14 +11829,14 @@
         "repel": [],
         "drain": [],
         "skills": [
-            "BitchSlap",
             "Jinodyne",
             "Majino",
             "Mediarama",
             "CuringAura",
             "Diarahan",
             "Makarakarn",
-            "Matarukaja"
+            "Matarukaja",
+            "MaxHPTest"
         ],
         "meleequote": [],
         "physquote": [],
@@ -19716,7 +19714,7 @@
             "Maeiga",
             "Kougaon",
             "IlluminatedLuckiness",
-            "Makouga",
+            "DUALPOWERRRR",
             "IntenseShine",
             "DreadfulMessage"
         ],
