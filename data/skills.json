@@ -28832,5 +28832,12 @@
         "target": "one",
         "originalAuthor": "441198920668938260",
         "levelLock": 10
+    },
+    "CureStatus": {
+        "name": "CureStatus",
+        "type": "passive",
+        "originalAuthor": "441198920668938260",
+        "passive": "curestatus",
+        "pow": 70
     }
 }

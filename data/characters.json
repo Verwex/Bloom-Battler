@@ -3155,7 +3155,7 @@
             "EtherealMirror",
             "Hexburst",
             "DespairsFood",
-            "DualElement",
+            "CureStatus",
             "HollowMind"
         ],
         "meleequote": [
@@ -5556,7 +5556,8 @@
             "Lunadeus",
             "Marevita",
             "Marakukaja",
-            "KindSoul"
+            "KindSoul",
+            "HollowMind"
         ],
         "meleequote": [],
         "physquote": [],
@@ -5618,7 +5619,8 @@
             "2": true,
             "3": true,
             "4": true,
-            "5": true
+            "5": true,
+            "6": true
         },
         "superweak": [
             "curse"

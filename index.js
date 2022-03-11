@@ -1544,7 +1544,7 @@ function writePassive(msg, name, name2, passivetype, extra1, extra2, desc) {
 	
 	let passiveType = passivetype.toLowerCase()
 	if (passiveType === 'damagephys' || passiveType === 'damagemag' || passiveType === 'dodgephys' || passiveType === 'dodgemag' ||
-		passiveType === 'healonturn' || passiveType === 'healmponturn' || passiveType === 'regen' || passiveType === 'invig') {
+		passiveType === 'healonturn' || passiveType === 'healmponturn' || passiveType === 'regen' || passiveType === 'invig' || passiveType === 'curestatus') {
 		skillFile[name].passive = passiveType
 		skillFile[name].pow = parseInt(extra1)
 	} else if (passiveType === 'status') {
@@ -1918,6 +1918,24 @@ function doStatusEffect(fighterDef, btl, server) {
 	}
 
     if (fighterDef.status && fighterDef.status.toLowerCase() != "none") {
+		if (fighterDef.statusturns > 1 && charFuncs.hasPassive(fighterDef, 'curestatus')) { //cancel status effects if they have a passive and it succeeds
+			let skillDef = charFuncs.hasPassive(fighterDef, 'curestatus');
+
+			if (Math.floor(Math.random() * 100) <= skillDef.pow) {
+				const statusType = fighterDef.status
+				fighterDef.status = "none"
+				fighterDef.statusturns = 0
+
+				const statusEmbed = new Discord.MessageEmbed()
+                .setColor('#e36b2b')
+                .setTitle(`${fighterDef.name}'s ${statusType}`)
+                .setDescription(`${fighterDef.name} got cured!`)
+
+				client.channels.fetch(btl[server].battlechannel)
+					.then(channel => channel.send({embeds: [statusEmbed]}))
+			}
+		}
+
         if (fighterDef.status === "burn" || fighterDef.status === "poison" || fighterDef.status === "illness") {
             let dmg = Math.round(fighterDef.maxhp/10)
 			if (fighterDef.boss || fighterDef.miniboss)
@@ -13656,8 +13674,8 @@ client.on('messageCreate', async message => {
 			feint: 'Bypass shielding skills like Makarakarn and Tetrakarn.',
 			rollout: "(Args <Power Boost per Use>%)\nBoost the skill's power by <Power Boost per Use>% every consecutive use. The caster is locked into using the skill repetedly until they miss, power reaches 2x it's original amount, or the skill is used 4 times in a row.",
 			forcetech: '(Args <Status 1> <Optional: Status 2>)\nForces a skill to tech off of different status effects instead of the preset ones.',
-			SEPARATOR: '======Extras Below Are Ideas From Verwex======',
-			dualelement: '(Args <Element 2>)\nIn addition to the original element, this skill will target a second element.',
+			SEPARATOR: '======Extras Below Are Ideas From The Community======',
+			dualelement: '(Args <Element 2>)\nIn addition to the original element, this skill will target a second element.\n[SKY]',
 		}
 
 		for (const i in atkDesc)
@@ -13690,7 +13708,7 @@ client.on('messageCreate', async message => {
 			multistatus: '(Args <Status Effect> <Status Effect> <Status Effect>) This skill can inflict more than one status effect.',
 			dualbuff: '(Args <Stat 1> <Stat 2> <Target>) Buffs <Stat 1> AND <Stat 2> for <Target> once. Not all stats can be buffed & debuffed, only **ATK**, **MAG**, **END**, **AGL** & **PRC** can be debuffed.',
 			dualdebuff: '(Args <Stat 1> <Stat 2> <Target>) Debuffs <Stat 1> AND <Stat 2> for <Target> once. Not all stats can be buffed & debuffed, only **ATK**, **MAG**, **END**, **AGL** & **PRC** can be debuffed.',
-			SEPARATOR: '======Extras Below Are Ideas From Verwex======',
+			SEPARATOR: '======Extras Below Are Ideas From The Community======',
 		}
 
 		for (const i in statusDesc)
@@ -13727,9 +13745,10 @@ client.on('messageCreate', async message => {
 			guardboost: '(Args <Percent>) Take this value away from the default 0.6x mult to reduce damage further.',
 			guarddodge: 'Boost agility when dodging attacks while guarding.',
 			sacrificial: '(Args <Percent>) Boost the power of sacrifice skills by <Percent>%.',
-			SEPARATOR: '======Extras Below Are Ideas From Verwex======',
-			overheal: '(Args <Percent> <Degradation Percent>) Heal skills heal HP up to <Percent>% more of max HP. Degrades by <Degradation Percent>% of max overheal true max difference (max HP with overheal - max HP), should HP be higher than max.',
-			elementstore: `(Args <Element> <Damage Percent>) Stores <Damage Percent>% of damage when hit from <Element> attacks to add up for the next attack. Stackable.`,
+			SEPARATOR: '======Extras Below Are Ideas From The Community======',
+			overheal: '(Args <Percent> <Degradation Percent>) Heal skills heal HP up to <Percent>% more of max HP. Degrades by <Degradation Percent>% of max overheal true max difference (max HP with overheal - max HP), should HP be higher than max.\n[VERWEX]',
+			elementstore: `(Args <Element> <Damage Percent>) Stores <Damage Percent>% of damage when hit from <Element> attacks to add up for the next attack. Stackable.\n[VERWEX]`,
+			curestatus: `(Args <Chance>) <Chance>% chance to cure the user's status effects at start of turn\n[SKY]`,
 		}
 
 		for (const i in passiveDesc)
@@ -13752,8 +13771,8 @@ client.on('messageCreate', async message => {
 			statusheal: 'Heals the target of status effects after casting this skill.',
 			recarmdra: 'Recovers the targets from the dead.',
 			fullheal: 'Fully heals the target.',
-			SEPARATOR: '======Extras Below Are Ideas From Verwex======',
-			increasemaxhp: "Make the user increase the target's max HP instead of healing current HP. Excess max HP will degrade over time.",
+			SEPARATOR: '======Extras Below Are Ideas From The Community======',
+			increasemaxhp: "Make the user increase the target's max HP instead of healing current HP. Excess max HP will degrade over time.\n[VERWEX]",
 		}
 
 		for (const i in atkDesc)
