@@ -507,6 +507,20 @@ function genDmg(userDefs, targDefs, skillDefs, server, forceDmgType, btl) {
 		atkStat = statWithBuff(userDefs[skillDefs.statCalc], userDefs.buffs[skillDefs.statCalc] ? userDefs.buffs[skillDefs.statCalc] : 0);
 
 	if (userDefs.rageSoul) atkStat *= 2;
+
+	//moodswing passives
+
+	if (charFuncs.hasPassive(userDefs, "moodswing")) {
+		let moodswingDefs = charFuncs.hasPassive(userDefs, "moodswing")
+		if (!userDefs.moodMod) userDefs.moodMod = moodswingDefs.pow
+		atkStat *= 1 + ((userDefs.moodMod)/100);
+	}
+
+	if (charFuncs.hasPassive(targDefs, "moodswing")) {
+		let moodswingDefs = charFuncs.hasPassive(targDefs, "moodswing")
+		if (!targDefs.moodMod) targDefs.moodMod = moodswingDefs.pow
+		endStat /= 1 + ((targDefs.moodMod)/100);
+	}
 	
 	var def = atkStat / endStat;
 

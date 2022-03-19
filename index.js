@@ -1596,6 +1596,14 @@ function writePassive(msg, name, name2, passivetype, extra1, extra2, desc) {
 		// Balancing
 		if (skillFile[name].pow > 20)
 			skillFile[name].pow = 20;
+	} else if (passiveType === 'moodswing') {
+		skillFile[name].turns = parseInt(extra1);
+		skillFile[name].pow = parseInt(extra2);
+		skillFile[name].moodswing = true;
+
+		// Balancing
+		if (skillFile[name].pow > 75)
+			skillFile[name].pow = 75;
 	} else if (passiveType === 'guardboost' || passiveType === 'sacrificial') {
 		skillFile[name].pow = parseInt(extra1);
 		skillFile[name][passiveType] = true;
@@ -4088,6 +4096,14 @@ function advanceTurn(btl, server, ignorePet) {
 						fighterDefs.hp -= Math.floor(diff * (skillDefs.acc / 100))
 						client.channels.fetch(btl[server].battlechannel)
 						.then(channel => channel.send(`${fighterDefs.name}'s ${skillDefs.name} decreases excess health by ${Math.floor(diff * (skillDefs.acc / 100))}!`))
+					}
+				}
+
+				if (skillDefs.passive === "moodswing") {
+					if ((btl[server].turn - 1) % skillDefs.turns == 0) {
+						if (!fighterDefs.moodMod) fighterDefs.moodMod = skillDefs.pow; else fighterDefs.moodMod *= -1;
+						client.channels.fetch(btl[server].battlechannel)
+							.then(channel => channel.send(`${fighterDefs.name} ${fighterDefs.moodMod == skillDefs.pow ? `has been enraged with emotions` : `has calmed themselves down`}.`))
 					}
 				}
 			}
@@ -13749,6 +13765,7 @@ client.on('messageCreate', async message => {
 			overheal: '(Args <Percent> <Degradation Percent>) Heal skills heal HP up to <Percent>% more of max HP. Degrades by <Degradation Percent>% of max overheal true max difference (max HP with overheal - max HP), should HP be higher than max.\n[VERWEX]',
 			elementstore: `(Args <Element> <Damage Percent>) Stores <Damage Percent>% of damage when hit from <Element> attacks to add up for the next attack. Stackable.\n[VERWEX]`,
 			curestatus: `(Args <Chance>) <Chance>% chance to cure the user's status effects at start of turn\n[SKY]`,
+			moodswing: `(Args <Number> <Percent>) Switch emotions every <Number> turns from calm to angry, to deal and take <Percent>% less or more damage\n[DJ]`
 		}
 
 		for (const i in passiveDesc)

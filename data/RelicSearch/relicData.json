@@ -2,42 +2,42 @@
     "532291526634635285": {
         "rolls": 10,
         "canfind": true,
-        "findcooldown": 51,
+        "findcooldown": 39,
         "stars": 0,
         "relics": []
     },
     "461050360832720904": {
         "rolls": 10,
         "canfind": true,
-        "findcooldown": 52,
+        "findcooldown": 40,
         "stars": 0,
         "relics": []
     },
     "285347786218799104": {
         "rolls": 10,
         "canfind": true,
-        "findcooldown": 55,
+        "findcooldown": 43,
         "stars": 0,
         "relics": []
     },
     "500703373926858907": {
         "rolls": 10,
         "canfind": true,
-        "findcooldown": 56,
+        "findcooldown": 44,
         "stars": 0,
         "relics": []
     },
     "642841151484985365": {
         "rolls": 10,
         "canfind": true,
-        "findcooldown": 4,
+        "findcooldown": 52,
         "stars": 0,
         "relics": []
     },
     "441198920668938260": {
         "rolls": 10,
         "canfind": true,
-        "findcooldown": 49,
+        "findcooldown": 37,
         "stars": 0,
         "relics": []
     }
