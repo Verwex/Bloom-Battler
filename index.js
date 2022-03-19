@@ -15248,16 +15248,6 @@ client.on('messageCreate', async message => {
 					return message.channel.send('One of your 8 stats are less than 0.');
 				else {
 					let statNum = parseInt(arg[i])
-					if (statNum <= 3) {
-						lowStats++;
-					} else if (statNum <= 6) {
-						midStats++;
-					} else {
-						highStats++;
-//						if (highStats > 3)
-//							return message.channel.send('You should have 3 or less high stats.')
-					}
-
 					BST += statNum
 				}
 			}
@@ -18669,11 +18659,10 @@ client.on('messageCreate', async message => {
 			let enemyDefs = enemyFuncs.genEnm(arg[2], message.guild.id)
 			enemyDefs.agl = 1
 			enemyDefs.prc = 1
-			enemyDefs.id = battlerID
+			enemyDefs.id = 1
 			btl[message.guild.id].enemies.members.push(enemyDefs)
 
 			console.log(`BattleStatus: ${arg[2]} generated.`);
-			battlerID++;
 		} else
 			return message.channel.send(`${arg[2]} is an invalid enemy.`);
 

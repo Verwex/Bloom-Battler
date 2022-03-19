@@ -320,10 +320,10 @@ function knowsEnemy(oppDefs, server) {
 function genDmg(userDefs, targDefs, skillDefs, server, forceDmgType, btl) {
 	console.log("genDmg:")
 
-    let values = [0, "normal", false, false, false, false]; // Damage, Damagestate, Hit a Weakness?, Crit?, Inflict Status?, Technical?, Super Weakness?
+    var values = [0, "normal", false, false, false, false]; // Damage, Damagestate, Hit a Weakness?, Crit?, Inflict Status?, Technical?, Super Weakness?
 
 	// Weaknesses and shit
-	let dmgtype = "normal"
+	var dmgtype = "normal"
 	if (forceDmgType)
 		dmgtype = forceDmgType
 	else if (targDefs.status === 'mirror') {
@@ -354,9 +354,9 @@ function genDmg(userDefs, targDefs, skillDefs, server, forceDmgType, btl) {
 
     values[0] = 1
 
-	let skillPow = skillDefs.pow
-	let skillAcc = skillDefs.acc
-	let skillStatus = skillDefs.statuschance ? skillDefs.statuschance : 0
+	var skillPow = skillDefs.pow
+	var skillAcc = skillDefs.acc
+	var skillStatus = skillDefs.statuschance ? skillDefs.statuschance : 0
 	
 	// Leader Skills
 	var allySide = btl[server].allies.members
@@ -415,19 +415,15 @@ function genDmg(userDefs, targDefs, skillDefs, server, forceDmgType, btl) {
 	// Boost Passives
 	if (charFuncs.hasPassive(userDefs, "boost")) {
 		let boostDefs = charFuncs.hasPassive(userDefs, "boost")
-		skillPow *= 1 + (boostDefs.pow/100)
+		if (boostDefs.boosttype == skillDefs.type) skillPow *= 1 + (boostDefs.pow/100);
 	}
 
 	// Skills
-	if (skillDefs.hpcalc) {
-		let percentMod = 0.5 + (userDefs.hp/userDefs.maxhp)
-		skillPow *= percentMod
-	}
+	if (skillDefs.hpcalc)
+		skillPow *= 0.5 + (userDefs.hp/userDefs.maxhp);
 
-	if (skillDefs.mpcalc) {
-		let percentMod = 0.5 + (userDefs.mp/userDefs.maxmp)
-		skillPow *= percentMod
-	}
+	if (skillDefs.mpcalc)
+		skillPow *= 0.5 + (userDefs.mp/userDefs.maxmp);
 
 	if (skillDefs.affinitypow && userDefs.affinitypoint && charFuncs.hasPassive(userDefs, "affinitypoint")) {
 		for (i = 0; i < userDefs.affinitypoint; i++)
@@ -496,8 +492,8 @@ function genDmg(userDefs, targDefs, skillDefs, server, forceDmgType, btl) {
 	}
 
     // Damage Generation
-	let atkStat = statWithBuff(userDefs.atk, userDefs.buffs.atk)
-	let endStat = statWithBuff(targDefs.end, targDefs.buffs.end)
+	var atkStat = statWithBuff(userDefs.atk, userDefs.buffs.atk)
+	var endStat = statWithBuff(targDefs.end, targDefs.buffs.end)
 
 	if (skillDefs.atktype === "magic") {
 		atkStat = statWithBuff(userDefs.mag, userDefs.buffs.mag);
@@ -512,7 +508,7 @@ function genDmg(userDefs, targDefs, skillDefs, server, forceDmgType, btl) {
 
 	if (userDefs.rageSoul) atkStat *= 2;
 	
-	let def = atkStat / endStat;
+	var def = atkStat / endStat;
 
 	if (skillDefs.limitbreak) {
 		values[0] = Math.round((((skillPow+(atkStat*2)-targDefs.end)*2) + Math.round(Math.random() * 30))/2)
@@ -538,10 +534,14 @@ function genDmg(userDefs, targDefs, skillDefs, server, forceDmgType, btl) {
 			values[0] = Math.round(values[0] / 2);
 		}
 	} else {
+		console.log(`Def: ${def}, Power: ${skillPow}`)
+
 		if (btl[server].damageFormula === 'pokemon')
 			values[0] = Math.round((((2*userDefs.level)/5+2)*skillPow*def)/50+2)
 		else
 			values[0] = Math.round(5 * Math.sqrt(def * skillPow));
+		
+		console.log(`Checkpoint 1: ${values}`)
 
 		if (dmgtype === "repel" || dmgtype === "drain")
 			return [Math.round(values[0]), dmgtype, false, false, false, false];
@@ -564,6 +564,8 @@ function genDmg(userDefs, targDefs, skillDefs, server, forceDmgType, btl) {
 			values[0] = Math.round(values[0]/2);
 		}
 
+		console.log(`Checkpoint 2: ${values}`)
+
 		// Crits
 		console.log("<<Crit Checks>>")
 		if (skillDefs.crit > 0 && !targDefs.guard) {
@@ -577,6 +579,8 @@ function genDmg(userDefs, targDefs, skillDefs, server, forceDmgType, btl) {
 				values[3] = true;
 			}
 		}
+		
+		console.log(`Checkpoint 3: ${values}`)
 
 		// Shield
 		if (targDefs.shield && !skillDefs.feint) {
@@ -590,6 +594,8 @@ function genDmg(userDefs, targDefs, skillDefs, server, forceDmgType, btl) {
 //			delete targDefs.shield
 //			delete targDefs.powerShield
 		}
+		
+		console.log(`Checkpoint 4: ${values}`)
 
 		// Armors
 		if (targDefs.armorData && targDefs.armorData.element && skillDefs.type === targDefs.armorData.element)
@@ -659,6 +665,9 @@ function genDmg(userDefs, targDefs, skillDefs, server, forceDmgType, btl) {
 		values[0] = Math.round(values[0]*guardMult)
 	}
 
+	console.log(`Checkpoint 5: ${values}`)
+	
+	if (!values[0]) values[0] = 1;
 	return values
 }
 
@@ -1229,17 +1238,17 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 		if (skillDefs.atktype && skillDefs.atktype === "magic")
 			atk = statWithBuff(userDefs.mag, userDefs.buffs.mag)
 
-		var prc = statWithBuff(userDefs.prc, userDefs.buffs.prc)
-		var luk = userDefs.luk
-		var chr = userDefs.chr
-		var enmdef = statWithBuff(oppDefs.end, oppDefs.buffs.end)
-		var enmagl = statWithBuff(oppDefs.agl, oppDefs.buffs.agl)
-		var enmluk = oppDefs.luk
+		let prc = statWithBuff(userDefs.prc, userDefs.buffs.prc)
+		let luk = userDefs.luk
+		let chr = userDefs.chr
+		let enmdef = statWithBuff(oppDefs.end, oppDefs.buffs.end)
+		let enmagl = statWithBuff(oppDefs.agl, oppDefs.buffs.agl)
+		let enmluk = oppDefs.luk
 
-		var movepow = parseInt(skillDefs.pow)
+		let movepow = parseInt(skillDefs.pow)
 
-		var movetype = skillDefs.atktype
-		var moveacc = 999
+		let movetype = skillDefs.atktype
+		let moveacc = 999
 		if (skillDefs.acc)
 			moveacc = skillDefs.acc;
 		
@@ -1247,31 +1256,31 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 		if (userDefs.status === "dizzy") 
 			moveacc -= Math.floor(moveacc/2)
 
-		var movecrit = 0
+		let movecrit = 0
 		if (skillDefs.crit) {
 			movecrit = skillDefs.crit
 		}
-		var movestatus = "none"
+		let movestatus = "none"
 		if (skillDefs.status) {
 			movestatus = skillDefs.status
 		}
-		var movestatuschance = 0
+		let movestatuschance = 0
 		if (skillDefs.status && skillDefs.statuschance) {
 			movestatuschance = skillDefs.statuschance
 		}
 
 		// Weaknesses and shit
-		var dmgtype = getAffinity(oppDefs, skillDefs.type)
+		let dmgtype = getAffinity(oppDefs, skillDefs.type)
 
-		const skillPath = dataPath+'/skills.json'
-		const skillRead = fs.readFileSync(skillPath);
-		const skillFile = JSON.parse(skillRead);
-		
+		let skillPath = dataPath+'/skills.json'
+		let skillRead = fs.readFileSync(skillPath);
+		let skillFile = JSON.parse(skillRead);
+
 		// Boosting Passives
 		let extraHit = null;
 		if (charFuncs.hasPassive(userDefs, "extrahit") && skillDefs.hits <= 1) {
-			var skillDefs2 = charFuncs.hasPassive(userDefs, "extrahit")
-			
+			let skillDefs2 = charFuncs.hasPassive(userDefs, "extrahit")
+
 			if (skillDefs2.pow <= -1) {
 				embedText.targetText = `${userName} => ${oppName}`
 				embedText.attackText = `${userName} used ${skillDefs.name}!`
@@ -1290,10 +1299,10 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 		}
 
 		// Resisting Passives
-		var repelSkill = null
-		var counterSkill = null
-		var resistSkill = null
-		var trapped = false
+		let repelSkill = null
+		let counterSkill = null
+		let resistSkill = null
+		let trapped = false
 		if (!skillDefs.limitbreak) {
 			for (const i in oppDefs.skills) {
 				const skillDefs2 = skillFile[oppDefs.skills[i]]
@@ -1305,7 +1314,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 						embedText.resultText = `${oppName}'s ${skillDefs2.name} made them immune to the attack!`
 
 						if (oppDefs.blockquote && oppDefs.blockquote.length > 0) {
-							var possibleQuote = Math.round(Math.random() * (oppDefs.blockquote.length-1))
+							let possibleQuote = Math.round(Math.random() * (oppDefs.blockquote.length-1))
 							finaltext += `\n*${oppName}: "${oppDefs.blockquote[possibleQuote]}"*`
 						}
 						
@@ -1323,8 +1332,8 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 						}
 					} else if ((skillDefs2.passive === "dodgephys" && skillDefs.atktype === "physical") ||
 							   (skillDefs2.passive === "dodgemag" && skillDefs.atktype === "magic")) {
-						var dodgeChance = skillDefs2.pow
-						var dodgeValue = Math.round(Math.random()*100)
+						let dodgeChance = skillDefs2.pow
+						let dodgeValue = Math.round(Math.random()*100)
 
 						console.log(`DodgeSkill: ${dodgeValue} <= ${dodgeChance}?`)
 						if (dodgeValue <= dodgeChance) {
@@ -1343,17 +1352,17 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 
 					if ((skillDefs2.passive === "counterphys" && skillDefs.atktype === "physical") ||
 							   (skillDefs2.passive === "countermag" && skillDefs.atktype === "magic")) {
-						var dodgeChance = skillDefs2.counter.chance
-						var dodgeValue = Math.round(Math.random()*100);
+						let dodgeChance = skillDefs2.counter.chance
+						let dodgeValue = Math.round(Math.random()*100);
 
 						console.log(`CounterSkill: ${dodgeValue} <= ${dodgeChance}?`)
 						if (dodgeValue <= dodgeChance)
 							counterSkill = skillDefs2.counter.skill;
 					}
 					
-					if (!counterSkill && skillDefs2.passive === "swordbreaker" && skillDefs.atktype === "physical" && (dmgtype === "normal" || dmgtype === "weak" || dmgtype === "superweak" || dmgtype === "deathly")) {
-						var resistChance = skillDefs2.pow;
-						var resistValue = Math.round(Math.random()*100);
+					if (!counterSkill && skillDefs2.passive === "swordbreaker" && skillDefs.atktype === "physical" && (dmgtype === "normal" || dmgtype === "weak" || dmgtype === "superweak")) {
+						let resistChance = skillDefs2.pow;
+						let resistValue = Math.round(Math.random()*100);
 
 						console.log(`Swordbreaker: ${resistValue} <= ${resistChance}?`)
 						if (resistValue <= resistChance)
@@ -1364,22 +1373,22 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 		}
 		
 		if (counterSkill) {
-			var dmgtype2 = getAffinity(userDefs, counterSkill.type)
+			let dmgtype2 = getAffinity(userDefs, counterSkill.type)
 
 			// Affinity Cutter & Slicer
 			for (const i in oppDefs.skills) {
-				var oppSkill = skillFile[oppDefs.skills[i]]
+				let oppSkill = skillFile[oppDefs.skills[i]]
 				
 				if (oppSkill.passive) {
 					if (oppSkill.affinitycutter) {
-						var randChance = Math.round(Math.random()*100)
+						let randChance = Math.round(Math.random()*100)
 						
 						if (randChance <= oppSkill.pow && (dmgtype2 === "resist" || dmgtype2 === "block")) {
 							finaltext += `\n${oppName}'s ${oppSkill.name} allowed them to cut through resist & block affinities!`
 							dmgtype2 = "normal"
 						}
 					} else if (oppSkill.affinityslicer) {
-						var randChance = Math.round(Math.random()*100)
+						let randChance = Math.round(Math.random()*100)
 						
 						if (randChance <= oppSkill.pow && (dmgtype2 === "resist" || dmgtype2 === "block" || dmgtype2 === "repel" || dmgtype2 === "drain")) {
 							finaltext += `\n${oppName}'s ${oppSkill.name} allowed them to cut through resist, block, repel and drain affinities!`
@@ -1398,21 +1407,21 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 				trapped = true;
 			}
 
-			var atk = statWithBuff(oppDefs.atk, oppDefs.buffs.atk)
+			let atk = statWithBuff(oppDefs.atk, oppDefs.buffs.atk)
 			if (counterSkill.atktype && counterSkill.atktype === "magic")
 				atk = statWithBuff(oppDefs.mag, oppDefs.buffs.mag)
 
-			var prc = statWithBuff(oppDefs.prc, oppDefs.buffs.prc)
-			var luk = oppDefs.luk
-			var chr = oppDefs.chr
-			var enmdef = statWithBuff(userDefs.end, userDefs.buffs.end)
-			var enmagl = statWithBuff(userDefs.agl, userDefs.buffs.agl)
-			var enmluk = userDefs.luk
+			let prc = statWithBuff(oppDefs.prc, oppDefs.buffs.prc)
+			let luk = oppDefs.luk
+			let chr = oppDefs.chr
+			let enmdef = statWithBuff(userDefs.end, userDefs.buffs.end)
+			let enmagl = statWithBuff(userDefs.agl, userDefs.buffs.agl)
+			let enmluk = userDefs.luk
 
-			var movepow = parseInt(counterSkill.pow)
+			let movepow = parseInt(counterSkill.pow)
 
-			var movetype = counterSkill.atktype
-			var moveacc = 999
+			let movetype = counterSkill.atktype
+			let moveacc = 999
 			if (counterSkill.acc)
 				moveacc = counterSkill.acc;
 			
@@ -1420,12 +1429,12 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 			if (oppDefs.status === "dizzy") 
 				moveacc -= Math.floor(moveacc/2);
 
-			var movecrit = 0
+			let movecrit = 0
 			if (counterSkill.crit) {
 				movecrit = counterSkill.crit
 			}
-			var movestatus = "none"
-			var movestatuschance = 0
+			let movestatus = "none"
+			let movestatuschance = 0
 			if (counterSkill.status) {
 				movestatus = counterSkill.status
 				if (counterSkill.statuschance) {
@@ -1433,14 +1442,14 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 				}
 			}
 
-			var dmg = genDmg(oppDefs, userDefs, counterSkill, server, null, btl);
+			let dmg = genDmg(oppDefs, userDefs, counterSkill, server, null, btl);
 			
 			var finaltext = `${oppName}'s ${counterSkill.name} allowed them to evade & counter! `
-			var rand = -7 + Math.round(Math.random() * 14)
+			let rand = -7 + Math.round(Math.random() * 14)
 			dmg[0] += Math.round(rand)
 
 			// Prompts
-			var result = Math.round(dmg[0]);
+			let result = Math.round(dmg[0]);
 
 			if (result < 1) 
 				result = 1;
@@ -1450,8 +1459,8 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 				trapped = false;
 
 				if (oppDefs.missquote && oppDefs.missquote.length > 0) {
-					var possibleQuote = Math.round(Math.random() * (oppDefs.missquote.length-1))
-					var missQuote = `\n*${oppName}: "${oppDefs.missquote[possibleQuote]}"*`
+					let possibleQuote = Math.round(Math.random() * (oppDefs.missquote.length-1))
+					let missQuote = `\n*${oppName}: "${oppDefs.missquote[possibleQuote]}"*`
 					
 					if (missQuote.includes('%ENEMY%'))
 						missQuote.replace('%ENEMY%', userName)
@@ -1460,8 +1469,8 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 				}
 
 				if (userDefs.dodgequote && userDefs.dodgequote.length > 0) {
-					var possibleQuote = Math.round(Math.random() * (userDefs.dodgequote.length-1))
-					var dodgeQuote = `\n*${userName}: "${userDefs.dodgequote[possibleQuote]}"*`
+					let possibleQuote = Math.round(Math.random() * (userDefs.dodgequote.length-1))
+					let dodgeQuote = `\n*${userName}: "${userDefs.dodgequote[possibleQuote]}"*`
 					
 					if (dodgeQuote.includes('%ENEMY%'))
 						dodgeQuote.replace('%ENEMY%', oppName)
@@ -1473,7 +1482,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 				dmg[1] = "block"
 					
 				if (userDefs.blockquote && userDefs.blockquote.length > 0) {
-					var possibleQuote = Math.round(Math.random() * (userDefs.blockquote.length-1))
+					let possibleQuote = Math.round(Math.random() * (userDefs.blockquote.length-1))
 					finaltext += `\n*${userDefs.name}: "${userDefs.blockquote[possibleQuote]}"*`
 				}
 			} else if (dmg[1] == "drain") {
@@ -1481,7 +1490,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 				userDefs.hp = Math.min(userDefs.maxhp, userDefs.hp + result)
 					
 				if (userDefs.drainquote && userDefs.drainquote.length > 0) {
-					var possibleQuote = Math.round(Math.random() * (userDefs.drainquote.length-1))
+					let possibleQuote = Math.round(Math.random() * (userDefs.drainquote.length-1))
 					finaltext += `\n*${userDefs.name}: "${userDefs.drainquote[possibleQuote]}"*`
 				}
 			} else {
@@ -1525,8 +1534,8 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 					finaltext += '!'
 
 					if (oppDefs.killquote && oppDefs.killquote.length > 0) {
-						var possibleQuote = Math.round(Math.random() * (oppDefs.killquote.length-1))
-						var quote = `\n*${oppDefs.name}: "${oppDefs.killquote[possibleQuote]}"*`
+						let possibleQuote = Math.round(Math.random() * (oppDefs.killquote.length-1))
+						let quote = `\n*${oppDefs.name}: "${oppDefs.killquote[possibleQuote]}"*`
 
 						while (quote.includes('%ENEMY%'))
 							quote = quote.replace('%ENEMY%', oppDefs.name);
@@ -1535,8 +1544,8 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 					}
 
 					if (userDefs.deathquote && userDefs.deathquote.length > 0) {
-						var possibleQuote = Math.round(Math.random() * (userDefs.deathquote.length-1))
-						var quote = `\n*${userDefs.name}: "${userDefs.deathquote[possibleQuote]}"*`
+						let possibleQuote = Math.round(Math.random() * (userDefs.deathquote.length-1))
+						let quote = `\n*${userDefs.name}: "${userDefs.deathquote[possibleQuote]}"*`
 
 						if (quote.includes('%ENEMY%'))
 							quote = quote.replace('%ENEMY%', oppDefs.name);
@@ -1547,7 +1556,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 					finaltext += "!";
 					if (dmg[4] == true && userDefs.status == "none" && counterSkill.status) {
 						if (typeof counterSkill.status == "object") {
-							var possibleStatus = []
+							let possibleStatus = []
 							for (const i in counterSkill.status)
 								possibleStatus.push(counterSkill.status[i]);
 							
@@ -1559,7 +1568,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 					}
 					
 					if (userDefs.hurtquote && userDefs.hurtquote.length > 0) {
-						var possibleQuote = Math.round(Math.random() * (userDefs.hurtquote.length-1))
+						let possibleQuote = Math.round(Math.random() * (userDefs.hurtquote.length-1))
 						finaltext += `\n*${userDefs.name}: "${userDefs.hurtquote[possibleQuote]}"*`
 					}
 				}
@@ -1573,17 +1582,17 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 				
 				// Verse Skills
 				if (userDefs.healVerse) {
-					var healDmg = Math.round((dmg[0]/100)*userDefs.healVerse.healPercent)
+					let healDmg = Math.round((dmg[0]/100)*userDefs.healVerse.healPercent)
 					finaltext += `\n${userDefs.healVerse.username}'s ${userDefs.healVerse.skillname} healed ${oppName} by ${healDmg}!`
 					oppDefs.hp = Math.min(oppDefs.maxhp, oppDefs.hp + healDmg) 
 				}
 
 				if (userDefs.spreadVerse && skillDefs.target === 'one') {
-					var spreadDmg = Math.round((dmg[0]/100)*userDefs.spreadVerse.dmgPercent)
+					let spreadDmg = Math.round((dmg[0]/100)*userDefs.spreadVerse.dmgPercent)
 					finaltext += `\n${userDefs.spreadVerse.username}'s ${userDefs.spreadVerse.skillname} spread ${spreadDmg} to ${userDefs.name}'s allies!`
 					
 					for (const i in allySide) {
-						var allyDefs = allySide[i]
+						let allyDefs = allySide[i]
 						allyDefs.hp = Math.max(1, allyDefs.hp - spreadDmg)
 					}
 				}
@@ -1622,12 +1631,12 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 
 				// Passives
 				if (charFuncs.hasPassive(userDefs, "damagephys") && counterSkill.atktype === 'physical') {
-					var skillDefs2 = charFuncs.hasPassive(userDefs, "damagephys")
+					let skillDefs2 = charFuncs.hasPassive(userDefs, "damagephys")
 					oppDefs.hp = Math.min(oppDefs.maxhp, oppDefs.hp - skillDefs2.pow)
 					finaltext += ` ${oppName} was damaged by ${userName}'s ${skillDefs2.name}, taking ${skillDefs2.pow} damage!`
 				}
 				if (charFuncs.hasPassive(userDefs, "damagemag") && counterSkill.atktype === 'magic') {
-					var skillDefs2 = charFuncs.hasPassive(userDefs, "damagemag")
+					let skillDefs2 = charFuncs.hasPassive(userDefs, "damagemag")
 					oppDefs.hp = Math.min(oppDefs.maxhp, oppDefs.hp - skillDefs2.pow)
 					finaltext += ` ${oppName} was damaged by ${userName}'s ${skillDefs2.name}, taking ${skillDefs2.pow} damage!`
 				}
@@ -1644,9 +1653,9 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 				}
 			}
 		} else {
-			var userQuote
-			var oppQuote
-			var forceDmgType
+			let userQuote
+			let oppQuote
+			let forceDmgType
 			
 			const weather = btl[server].changeweather ? btl[server].changeweather.weather : btl[server].weather
 			const terrain = btl[server].changeterrain ? btl[server].changeterrain.terrain : btl[server].terrain
@@ -1666,11 +1675,11 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 
 			// Affinity Cutter & Slicer
 			for (const i in oppDefs.skills) {
-				var oppSkill = skillFile[oppDefs.skills[i]]
+				let oppSkill = skillFile[oppDefs.skills[i]]
 				
 				if (oppSkill.passive) {
 					if (oppSkill.affinitycutter) {
-						var randChance = Math.random()*100
+						let randChance = Math.random()*100
 						
 						if (randChance <= oppSkill.pow && (dmgtype === "resist" || dmgtype2 === "block")) {
 							finaltext += `\n${userName}'s ${oppSkill.name} allowed them to cut through resist & block affinities!`
@@ -1678,7 +1687,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 							forceDmgType = "normal"
 						}
 					} else if (oppSkill.affinityslicer) {
-						var randChance = Math.random()*100
+						let randChance = Math.random()*100
 						
 						if (randChance <= oppSkill.pow && (dmgtype === "resist" || dmgtype === "block" || dmgtype === "repel" || dmgtype === "drain")) {
 							finaltext += `\n${userName}'s ${oppSkill.name} allowed them to cut through resist, block, repel and drain affinities!`
@@ -1703,18 +1712,18 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 			const dmgCheck = getAffinity(oppDefs, skillDefs.type);
 
 			if (!skillDefs.hits || skillDefs.hits == 1) {
-				var dmg = genDmg(userDefs, oppDefs, skillDefs, server, forceDmgType, btl)
+				let dmg = genDmg(userDefs, oppDefs, skillDefs, server, forceDmgType, btl)
 				var finaltext = ``
 				
-				var rand = -7 + Math.round(Math.random() * 14)
+				let rand = -7 + Math.round(Math.random() * 14)
 				dmg[0] += rand;
 				
 				fieldMod(dmg, weather, terrain, skillDefs)
 				
-				var ignoreDmgTxt = false
+				let ignoreDmgTxt = false
 
 				// Prompts
-				var result = Math.round(dmg[0]);
+				let result = Math.round(dmg[0]);
 				if (result < 1) { result = 1 }
 
 				if (dmg[1] == "miss") {
@@ -1722,7 +1731,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 					trapped = false;
 
 					if (userDefs.missquote && userDefs.missquote.length > 0) {
-						var possibleQuote = Math.round(Math.random() * (userDefs.missquote.length-1))
+						let possibleQuote = Math.round(Math.random() * (userDefs.missquote.length-1))
 						userQuote = `\n*${userName}: "${userDefs.missquote[possibleQuote]}"*`
 						
 						if (userQuote.includes('%ENEMY%'))
@@ -1730,7 +1739,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 					}
 
 					if (oppDefs.dodgequote && oppDefs.dodgequote.length > 0) {
-						var possibleQuote = Math.round(Math.random() * (oppDefs.dodgequote.length-1))
+						let possibleQuote = Math.round(Math.random() * (oppDefs.dodgequote.length-1))
 						oppQuote = `\n*${oppName}: "${oppDefs.dodgequote[possibleQuote]}"*`
 					
 						if (oppQuote.includes('%ENEMY%'))
@@ -1741,9 +1750,9 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 
 
 					skillDefs.acc = 999
-					var repelDmg = genDmg(userDefs, userDefs, skillDefs, server, null, btl)
+					let repelDmg = genDmg(userDefs, userDefs, skillDefs, server, null, btl)
 					
-					var rand = -7 + Math.round(Math.random() * 14)
+					let rand = -7 + Math.round(Math.random() * 14)
 					repelDmg[0] += rand;
 					
 					fieldMod(repelDmg, weather, terrain, skillDefs)
@@ -1763,7 +1772,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 						dmg = repelDmg
 						
 						if (oppDefs.repelquote && oppDefs.repelquote.length > 0) {
-							var possibleQuote = Math.round(Math.random() * (oppDefs.repelquote.length-1))
+							let possibleQuote = Math.round(Math.random() * (oppDefs.repelquote.length-1))
 							oppQuote = `\n*${oppDefs.name}: "${oppDefs.repelquote[possibleQuote]}"*`
 						}
 					}
@@ -1776,9 +1785,9 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 					finaltext += `${oppName}'s ${repelSkill.name} repels the attack!\n`;
 
 					skillDefs.acc = 999
-					var repelDmg = genDmg(userDefs, userDefs, skillDefs, server, null, btl)
+					let repelDmg = genDmg(userDefs, userDefs, skillDefs, server, null, btl)
 					
-					var rand = -7 + Math.round(Math.random() * 14)
+					let rand = -7 + Math.round(Math.random() * 14)
 					repelDmg[0] += rand;
 					
 					fieldMod(repelDmg, weather, terrain, skillDefs)
@@ -1798,7 +1807,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 						dmg = repelDmg
 						
 						if (oppDefs.repelquote && oppDefs.repelquote.length > 0) {
-							var possibleQuote = Math.round(Math.random() * (oppDefs.repelquote.length-1))
+							let possibleQuote = Math.round(Math.random() * (oppDefs.repelquote.length-1))
 							oppQuote = `\n*${oppDefs.name}: "${oppDefs.repelquote[possibleQuote]}"*`
 						}
 					}
@@ -1817,8 +1826,8 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 
 					skillDefs.acc = 999
 
-					var repelDmg = genDmg(userDefs, userDefs, skillDefs, server, null, btl)
-					var rand = -7 + Math.round(Math.random() * 14)
+					let repelDmg = genDmg(userDefs, userDefs, skillDefs, server, null, btl)
+					let rand = -7 + Math.round(Math.random() * 14)
 					repelDmg[0] += rand;
 					
 					fieldMod(repelDmg, weather, terrain, skillDefs)
@@ -1838,7 +1847,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 						dmg = repelDmg
 						
 						if (oppDefs.repelquote && oppDefs.repelquote.length > 0) {
-							var possibleQuote = Math.round(Math.random() * (oppDefs.repelquote.length-1))
+							let possibleQuote = Math.round(Math.random() * (oppDefs.repelquote.length-1))
 							oppQuote = `\n*${oppDefs.name}: "${oppDefs.repelquote[possibleQuote]}"*`
 						}
 					}
@@ -1849,7 +1858,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 					finaltext += `${oppName} blocked it!`
 					
 					if (oppDefs.blockquote && oppDefs.blockquote.length > 0) {
-						var possibleQuote = Math.round(Math.random() * (oppDefs.blockquote.length-1))
+						let possibleQuote = Math.round(Math.random() * (oppDefs.blockquote.length-1))
 						oppQuote = `\n*${oppDefs.name}: "${oppDefs.blockquote[possibleQuote]}"*`
 					}
 
@@ -1859,7 +1868,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 					oppDefs.hp = Math.min(oppDefs.maxhp, oppDefs.hp + result)
 					
 					if (oppDefs.drainquote && oppDefs.drainquote.length > 0) {
-						var possibleQuote = Math.round(Math.random() * (oppDefs.drainquote.length-1))
+						let possibleQuote = Math.round(Math.random() * (oppDefs.drainquote.length-1))
 						oppQuote = `\n*${oppDefs.name}: "${oppDefs.drainquote[possibleQuote]}"*`
 					}
 				} else {
@@ -1869,29 +1878,29 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 					
 					if (dmg[2] == true) {
 						if (userDefs.strongquote && userDefs.strongquote.length > 0) {
-							var possibleQuote = Math.round(Math.random() * (userDefs.strongquote.length-1))
+							let possibleQuote = Math.round(Math.random() * (userDefs.strongquote.length-1))
 							userQuote = `\n*${userDefs.name}: "${userDefs.strongquote[possibleQuote]}"*`
 						}
 
 						if (oppDefs.weakquote && oppDefs.weakquote.length > 0) {
-							var possibleQuote = Math.round(Math.random() * (oppDefs.weakquote.length-1))
+							let possibleQuote = Math.round(Math.random() * (oppDefs.weakquote.length-1))
 							oppQuote = `\n*${oppDefs.name}: "${oppDefs.weakquote[possibleQuote]}"*`
 						}
 					} else if (dmgtype === "resist") {
 						if (oppDefs.resistquote && oppDefs.resistquote.length > 0) {
-							var possibleQuote = Math.round(Math.random() * (oppDefs.resistquote.length-1))
+							let possibleQuote = Math.round(Math.random() * (oppDefs.resistquote.length-1))
 							oppQuote = `\n*${oppDefs.name}: "${oppDefs.resistquote[possibleQuote]}"*`
 						}
 					} else {
 						if (oppDefs.hurtquote && oppDefs.hurtquote.length > 0) {
-							var possibleQuote = Math.round(Math.random() * (oppDefs.hurtquote.length-1))
+							let possibleQuote = Math.round(Math.random() * (oppDefs.hurtquote.length-1))
 							oppQuote = `\n*${oppDefs.name}: "${oppDefs.hurtquote[possibleQuote]}"*`
 						}
 					}
 				}
 
-				var targDefs = oppDefs
-				if (dmgCheck === 'repel' || repelSkill || !skillDefs.feint && ((skillDefs.type != 'almighty' && typeof skillDefs.type == 'string') || (typeof skillDefs.type == 'object' && !skillDefs.type.includes('almighty'))) && (oppDefs.makarakarn && skillDefs.atktype === "magic" || oppDefs.tetrakarn && skillDefs.atktype === "physical"))
+				let targDefs = oppDefs
+				if (dmgCheck === 'repel' || repelSkill || !skillDefs.feint && skillDefs.type != 'almighty' && (oppDefs.makarakarn && skillDefs.atktype === "magic" || oppDefs.tetrakarn && skillDefs.atktype === "physical"))
 					targDefs = userDefs
 
 				// Display Weakness
@@ -1931,9 +1940,9 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 
 					// Critical Quotes
 					if (dmg[3] == true && userDefs.critquote && userDefs.critquote.length > 0) {
-						var possibleQuote = Math.round(Math.random() * (userDefs.critquote.length-1))
+						let possibleQuote = Math.round(Math.random() * (userDefs.critquote.length-1))
 						
-						var critQuote = `\n*${userDefs.name}: "${userDefs.critquote[possibleQuote]}"*`
+						let critQuote = `\n*${userDefs.name}: "${userDefs.critquote[possibleQuote]}"*`
 						if (critQuote.includes('%ALLY%'))
 							critQuote = critQuote.replace('%ALLY%', allySide[Math.round(Math.random() * (allySide.length-1))].name);
 						if (critQuote.includes('%ENEMY%'))
@@ -1959,7 +1968,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 						finaltext += '!'
 
 						if (userDefs.killquote && userDefs.killquote.length > 0) {
-							var possibleQuote = Math.round(Math.random() * (userDefs.killquote.length-1))
+							let possibleQuote = Math.round(Math.random() * (userDefs.killquote.length-1))
 							userQuote = `\n*${userDefs.name}: "${userDefs.killquote[possibleQuote]}"*`
 
 							while (userQuote.includes('%ENEMY%'))
@@ -1967,7 +1976,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 						}
 
 						if (oppDefs.deathquote && oppDefs.deathquote.length > 0) {
-							var possibleQuote = Math.round(Math.random() * (oppDefs.deathquote.length-1))
+							let possibleQuote = Math.round(Math.random() * (oppDefs.deathquote.length-1))
 							oppQuote = `\n*${oppDefs.name}: "${oppDefs.deathquote[possibleQuote]}"*`
 
 							if (oppQuote.includes('%ENEMY%'))
@@ -1975,11 +1984,11 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 						}
 
 						for (const i in opposingSide) {
-							var allyDefs = opposingSide[i]
+							let allyDefs = opposingSide[i]
 							if (oppDefs.trust[allyDefs.name] && oppDefs.trust[allyDefs.name].level >= 12) {
 								if (allyDefs.hp > 0 && allyDefs.allydeathquote && allyDefs.allydeathquote.length > 0) {
-									var possibleQuote = Math.round(Math.random() * (allyDefs.allydeathquote.length-1))
-									var allyQuote = `\n*${allyDefs.name}: "${allyDefs.allydeathquote[possibleQuote]}"*`
+									let possibleQuote = Math.round(Math.random() * (allyDefs.allydeathquote.length-1))
+									let allyQuote = `\n*${allyDefs.name}: "${allyDefs.allydeathquote[possibleQuote]}"*`
 									if (allyQuote.includes('%ALLY%'))
 										allyQuote = allyQuote.replace('%ALLY%', oppDefs.name);
 									if (allyQuote.includes('%ENEMY%'))
@@ -2002,12 +2011,12 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 						finaltext += '!'
 
 						if (oppDefs.killquote && oppDefs.killquote.length > 0) {
-							var possibleQuote = Math.round(Math.random() * (oppDefs.killquote.length-1))
+							let possibleQuote = Math.round(Math.random() * (oppDefs.killquote.length-1))
 							oppQuote = `\n*${oppDefs.name}: "${oppDefs.killquote[possibleQuote]}"*`
 						}
 
 						if (userDefs.deathquote && userDefs.deathquote.length > 0) {
-							var possibleQuote = Math.round(Math.random() * (userDefs.deathquote.length-1))
+							let possibleQuote = Math.round(Math.random() * (userDefs.deathquote.length-1))
 							userQuote = `\n*${userDefs.name}: "${userDefs.deathquote[possibleQuote]}"*`
 
 							if (userQuote.includes('%ENEMY%'))
@@ -2015,11 +2024,11 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 						}
 
 						for (const i in allySide) {
-							var allyDefs = allySide[i]
+							let allyDefs = allySide[i]
 							if (userDefs.trust[allyDefs.name] && userDefs.trust[allyDefs.name].level >= 12) {
 								if (allyDefs.hp > 0 && allyDefs.allydeathquote && allyDefs.allydeathquote.length > 0) {
-									var possibleQuote = Math.round(Math.random() * (allyDefs.allydeathquote.length-1))
-									var allyQuote = `\n*${allyDefs.name}: "${allyDefs.allydeathquote[possibleQuote]}"*`
+									let possibleQuote = Math.round(Math.random() * (allyDefs.allydeathquote.length-1))
+									let allyQuote = `\n*${allyDefs.name}: "${allyDefs.allydeathquote[possibleQuote]}"*`
 									if (allyQuote.includes('%ALLY%'))
 										allyQuote = allyQuote.replace('%ALLY%', userDefs.name);
 									if (allyQuote.includes('%ENEMY%'))
@@ -2033,7 +2042,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 						finaltext += "!";
 						if (dmg[4] == true && targDefs.status == "none" && skillDefs.status) {
 							if (typeof skillDefs.status == "object") {
-								var possibleStatus = []
+								let possibleStatus = []
 								for (const i in skillDefs.status)
 									possibleStatus.push(skillDefs.status[i]);
 								
@@ -2054,17 +2063,17 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 
 					// Verse Skills
 					if (targDefs.healVerse && !skillDefs.limitbreak) {
-						var healDmg = Math.round((dmg[0]/100)*targDefs.healVerse.healPercent)
+						let healDmg = Math.round((dmg[0]/100)*targDefs.healVerse.healPercent)
 						finaltext += `\n${targDefs.healVerse.username}'s ${targDefs.healVerse.skillname} healed ${userName} by ${healDmg}!`
 						userDefs.hp = Math.min(userDefs.maxhp, userDefs.hp + healDmg)
 					}
 
 					if (targDefs.spreadVerse && skillDefs.target === 'one') {
-						var spreadDmg = Math.round((dmg[0]/100)*targDefs.spreadVerse.dmgPercent)
+						let spreadDmg = Math.round((dmg[0]/100)*targDefs.spreadVerse.dmgPercent)
 						finaltext += `\n${targDefs.spreadVerse.username}'s ${targDefs.spreadVerse.skillname} spread ${spreadDmg} to ${targDefs.name}'s allies!`
 
 						for (const i in opposingSide) {
-							var allyDefs = opposingSide[i]
+							let allyDefs = opposingSide[i]
 							allyDefs.hp = Math.max(1, allyDefs.hp - spreadDmg)
 						}
 					}
@@ -2103,12 +2112,12 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 
 					// Passives
 					if (charFuncs.hasPassive(targDefs, "damagephys") && skillDefs.atktype === 'physical') {
-						var skillDefs2 = charFuncs.hasPassive(targDefs, "damagephys")
+						let skillDefs2 = charFuncs.hasPassive(targDefs, "damagephys")
 						userDefs.hp = Math.min(userDefs.maxhp, userDefs.hp - skillDefs2.pow)
 						finaltext += ` ${userName} was damaged by ${oppName}'s ${skillDefs2.name}, taking ${skillDefs2.pow} damage!`
 					}
 					if (charFuncs.hasPassive(targDefs, "damagemag") && skillDefs.atktype === 'magic') {
-						var skillDefs2 = charFuncs.hasPassive(targDefs, "damagemag")
+						let skillDefs2 = charFuncs.hasPassive(targDefs, "damagemag")
 						userDefs.hp = Math.min(userDefs.maxhp, userDefs.hp - skillDefs2.pow)
 						finaltext += ` ${userName} was damaged by ${oppName}'s ${skillDefs2.name}, taking ${skillDefs2.pow} damage!`
 					}
@@ -2132,7 +2141,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 
 					// Limit Break
 					if (dmg[1] != "repel" && doLimitBreaks(server)) {
-						var lbGain = [0, Math.floor(result / 16) ]
+						let lbGain = [0, Math.floor(result / 16) ]
 						if (skillDefs.target === "allopposing" || skillDefs.target === "allallies") {
 							lbGain[0] += Math.floor(result / 8)
 						} else if (skillDefs.target === "everyone") {
@@ -2151,9 +2160,9 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 					}
 
 					if (charFuncs.hasPassive(targDefs, "alterpain") && targDefs.hp >= 0 && !skillDefs.feint) {
-						var painDefs = charFuncs.hasPassive(targDefs, "alterpain");
+						let painDefs = charFuncs.hasPassive(targDefs, "alterpain");
 
-						var mpGain = Math.round((result/100)*painDefs.pow);		
+						let mpGain = Math.round((result/100)*painDefs.pow);		
 						targDefs.mp = Math.min(targDefs.maxmp, targDefs.mp+mpGain);
 
 						finaltext += `\n${targDefs.name}'s ${painDefs.name} allowed them to gain ${mpGain}MP back!`;
@@ -2167,7 +2176,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 					trapped = false;
 
 					if (userDefs.missquote && userDefs.missquote.length > 0) {
-						var possibleQuote = Math.round(Math.random() * (userDefs.missquote.length-1))
+						let possibleQuote = Math.round(Math.random() * (userDefs.missquote.length-1))
 						userQuote = `\n*${userName}: "${userDefs.missquote[possibleQuote]}"*`
 						
 						if (userQuote.includes('%ENEMY%'))
@@ -2175,7 +2184,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 					}
 
 					if (oppDefs.dodgequote && oppDefs.dodgequote.length > 0) {
-						var possibleQuote = Math.round(Math.random() * (oppDefs.dodgequote.length-1))
+						let possibleQuote = Math.round(Math.random() * (oppDefs.dodgequote.length-1))
 						oppQuote = `\n*${oppName}: "${oppDefs.dodgequote[possibleQuote]}"*`
 					
 						if (oppQuote.includes('%ENEMY%'))
@@ -2184,7 +2193,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 				} else if (dmgCheck == "repel") {
 					finaltext = `${oppName} repelled it! `;
 
-					var repelDmg = genDmg(userDefs, userDefs, skillDefs, server, null, btl)
+					let repelDmg = genDmg(userDefs, userDefs, skillDefs, server, null, btl)
 					if (repelDmg[1] === "block" || repelDmg[1] === "repel") {
 						finaltext += `${userName} blocked it!`;
 						dmgCheck = "block"
@@ -2195,13 +2204,13 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 					}
 					
 					if (oppDefs.repelquote && oppDefs.repelquote.length > 0) {
-						var possibleQuote = Math.round(Math.random() * (oppDefs.repelquote.length-1))
+						let possibleQuote = Math.round(Math.random() * (oppDefs.repelquote.length-1))
 						oppQuote = `\n*${oppDefs.name}: "${oppDefs.repelquote[possibleQuote]}"*`
 					}
 				} else if (repelSkill) {
 					finaltext = `${oppName}'s ${repelSkill.name} repels the attack! `;
 
-					var repelDmg = genDmg(userDefs, userDefs, skillDefs, server, null, btl)
+					let repelDmg = genDmg(userDefs, userDefs, skillDefs, server, null, btl)
 					if (repelDmg[1] === "block" || repelDmg[1] === "repel") {
 						finaltext += `${userName} blocked it!`;
 						dmgCheck = "block"
@@ -2212,7 +2221,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 					}
 					
 					if (oppDefs.repelquote && oppDefs.repelquote.length > 0) {
-						var possibleQuote = Math.round(Math.random() * (oppDefs.repelquote.length-1))
+						let possibleQuote = Math.round(Math.random() * (oppDefs.repelquote.length-1))
 						oppQuote = `\n*${oppDefs.name}: "${oppDefs.repelquote[possibleQuote]}"*`
 					}
 				} else if (!skillDefs.feint && ((skillDefs.type != 'almighty' && typeof skillDefs.type == 'string') || (typeof skillDefs.type == 'object' && !skillDefs.type.includes('almighty'))) && (oppDefs.makarakarn && skillDefs.atktype === "magic" || oppDefs.tetrakarn && skillDefs.atktype === "physical")) {
@@ -2224,7 +2233,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 						delete oppDefs.tetrakarn
 					}
 
-					var repelDmg = genDmg(userDefs, userDefs, skillDefs, server, null, btl)
+					let repelDmg = genDmg(userDefs, userDefs, skillDefs, server, null, btl)
 					if (repelDmg[1] === "block" || repelDmg[1] === "repel") {
 						finaltext += `${userName} blocked it!`;
 						dmgCheck = "block"
@@ -2235,21 +2244,21 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 					}
 					
 					if (oppDefs.repelquote && oppDefs.repelquote.length > 0) {
-						var possibleQuote = Math.round(Math.random() * (oppDefs.repelquote.length-1))
+						let possibleQuote = Math.round(Math.random() * (oppDefs.repelquote.length-1))
 						oppQuote = `\n*${oppDefs.name}: "${oppDefs.repelquote[possibleQuote]}"*`
 					}
 				} else if (dmgCheck == "block") {
 					finaltext = `${oppName} blocked it!`;
 					
 					if (oppDefs.blockquote && oppDefs.blockquote.length > 0) {
-						var possibleQuote = Math.round(Math.random() * (oppDefs.blockquote.length-1))
+						let possibleQuote = Math.round(Math.random() * (oppDefs.blockquote.length-1))
 						oppQuote = `\n*${oppDefs.name}: "${oppDefs.blockquote[possibleQuote]}"*`
 					}
 				} else if (dmgCheck == "drain") {
 					finaltext = `It was drained! ${oppName}'s HP was restored by`;
 					
 					if (oppDefs.drainquote && oppDefs.drainquote.length > 0) {
-						var possibleQuote = Math.round(Math.random() * (oppDefs.drainquote.length-1))
+						let possibleQuote = Math.round(Math.random() * (oppDefs.drainquote.length-1))
 						oppQuote = `\n*${oppDefs.name}: "${oppDefs.drainquote[possibleQuote]}"*`
 					}
 				} else {
@@ -2257,7 +2266,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 				}
 				
 				// Accuracy Checks
-				var hitCount = 1;
+				let hitCount = 1;
 				if (dmgCheck != 'repel' && !repelSkill) {
 					for (let i = 2; i <= skillDefs.hits; i++) {
 						if (missCheck(prc, enmagl, moveacc)) {
@@ -2269,31 +2278,31 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 				}
 				
 				if (dmgCheck != "block" && dmgCheck != "miss") {
-					var total = 0;
-					var resulttext = ``;
+					let total = 0;
+					let resulttext = ``;
 					
-					var hasCrit = false;
-					var hasStatus = false;
+					let hasCrit = false;
+					let hasStatus = false;
 
 					for (let i = 1; i <= hitCount; i++) {
 						skillDefs.acc = 999
 
-						var dmg = genDmg(userDefs, oppDefs, skillDefs, server, forceDmgType, btl)
+						let dmg = genDmg(userDefs, oppDefs, skillDefs, server, forceDmgType, btl)
 
-						var rand = -7 + Math.round(Math.random() * 14)
+						let rand = -7 + Math.round(Math.random() * 14)
 						dmg[0] += Math.round(rand);
 						
 						fieldMod(dmg, weather, terrain, skillDefs)
 
 						// Prompts
-						var result = Math.round(dmg[0]);
+						let result = Math.round(dmg[0]);
 						
 						if (result < 1)
 							result = 1;
 
-						if (dmgCheck == "repel" || repelSkill || (((skillDefs.type != 'almighty' && typeof skillDefs.type == 'string') || (typeof skillDefs.type == 'object' && !skillDefs.type.includes('almighty'))) && (oppDefs.makarakarn && skillDefs.atktype === "magic" || oppDefs.tetrakarn && skillDefs.atktype === "physical")) && !skillDefs.feint) {
-							var repelDmg = genDmg(userDefs, userDefs, skillDefs, server, null, btl)
-							var rand = -7 + Math.round(Math.random() * 14)
+						if (dmgCheck == "repel" || repelSkill || (skillDefs.type != 'almighty' && (oppDefs.makarakarn && skillDefs.atktype === "magic" || oppDefs.tetrakarn && skillDefs.atktype === "physical")) && !skillDefs.feint) {
+							let repelDmg = genDmg(userDefs, userDefs, skillDefs, server, null, btl)
+							let rand = -7 + Math.round(Math.random() * 14)
 							repelDmg[0] += rand;
 							fieldMod(repelDmg, weather, terrain, skillDefs)
 							
@@ -2318,8 +2327,8 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 							embedText.oneMore = true
 						}
 
-						var effective = ''
-						if (dmg[2]) effective = '<:effective:876899270731628584>';
+						let effective = ''
+						if (dmg[2]) effective = dmg[1] == "superweak" ? '<:supereffective:939053172528394252>' : '<:effective:876899270731628584>';
 						if (dmg[1] == 'resist') effective = '<:resist:877132670784647238>';
 
 						// Display Crits
@@ -2359,7 +2368,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 						// Weakness Quotes & Critical Quotes
 						if (dmgCheck == 'weak' || dmgCheck == 'superweak') {
 							if (userDefs.strongquote && userDefs.strongquote.length > 0) {
-								var possibleQuote = Math.round(Math.random() * (userDefs.strongquote.length-1))
+								let possibleQuote = Math.round(Math.random() * (userDefs.strongquote.length-1))
 		
 								if (userQuote) {
 									userQuote += `\n*${userDefs.name}: "${userDefs.strongquote[possibleQuote]}"*`
@@ -2370,26 +2379,26 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 
 							if (oppDefs.weakquote && oppDefs.weakquote.length > 0) {
 								console.log(`${oppDefs.name}'s Weak Quote is played.`)
-								var possibleQuote = Math.round(Math.random() * (oppDefs.weakquote.length-1))
+								let possibleQuote = Math.round(Math.random() * (oppDefs.weakquote.length-1))
 								
 								oppQuote = `\n*${oppDefs.name}: "${oppDefs.weakquote[possibleQuote]}"*`
 							}
 						} else if (dmgCheck === "resist") {
 							if (oppDefs.resistquote && oppDefs.resistquote.length > 0) {
-								var possibleQuote = Math.round(Math.random() * (oppDefs.resistquote.length-1))
+								let possibleQuote = Math.round(Math.random() * (oppDefs.resistquote.length-1))
 								oppQuote = `\n*${oppDefs.name}: "${oppDefs.resistquote[possibleQuote]}"*`
 							}
 						} else {
 							if (oppDefs.hurtquote && oppDefs.hurtquote.length > 0) {
-								var possibleQuote = Math.round(Math.random() * (oppDefs.hurtquote.length-1))
+								let possibleQuote = Math.round(Math.random() * (oppDefs.hurtquote.length-1))
 								oppQuote = `\n*${oppDefs.name}: "${oppDefs.hurtquote[possibleQuote]}"*`
 							}
 						}
 						
 						if (hasCrit == true && userDefs.critquote && userDefs.critquote.length > 0) {
-							var possibleQuote = Math.round(Math.random() * (userDefs.critquote.length-1))
+							let possibleQuote = Math.round(Math.random() * (userDefs.critquote.length-1))
 
-							var critQuote = `\n*${userDefs.name}: "${userDefs.critquote[possibleQuote]}"*`
+							let critQuote = `\n*${userDefs.name}: "${userDefs.critquote[possibleQuote]}"*`
 							if (critQuote.includes('%ALLY%'))
 								critQuote = critQuote.replace('%ALLY%', allySide[Math.round(Math.random() * (allySide.length-1))].name);
 							if (critQuote.includes('%ENEMY%'))
@@ -2402,7 +2411,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 							}
 						}
 
-						var targDefs = oppDefs
+						let targDefs = oppDefs
 						if (dmgCheck === 'repel' || repelSkill)
 							targDefs = userDefs
 
@@ -2419,12 +2428,12 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 							finaltext += '!'
 
 							if (userDefs.killquote && userDefs.killquote.length > 0) {
-								var possibleQuote = Math.round(Math.random() * (userDefs.killquote.length-1))
+								let possibleQuote = Math.round(Math.random() * (userDefs.killquote.length-1))
 								userQuote = `\n*${userDefs.name}: "${userDefs.killquote[possibleQuote]}"*`
 							}
 
 							if (oppDefs.deathquote && oppDefs.deathquote.length > 0) {
-								var possibleQuote = Math.round(Math.random() * (oppDefs.deathquote.length-1))
+								let possibleQuote = Math.round(Math.random() * (oppDefs.deathquote.length-1))
 								oppQuote = `\n*${oppDefs.name}: "${oppDefs.deathquote[possibleQuote]}"*`
 
 								if (oppQuote.includes('%ENEMY%'))
@@ -2432,11 +2441,11 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 							}
 
 							for (const i in opposingSide) {
-								var allyDefs = opposingSide[i]
+								let allyDefs = opposingSide[i]
 								if (oppDefs.trust[allyDefs.name] && oppDefs.trust[allyDefs.name].level >= 12) {
 									if (allyDefs.hp > 0 && allyDefs.allydeathquote && allyDefs.allydeathquote.length > 0) {
-										var possibleQuote = Math.round(Math.random() * (allyDefs.allydeathquote.length-1))
-										var allyQuote = `\n*${allyDefs.name}: "${allyDefs.allydeathquote[possibleQuote]}"*`
+										let possibleQuote = Math.round(Math.random() * (allyDefs.allydeathquote.length-1))
+										let allyQuote = `\n*${allyDefs.name}: "${allyDefs.allydeathquote[possibleQuote]}"*`
 										if (allyQuote.includes('%ALLY%'))
 											allyQuote = allyQuote.replace('%ALLY%', oppDefs.name);
 										if (allyQuote.includes('%ENEMY%'))
@@ -2459,21 +2468,21 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 							finaltext += '!'
 
 							if (oppDefs.killquote && oppDefs.killquote.length > 0) {
-								var possibleQuote = Math.round(Math.random() * (oppDefs.killquote.length-1))
+								let possibleQuote = Math.round(Math.random() * (oppDefs.killquote.length-1))
 								oppQuote = `\n*${oppDefs.name}: "${oppDefs.killquote[possibleQuote]}"*`
 							}
 
 							if (userDefs.deathquote && userDefs.deathquote.length > 0) {
-								var possibleQuote = Math.round(Math.random() * (userDefs.deathquote.length-1))
+								let possibleQuote = Math.round(Math.random() * (userDefs.deathquote.length-1))
 								userQuote = `\n*${userDefs.name}: "${userDefs.deathquote[possibleQuote]}"*`
 							}
 
 							for (const i in allySide) {
-								var allyDefs = allySide[i]
+								let allyDefs = allySide[i]
 								if (userDefs.trust[allyDefs.name] && userDefs.trust[allyDefs.name].level >= 12) {
 									if (allyDefs.hp > 0 && allyDefs.allydeathquote && allyDefs.allydeathquote.length > 0) {
-										var possibleQuote = Math.round(Math.random() * (allyDefs.allydeathquote.length-1))
-										var allyQuote = `\n*${allyDefs.name}: "${allyDefs.allydeathquote[possibleQuote]}"*`
+										let possibleQuote = Math.round(Math.random() * (allyDefs.allydeathquote.length-1))
+										let allyQuote = `\n*${allyDefs.name}: "${allyDefs.allydeathquote[possibleQuote]}"*`
 										if (allyQuote.includes('%ALLY%'))
 											allyQuote = allyQuote.replace('%ALLY%', userDefs.name);
 										if (allyQuote.includes('%ENEMY%'))
@@ -2487,7 +2496,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 							finaltext = finaltext + "!";
 							if (hasStatus && targDefs.status != "none" && skillDefs.status) {
 								if (typeof skillDefs.status == "object") {
-									var possibleStatus = []
+									let possibleStatus = []
 									for (const i in skillDefs.status)
 										possibleStatus.push(skillDefs.status[i]);
 									
@@ -2507,17 +2516,17 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 
 						// Verse Skills
 						if (targDefs.healVerse && !skillDefs.limitbreak) {
-							var healDmg = Math.round((total/100)*targDefs.healVerse.healPercent)
+							let healDmg = Math.round((total/100)*targDefs.healVerse.healPercent)
 							finaltext += `\n${targDefs.healVerse.username}'s ${targDefs.healVerse.skillname} healed ${userName} by ${healDmg}!`
 							userDefs.hp = Math.min(userDefs.maxhp, userDefs.hp + healDmg)
 						}
 
 						if (targDefs.spreadVerse && skillDefs.target === 'one') {
-							var spreadDmg = Math.round((total/100)*targDefs.spreadVerse.dmgPercent)
+							let spreadDmg = Math.round((total/100)*targDefs.spreadVerse.dmgPercent)
 							finaltext += `\n${targDefs.spreadVerse.username}'s ${targDefs.spreadVerse.skillname} spread ${spreadDmg} to ${targDefs.name}'s allies!`
 
 							for (const i in opposingSide) {
-								var allyDefs = opposingSide[i]
+								let allyDefs = opposingSide[i]
 								allyDefs.hp = Math.max(1, allyDefs.hp - spreadDmg)
 							}
 						}
@@ -2556,12 +2565,12 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 
 						// Passives
 						if (charFuncs.hasPassive(targDefs, "damagephys") && skillDefs.atktype === 'physical') {
-							var skillDefs2 = charFuncs.hasPassive(targDefs, "damagephys")
+							let skillDefs2 = charFuncs.hasPassive(targDefs, "damagephys")
 							userDefs.hp = Math.min(userDefs.maxhp, userDefs.hp - skillDefs2.pow)
 							finaltext += ` ${userName} was damaged by ${oppName}'s ${skillDefs2.name}, taking ${skillDefs2.pow} damage!`
 						}
 						if (charFuncs.hasPassive(targDefs, "damagemag") && skillDefs.atktype === 'magic') {
-							var skillDefs2 = charFuncs.hasPassive(targDefs, "damagemag")
+							let skillDefs2 = charFuncs.hasPassive(targDefs, "damagemag")
 							userDefs.hp = Math.min(userDefs.maxhp, userDefs.hp - skillDefs2.pow)
 							finaltext += ` ${userName} was damaged by ${oppName}'s ${skillDefs2.name}, taking ${skillDefs2.pow} damage!`
 						}
@@ -2585,7 +2594,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 						
 						// Limit Break
 						if (dmgCheck != "repel" && doLimitBreaks(server)) {
-							var lbGain = [0, Math.floor(total / 32)]
+							let lbGain = [0, Math.floor(total / 32)]
 							if (skillDefs.target === "allopposing" || skillDefs.target === "allallies") {
 								lbGain[0] += Math.floor(total / 32)
 							} else if (skillDefs.target === "everyone") {
@@ -2604,9 +2613,9 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 						}
 
 						if (charFuncs.hasPassive(targDefs, "alterpain") && targDefs.hp >= 0 && !skillDefs.feint) {
-							var painDefs = charFuncs.hasPassive(targDefs, "alterpain");
+							let painDefs = charFuncs.hasPassive(targDefs, "alterpain");
 
-							var mpGain = Math.round((total/100)*painDefs.pow);		
+							let mpGain = Math.round((total/100)*painDefs.pow);		
 							targDefs.mp = Math.min(targDefs.maxmp, targDefs.mp+mpGain);
 
 							finaltext += `\n${targDefs.name}'s ${painDefs.name} allowed them to gain ${mpGain}MP back!`;
@@ -2662,8 +2671,8 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 
 		if (skillDefs.debuff) {
 			if (skillDefs.buffchance) {
-				var debuffChance = (skillDefs.buffchance + (userDefs.luk - oppDefs.luk)) / 100;
-				var chance = Math.random();
+				let debuffChance = (skillDefs.buffchance + (userDefs.luk - oppDefs.luk)) / 100;
+				let chance = Math.random();
 				
 				if (chance < debuffChance) {
 					oppDefs.buffs[skillDefs.debuff] = Math.max(-3, oppDefs.buffs[skillDefs.debuff]-1)
@@ -2692,21 +2701,21 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 		}
 		
 		if (skillDefs.steal) {
-			var lootPath = `${dataPath}/Loot/lootTables-${server}.json`
-			var lootRead = fs.readFileSync(lootPath, {flag: 'as+'});
-			var lootFile = JSON.parse(lootRead);
+			let lootPath = `${dataPath}/Loot/lootTables-${server}.json`
+			let lootRead = fs.readFileSync(lootPath, {flag: 'as+'});
+			let lootFile = JSON.parse(lootRead);
 
-			var stealPercent = Math.round(Math.random()*100)
-			var stealChance = skillDefs.steal - Math.round((oppDefs.luk-userDefs.luk)/2)
+			let stealPercent = Math.round(Math.random()*100)
+			let stealChance = skillDefs.steal - Math.round((oppDefs.luk-userDefs.luk)/2)
 
 			console.log(`StealCheck: ${stealPercent} <= ${stealChance}?`);
 			if (stealPercent <= stealChance && lootFile[oppDefs.itemLoot]) {
-				var items = lootFile[oppDefs.itemLoot].items;
-				var itemName = items[Math.round(Math.random() * items.length-1)]
+				let items = lootFile[oppDefs.itemLoot].items;
+				let itemName = items[Math.round(Math.random() * items.length-1)]
 
 				finaltext += ` ${userName} managed to get their hands on ${oppName}'s ${itemName}!`
 
-				var partyDefs = btl[server].parties[btl[server].battleteam];
+				let partyDefs = btl[server].parties[btl[server].battleteam];
 				if (charFuncs.isOpposingSide(userDefs))
 					partyDefs = btl[server].parties[btl[server].battleteam2];
 	
@@ -2718,7 +2727,7 @@ function attackEnemy(userName, oppName, userDefs, oppDefs, skillDefs, useEnergy,
 		}
 
 		if (charFuncs.hasPassive(oppDefs, "endure") && oppDefs.hp <= 0 && !skillDefs.feint) {
-			var endDefs = charFuncs.hasPassive(oppDefs, "endure")
+			let endDefs = charFuncs.hasPassive(oppDefs, "endure")
 			if (endDefs.pow >= 999) {
 				finaltext += `\n\n...But ${oppDefs.name} endures the attack!`;
 				oppDefs.hp = 1;
@@ -2751,25 +2760,25 @@ function meleeAttack(userDefs, enmDefs, server, rage, btl) {
 		oneMore: false
 	}
 	
-	var userName = userDefs.name
-	var enmName = enmDefs.name
+	let userName = userDefs.name
+	let enmName = enmDefs.name
 	
-    var itemPath = dataPath+'/items.json'
-    var itemRead = fs.readFileSync(itemPath);
-    var itemFile = JSON.parse(itemRead);
+    let itemPath = dataPath+'/items.json'
+    let itemRead = fs.readFileSync(itemPath);
+    let itemFile = JSON.parse(itemRead);
 
 	// Weaknesses and shit
-	var dmgtype = getAffinity(enmDefs, userDefs.melee[1])
+	let dmgtype = getAffinity(enmDefs, userDefs.melee[1])
 	
 	const skillPath = dataPath+'/skills.json'
 	const skillRead = fs.readFileSync(skillPath);
 	const skillFile = JSON.parse(skillRead);
 	
 	// Resisting Passives
-	var repelSkill = null
-	var counterSkill = null
-	var resistSkill = null
-	var trapped = false
+	let repelSkill = null
+	let counterSkill = null
+	let resistSkill = null
+	let trapped = false
 	for (const i in enmDefs.skills) {
 		const skillDefs = skillFile[enmDefs.skills[i]]
 	
@@ -2809,23 +2818,23 @@ function meleeAttack(userDefs, enmDefs, server, rage, btl) {
 		skillDefs.target = 'allopposing'
 
 	if (skillDefs.target === 'allopposing') {
-		var damages = [];
+		let damages = [];
 		var finaltext = ``;
-		var embedTexts = [];
+		let embedTexts = [];
 		
-		var allySide = btl[server].allies.members
-		var opposingSide = btl[server].enemies.members
+		let allySide = btl[server].allies.members
+		let opposingSide = btl[server].enemies.members
 		if (charFuncs.isOpposingSide(userDefs, btl[server])) {
 			allySide = btl[server].enemies.members
 			opposingSide = btl[server].allies.members
 		}
 
 		for (const i in opposingSide) {
-			var enmDefs = opposingSide[i];
-			var enmName = opposingSide[i].name;
+			let enmDefs = opposingSide[i];
+			let enmName = opposingSide[i].name;
 
 			if (enmDefs.hp > 0 && !enmDefs.negotiated) {
-				var embedTxt = attackEnemy(userDefs.name, enmName, userDefs, enmDefs, skillDefs, false, server, btl)
+				let embedTxt = attackEnemy(userDefs.name, enmName, userDefs, enmDefs, skillDefs, false, server, btl)
 				if (embedTxt.oneMore == true && doOneMores(server)) {
 					btl[server].onemore = true
 				}
@@ -2848,20 +2857,20 @@ function meleeAttack(userDefs, enmDefs, server, rage, btl) {
 
 		return embedText
 	} else {
-		var dmg = genDmg(userDefs, enmDefs, skillDefs, server, null, btl)
+		let dmg = genDmg(userDefs, enmDefs, skillDefs, server, null, btl)
 		var finaltext = ``
-		var rand = -7 + Math.round(Math.random() * 14)
+		let rand = -7 + Math.round(Math.random() * 14)
 		dmg[0] += Math.round(rand)
 
 		// Prompts
-		var result = Math.round(dmg[0]);
+		let result = Math.round(dmg[0]);
 		if (dmg[1] == "miss") {
 			finaltext += `${enmName} dodged it!`;
 			trapped = false;
 
 			if (userDefs.missquote && userDefs.missquote.length > 0) {
-				var possibleQuote = Math.round(Math.random() * (userDefs.missquote.length-1))
-				var missQuote = `\n*${userName}: "${userDefs.missquote[possibleQuote]}"*`
+				let possibleQuote = Math.round(Math.random() * (userDefs.missquote.length-1))
+				let missQuote = `\n*${userName}: "${userDefs.missquote[possibleQuote]}"*`
 				
 				if (missQuote.includes('%ENEMY%'))
 					missQuote.replace('%ENEMY%', enmDefs.name)
