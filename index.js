@@ -208,7 +208,8 @@ const statusEffects = [
 	"infatuation",
 	"mirror",
 	"blind",
-	"confusion"
+	"confusion",
+	"irradiation"
 ]
 
 const statusEmojis = {
@@ -232,7 +233,8 @@ const statusEmojis = {
 	infatuation: '❣️',
 	mirror: '<:mirror:929864689406582784>',
 	blind: '🕶️',
-	confusion: '☄️'
+	confusion: '☄️',
+	irradiation: '☣️'
 }
 
 // Enemy Habitats
@@ -2220,6 +2222,60 @@ function doStatusEffect(fighterDef, btl, server) {
 
 			fs.writeFileSync(dataPath+'/Battles/battle-' + server + '.json', JSON.stringify(btl, null, '    '));
             return [fighterDef, forceSkip ? "skip" : "continue"]
+		} else if (fighterDef.status === "irradiation") {
+			if (!fighterDef.realStats) fighterDef.realStats = [fighterDef.atk, fighterDef.mag, fighterDef.prc, fighterDef.end, fighterDef.chr, fighterDef.int, fighterDef.agl, fighterDef.luk]
+
+			if (fighterDef.boss || fighterDef.statusturns <= 1) {
+				const statusEmbed = new Discord.MessageEmbed()
+					.setColor('#e36b2b')
+					.setTitle(`${fighterDef.name} is irradiated.`)
+					.setDescription("They got cured from radiation.")
+
+				client.channels.fetch(btl[server].battlechannel)
+					.then(channel => channel.send({embeds: [statusEmbed]}))
+
+				console.log(`TurnOrder: Done ${fighterDef.name}'s ${fighterDef.status} status effect.`);
+
+				fighterDef.atk = fighterDef.realStats[0]
+				fighterDef.mag = fighterDef.realStats[1]
+				fighterDef.prc = fighterDef.realStats[2]
+				fighterDef.end = fighterDef.realStats[3]
+				fighterDef.chr = fighterDef.realStats[4]
+				fighterDef.int = fighterDef.realStats[5]
+				fighterDef.agl = fighterDef.realStats[6]
+				fighterDef.luk = fighterDef.realStats[7]
+
+				delete fighterDef.realStats
+				if (fighterDef.currentStats) delete fighterDef.currentStats
+
+				fighterDef.status = "none"
+				fighterDef.statusturns = 0
+			} else {
+				fighterDef.currentStats = [fighterDef.atk, fighterDef.mag, fighterDef.prc, fighterDef.end, fighterDef.chr, fighterDef.int, fighterDef.agl, fighterDef.luk]
+				let statsAvailable = ['atk', 'mag', 'prc', 'end', 'chr', 'int', 'agl', 'luk']
+				//get 2 randomized statuses
+				let stat1 = statsAvailable[Math.floor(Math.random() * statsAvailable.length)]
+				let stat2 = statsAvailable[Math.floor(Math.random() * statsAvailable.length)]
+				while (stat1 === stat2) {
+					stat2 = statsAvailable[Math.floor(Math.random() * statsAvailable.length)]
+				}
+
+				//now swap fighterDef's stats around based on stat1 and stat2
+				let temp = fighterDef.currentStats[statsAvailable.indexOf(stat1)]
+				fighterDef.currentStats[statsAvailable.indexOf(stat1)] = fighterDef.currentStats[statsAvailable.indexOf(stat2)]
+				fighterDef.currentStats[statsAvailable.indexOf(stat2)] = temp
+
+				fighterDef.statusturns--;
+
+				const statusEmbed = new Discord.MessageEmbed()
+					.setColor('#e36b2b')
+					.setTitle(`${fighterDef.name} is irradiated.`)
+					.setDescription(`${fighterDef.name}'s ${stat1.toUpperCase()} and ${stat2.toUpperCase()} have been swapped!`)
+
+				client.channels.fetch(btl[server].battlechannel)
+					.then(channel => channel.send({embeds: [statusEmbed]}))
+			}
+
         } else if (fighterDef.status === "hunger") {
 			if (fighterDef.statusturns > 1) {
 				const statusEmbed = new Discord.MessageEmbed()
@@ -13823,7 +13879,8 @@ client.on('messageCreate', async message => {
 			hunger: ['strike', 'pierce', 'earth'],
 			illness: ['slash', 'poison', 'nuclear'],
 			mirror: ['strike', 'slash', 'pierce'],
-			blind: ['curse', 'bless', 'gravity']
+			blind: ['curse', 'bless', 'gravity'],
+			irradiation: ['nuclear', 'metal', 'poison']
 		}
 
 		let statusDesc = {
@@ -13847,6 +13904,7 @@ client.on('messageCreate', async message => {
 			confusion: '🌀50% chance to damage self when attacking. Stacks with other status effects.',
 			mirror: '💥Immobilized for 3 turns. Repel magic skills.',
 			blind: '💥PRC and AGL halved.',
+			irradiation: `💥Swap 2 random stats for 3 turns.`
 		}
 
 		for (const i in statusEffects) {
@@ -21130,16 +21188,19 @@ client.on('messageCreate', async message => {
 						.setDescription(`${charName} used ${skillName}!\n${charName}'s ATK is doubled, but is stuck to melee attacking!`)
                 } else if (skillDefs.status && skillDefs.statuschance) {
 					let statusChance = Math.round(skillDefs.statuschance);
+					let enmDefs = ''
+					let enmName = ''
+					let finaltext = ''
 					if (charDefs.mainElement === 'status')
 						statusChance *= 1.1;
 
 					if (skillDefs.target == "allopposing") {
 						let hitSomeone = false;
-						let finaltext = `${charName} used ${skillName} on the foes!\n\n`;
+						finaltext = `${charName} used ${skillName} on the foes!\n\n`;
 						for (const i in opposingSide) {
-							let enmDefs = opposingSide[i]
+							enmDefs = opposingSide[i]
 							if (enmDefs && enmDefs.status === "none") {
-								let enmName = enmDefs.name
+								enmName = enmDefs.name
 
 								let targ = (statusChance + (charDefs.chr - enmDefs.luk));
 								if (attackFuncs.physStatus(skillDefs.status))
@@ -21184,9 +21245,9 @@ client.on('messageCreate', async message => {
 						if (!hitSomeone)
 							return message.channel.send("This move will fail, don't use it! (All opponents have a status.)");
 					} else {
-						let enmDefs = opposingSide[parseInt(arg[2])]
+						enmDefs = opposingSide[parseInt(arg[2])]
 						if (enmDefs && enmDefs.status === "none") {
-							let enmName = enmDefs.name
+							enmName = enmDefs.name
 
 							let targ = (statusChance + (charDefs.chr - enmDefs.luk));
 							if (attackFuncs.physStatus(skillDefs.status))
@@ -21196,7 +21257,7 @@ client.on('messageCreate', async message => {
 
 							const movestatus = skillDefs.status
 
-							let finaltext = `${charName} used ${skillName} on ${enmDefs.name}!\n`;
+							finaltext = `${charName} used ${skillName} on ${enmDefs.name}!\n`;
 							if (chance <= targ || statusChance >= 100) {
 								finaltext += attackFuncs.inflictStatus(enmDefs, skillDefs);
 								if (charDefs.critquote && charDefs.critquote.length > 0) {

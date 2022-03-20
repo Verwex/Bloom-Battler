@@ -96,7 +96,8 @@ const statusEffects = [
 	"infatuation",
 	"mirror",
 	"blind",
-	"confusion"
+	"confusion",
+	"irradiation"
 ]
 
 const statusEmojis = {
@@ -120,7 +121,8 @@ const statusEmojis = {
 	infatuation: '❣️',
 	mirror: '<:mirror:929864689406582784>',
 	blind: '🕶️',
-	confusion: '☄️'
+	confusion: '☄️',
+	irradiation: '☣️'
 }
 
 // Enemy Habitats

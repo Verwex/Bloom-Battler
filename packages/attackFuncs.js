@@ -103,7 +103,8 @@ const statusEffects = [
 	"infatuation",
 	"mirror",
 	"blind",
-	"confusion"
+	"confusion",
+	"irradiation"
 ]
 
 const statusEmojis = {
@@ -127,7 +128,8 @@ const statusEmojis = {
 	infatuation: '❣️',
 	mirror: '<:mirror:929864689406582784>',
 	blind: '🕶️',
-	confusion: '☄️'
+	confusion: '☄️',
+	irradiation: '☣️'
 }
 
 // Enemy Habitats
@@ -255,7 +257,8 @@ const elementTechs = {
 	hunger: ['strike', 'pierce', 'earth'],
 	illness: ['slash', 'poison', 'nuclear'],
 	mirror: ['strike', 'slash', 'pierce'],
-	blind: ['curse', 'bless', 'gravity']
+	blind: ['curse', 'bless', 'gravity'],
+	irradiation: ['nuclear', 'metal', 'poison']
 }
 
 function isTech(charDefs, element) {
@@ -287,7 +290,7 @@ function isPhysicalStatus(status) {
 	if (!status) return false;
 
 	var statusName = status.toLowerCase()
-	if (statusName === 'burn' || statusName === 'bleed' || statusName === 'freeze' || statusName === 'paralyze' || statusName === 'poison' || statusName === 'hunger' || statusName === 'dazed' || statusName === 'illness' || statusName === 'mirror' || statusName === 'blind')
+	if (statusName === 'burn' || statusName === 'bleed' || statusName === 'freeze' || statusName === 'paralyze' || statusName === 'poison' || statusName === 'hunger' || statusName === 'dazed' || statusName === 'illness' || statusName === 'mirror' || statusName === 'blind' || statusName === 'irradiation')
 		return true;
 
 	return false;
@@ -782,6 +785,10 @@ function inflictStatus(oppDefs, skillDefs) {
 		finaltext = `${oppDefs.name} was blinded!`
 		oppDefs.status = "blind"
 		oppDefs.statusturns = 3
+	} else if (skillStatus === 'irradiation') {
+		finaltext = `${oppDefs.name} was irradiated!`
+		oppDefs.status = 'irradiation'
+		oppDefs.statusturns = 3
 	}
 	
 	return finaltext
@@ -876,6 +883,10 @@ function inflictStatusFromText(oppDefs, statusEffect) {
 	} else if (statusEffect === "blind") {
 		finaltext = `${oppDefs.name} was blinded!`
 		oppDefs.status = "blind"
+		oppDefs.statusturns = 3
+	} else if (statusEffect === 'irradiation') {
+		finaltext = `${oppDefs.name} was irradiated!`
+		oppDefs.status = 'irradiation'
 		oppDefs.statusturns = 3
 	}
 	

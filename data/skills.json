@@ -28839,5 +28839,15 @@
         "originalAuthor": "441198920668938260",
         "passive": "curestatus",
         "pow": 70
+    },
+    "Irradiation": {
+        "name": "Irradiation",
+        "type": "status",
+        "cost": 50,
+        "costtype": "mp",
+        "originalAuthor": "441198920668938260",
+        "status": "irradiation",
+        "statuschance": 100,
+        "levelLock": 10
     }
 }
